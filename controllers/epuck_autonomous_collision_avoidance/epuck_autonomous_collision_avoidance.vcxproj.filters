@@ -1,0 +1,130 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="$(WEBOTS_HOME)\resources\languages\cpp\Accelerometer.cpp">
+      <Filter>Webots</Filter>
+    </ClCompile>
+    <ClCompile Include="$(WEBOTS_HOME)\resources\languages\cpp\Brake.cpp">
+      <Filter>Webots</Filter>
+    </ClCompile>
+    <ClCompile Include="$(WEBOTS_HOME)\resources\languages\cpp\Camera.cpp">
+      <Filter>Webots</Filter>
+    </ClCompile>
+    <ClCompile Include="$(WEBOTS_HOME)\resources\languages\cpp\Compass.cpp">
+      <Filter>Webots</Filter>
+    </ClCompile>
+    <ClCompile Include="$(WEBOTS_HOME)\resources\languages\cpp\Connector.cpp">
+      <Filter>Webots</Filter>
+    </ClCompile>
+    <ClCompile Include="$(WEBOTS_HOME)\resources\languages\cpp\Device.cpp">
+      <Filter>Webots</Filter>
+    </ClCompile>
+    <ClCompile Include="$(WEBOTS_HOME)\resources\languages\cpp\DifferentialWheels.cpp">
+      <Filter>Webots</Filter>
+    </ClCompile>
+    <ClCompile Include="$(WEBOTS_HOME)\resources\languages\cpp\Display.cpp">
+      <Filter>Webots</Filter>
+    </ClCompile>
+    <ClCompile Include="$(WEBOTS_HOME)\resources\languages\cpp\DistanceSensor.cpp">
+      <Filter>Webots</Filter>
+    </ClCompile>
+    <ClCompile Include="$(WEBOTS_HOME)\resources\languages\cpp\Emitter.cpp">
+      <Filter>Webots</Filter>
+    </ClCompile>
+    <ClCompile Include="$(WEBOTS_HOME)\resources\languages\cpp\Field.cpp">
+      <Filter>Webots</Filter>
+    </ClCompile>
+    <ClCompile Include="$(WEBOTS_HOME)\resources\languages\cpp\GPS.cpp">
+      <Filter>Webots</Filter>
+    </ClCompile>
+    <ClCompile Include="$(WEBOTS_HOME)\resources\languages\cpp\Gyro.cpp">
+      <Filter>Webots</Filter>
+    </ClCompile>
+    <ClCompile Include="$(WEBOTS_HOME)\resources\languages\cpp\InertialUnit.cpp">
+      <Filter>Webots</Filter>
+    </ClCompile>
+    <ClCompile Include="$(WEBOTS_HOME)\resources\languages\cpp\Joystick.cpp">
+      <Filter>Webots</Filter>
+    </ClCompile>
+    <ClCompile Include="$(WEBOTS_HOME)\resources\languages\cpp\Keyboard.cpp">
+      <Filter>Webots</Filter>
+    </ClCompile>
+    <ClCompile Include="$(WEBOTS_HOME)\resources\languages\cpp\LED.cpp">
+      <Filter>Webots</Filter>
+    </ClCompile>
+    <ClCompile Include="$(WEBOTS_HOME)\resources\languages\cpp\Lidar.cpp">
+      <Filter>Webots</Filter>
+    </ClCompile>
+    <ClCompile Include="$(WEBOTS_HOME)\resources\languages\cpp\LightSensor.cpp">
+      <Filter>Webots</Filter>
+    </ClCompile>
+    <ClCompile Include="$(WEBOTS_HOME)\resources\languages\cpp\Motion.cpp">
+      <Filter>Webots</Filter>
+    </ClCompile>
+    <ClCompile Include="$(WEBOTS_HOME)\resources\languages\cpp\Motor.cpp">
+      <Filter>Webots</Filter>
+    </ClCompile>
+    <ClCompile Include="$(WEBOTS_HOME)\resources\languages\cpp\Mouse.cpp">
+      <Filter>Webots</Filter>
+    </ClCompile>
+    <ClCompile Include="$(WEBOTS_HOME)\resources\languages\cpp\Node.cpp">
+      <Filter>Webots</Filter>
+    </ClCompile>
+    <ClCompile Include="$(WEBOTS_HOME)\resources\languages\cpp\Pen.cpp">
+      <Filter>Webots</Filter>
+    </ClCompile>
+    <ClCompile Include="$(WEBOTS_HOME)\resources\languages\cpp\PositionSensor.cpp">
+      <Filter>Webots</Filter>
+    </ClCompile>
+    <ClCompile Include="$(WEBOTS_HOME)\resources\languages\cpp\Radar.cpp">
+      <Filter>Webots</Filter>
+    </ClCompile>
+    <ClCompile Include="$(WEBOTS_HOME)\resources\languages\cpp\RangeFinder.cpp">
+      <Filter>Webots</Filter>
+    </ClCompile>
+    <ClCompile Include="$(WEBOTS_HOME)\resources\languages\cpp\Receiver.cpp">
+      <Filter>Webots</Filter>
+    </ClCompile>
+    <ClCompile Include="$(WEBOTS_HOME)\resources\languages\cpp\Robot.cpp">
+      <Filter>Webots</Filter>
+    </ClCompile>
+    <ClCompile Include="$(WEBOTS_HOME)\resources\languages\cpp\Skin.cpp">
+      <Filter>Webots</Filter>
+    </ClCompile>
+    <ClCompile Include="$(WEBOTS_HOME)\resources\languages\cpp\Speaker.cpp">
+      <Filter>Webots</Filter>
+    </ClCompile>
+    <ClCompile Include="$(WEBOTS_HOME)\resources\languages\cpp\Supervisor.cpp">
+      <Filter>Webots</Filter>
+    </ClCompile>
+    <ClCompile Include="$(WEBOTS_HOME)\resources\languages\cpp\TouchSensor.cpp">
+      <Filter>Webots</Filter>
+    </ClCompile>
+    <ClCompile Include="a_star\AStar.cpp">
+      <Filter>a_star</Filter>
+    </ClCompile>
+    <ClCompile Include="epuck_autonomous_collision_avoidance.cpp" />
+    <ClCompile Include="ObstacleAvoidance.cpp" />
+    <ClCompile Include="Pathplanner.cpp" />
+    <ClCompile Include="RobotRoutine.cpp" />
+    <ClCompile Include="QRModule.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="a_star\AStar.hpp">
+      <Filter>a_star</Filter>
+    </ClInclude>
+    <ClInclude Include="epuck_autonomous_collision_avoidance.h" />
+    <ClInclude Include="ObstacleAvoidance.h" />
+    <ClInclude Include="Pathplanner.h" />
+    <ClInclude Include="RobotRoutine.h" />
+    <ClInclude Include="QRModule.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Webots">
+      <UniqueIdentifier>{1803c599-ab01-4c2e-99b0-cad896e0e11e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="a_star">
+      <UniqueIdentifier>{3d20961c-6a2b-420b-95eb-1fde3de41446}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>
