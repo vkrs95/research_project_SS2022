@@ -4,20 +4,48 @@
 #include "QRModule.h"
 
 int main(int argc, char **argv) {
-    // create all Object instances
+
+    /*** create all Object instances ***/
     Robot* robot = new Robot();
     RobotRoutine* robotroutine = new RobotRoutine(robot);
     Pathplanner* pathplanner = new Pathplanner();
     ObstacleAvoidance* obstacleavoidance = new ObstacleAvoidance;
     QRModule* qrmodule = new QRModule();
 
-    // local variables
+    
+    /*** define local variables ***/
     int timeStep = (int)robot->getBasicTimeStep();
     unsigned int path_direction_list_iterator = 0;
     unsigned int crossroad_turn_done = 3500;
     unsigned int turn_around_done = crossroad_turn_done;
 
+
+    /* robot parameters */
     unsigned int led_counter = 1;
+    int ground_sensor_jitter = 0;
+    bool epuck_endless_mode = true;
+    unsigned int qr_distance_to_scan_pos = 2000;
+    unsigned int init_procedure_distance_to_scan_counter = 0;
+
+
+    /* world parameters */
+    AStar::Vec2i start_position;
+    AStar::Vec2i goal_position;
+
+    AStar::Vec2i pred_post;
+    AStar::CoordinateList new_wall;
+
+    unsigned int world_dimension = 0;
+    unsigned int start_pos_index = 0;
+    unsigned int goal_pos_index = 0;
+
+
+    /* robot routine flags */
+    bool obstacle_detected = false;
+    bool crossroad_detected = false;
+    bool get_next_direction = true;
+    bool performing_turn = false;
+    bool avoid_second_collision = false;
     bool performing_turn_on_crossroad = false;
     bool end_of_line_goal_reached = false;
     unsigned int turn_counter = 0;
@@ -25,39 +53,15 @@ int main(int argc, char **argv) {
     bool init_procedure_done = false;
     bool path_planning_completed = false;
 
-    bool obstacle_detected = false;
-    bool crossroad_detected = false;
-    bool get_next_direction = true;
 
-
-    unsigned int path_iterator = 1;
-
-    // pathplanning
-    AStar::Vec2i start_position;
-    AStar::Vec2i goal_position;
-        
-    robotroutine->EnableEpuckCam();
-
-
-    int ground_sensor_jitter = 0;
-    bool performing_turn = false;
-    bool avoid_second_collision = false;
-
+    /* path parameters */
+    unsigned int path_iterator = 1;    
     MovingDirection currentdirection;
 
-    bool temporary_helper = false;
-    AStar::Vec2i pred_post;
-    AStar::CoordinateList new_wall;
+    // bool temporary_helper = false;
 
-    unsigned int qr_distance_to_scan_pos = 2000;
-    unsigned int init_procedure_distance_to_scan_counter = 0;
-
-    bool epuck_endless_mode = true;
-
-    unsigned int world_dimension = 0;
-    unsigned int start_pos_index = 0;
-    unsigned int goal_pos_index = 0;
-
+    /* before entering main loop init camera by enabling it */
+    robotroutine->EnableEpuckCam();
 
     // Main loop:
     while (robot->step(timeStep) != -1) {
@@ -78,6 +82,7 @@ int main(int argc, char **argv) {
             }
         }
 
+        /********** INIT PROCEDURE **********/
         if (!init_procedure_done) {
 
             if (path_planning_completed) {
@@ -133,6 +138,7 @@ int main(int argc, char **argv) {
                 }
             }
         }
+        /********** MOVE TO GOAL PROCEDURE *********/
         else if(!end_of_line_goal_reached) {
 
             if (robotroutine->DetectLineCrossroad())
@@ -238,7 +244,7 @@ int main(int argc, char **argv) {
                     new_wall.push_back(pathplanner->coordinate_list[path_iterator]);
                     start_position = pathplanner->coordinate_list[path_iterator - 1];
 
-                    temporary_helper = true;
+                    //temporary_helper = true;
                     pred_post = pathplanner->coordinate_list[path_iterator];
 
                     pathplanner->PathPlanning(new_wall, start_position, goal_position);
@@ -273,6 +279,7 @@ int main(int argc, char **argv) {
                 if (pathplanner->coordinate_list.size() > 0 && // direction command list has been initialized already
                     path_iterator >= pathplanner->coordinate_list.size()) // all direction commands have been executed
                 {
+                    /********** GOAL REACHED PROCEDURE **********/
                     if (epuck_endless_mode) {
 
                         // reset variables -> reset_controller_state();
