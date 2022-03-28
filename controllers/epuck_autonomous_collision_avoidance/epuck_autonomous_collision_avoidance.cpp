@@ -1,7 +1,7 @@
 #include "RobotRoutine.h"
 #include "Pathplanner.h"
 #include "ObstacleAvoidance.h"
-#include "QRModule.h"
+#include "QRModuleEPuckSGD.h"
 
 int main(int argc, char **argv) {
 
@@ -10,7 +10,7 @@ int main(int argc, char **argv) {
     RobotRoutine* robotroutine = new RobotRoutine(robot);
     Pathplanner* pathplanner = new Pathplanner();
     ObstacleAvoidance* obstacleavoidance = new ObstacleAvoidance;
-    QRModule* qrmodule = new QRModule();
+    QRModule* qrmodule = new QRModuleEPuckSGD();
 
     
     /*** define local variables ***/
@@ -52,7 +52,8 @@ int main(int argc, char **argv) {
     unsigned int end_of_line_detection_counter = 0;
     bool init_procedure_done = false;
     bool path_planning_completed = false;
-
+    unsigned int readQrCodeAttemptCounter = 0;
+    unsigned int readQrCodeAttemptLimit = 3;
 
     /* path parameters */
     unsigned int path_iterator = 1;    
@@ -98,14 +99,25 @@ int main(int argc, char **argv) {
             else {
                 if (init_procedure_distance_to_scan_counter >= qr_distance_to_scan_pos) {
 
-                    robotroutine->PerformHalt();
+                    /* check if camera is enabled and take a snapshot via camera while robot is facing towards QR code*/
+                    if (robotroutine->IsEpuckCamEnabled()) {
 
-                    robotroutine->TakeCameraSnapshot();
-                    robotroutine->DisableEpuckCam();
+                        robotroutine->PerformHalt();
+                        robotroutine->TakeCameraSnapshot();
+                    }
+                    else {
+                        // enable camera and finish this step of routine 
+                        robotroutine->EnableEpuckCam();
+                        continue;
+                    }
 
-                    AStar::Vec2i start_goal_coordinates[2];
-                    if (qrmodule->ReadCoordinatesFromQrImage(robotroutine->qr_img_file_name, &start_pos_index, &goal_pos_index, &world_dimension)) {
+                    // get content from QR image
+                    bool readSuccessful = qrmodule->readQRCode(robotroutine->qr_img_file_name, &start_pos_index, &goal_pos_index, &world_dimension);
 
+                    if (readSuccessful) {
+
+                        // deactivate epuck camera since reading was successful
+                        robotroutine->DisableEpuckCam();
 
                         pathplanner->SetMatrixDimension(world_dimension);
 
@@ -113,17 +125,23 @@ int main(int argc, char **argv) {
                         start_position = pathplanner->MP_List.at(start_pos_index);
                         goal_position = pathplanner->MP_List.at(goal_pos_index);
 
+                        // debug output of start/goal information
                         std::cout << "------------------------" << "\n";
-                        std::cout << "E-Puck: " << robotroutine->epuck_name << " in " << world_dimension << "x" << world_dimension << " map\n";
+                        std::cout << "E-Puck: this is " << robotroutine->epuck_name << " in " << world_dimension << "x" << world_dimension << " map\n";
                         std::cout << "Start Position: P" << start_pos_index + 1 << "(" << start_position.x << ", " << start_position.y <<
                             ")\nGoal Position: P" << goal_pos_index + 1 << "(" << goal_position.x << ", " << goal_position.y << ")" << "\n";
-
                     }
-                    // check if invalid coordinates have been written into the vectors
                     else {
-                        end_of_line_goal_reached = true;
-                        // TODO: error handling if image could not be read
-                        return -1;
+                        
+                        if (readQrCodeAttemptCounter < readQrCodeAttemptLimit) {
+                            readQrCodeAttemptCounter++;
+                            continue; // finish this routine step 
+                        }
+                        else {
+                            // number of attempts exceeded, handle error
+                            end_of_line_goal_reached = true;
+                            return -1;
+                        }
                     }
 
                     /* path planning */
@@ -210,6 +228,7 @@ int main(int argc, char **argv) {
                 }
                 else
                 {
+                    /* set speed of each wheel depening on executing movement */
                     if (currentdirection == turn_left)
                         robotroutine->OnCrossroadTurnLeft();
                     else if (currentdirection == turn_right)
@@ -222,12 +241,25 @@ int main(int argc, char **argv) {
 
                     turn_counter += timeStep;
 
-                    if (turn_counter >= crossroad_turn_done)
-                    {
-                        turn_counter = 0;
-                        crossroad_detected = false;
-                        performing_turn = false;
+                    /* turn maneuver should be finished after turn counter has exceeded threshold */
+                    if (currentdirection == straight_on) {
+                        /* when moving straight ahead on a crossroad, use reduced threshold until movement is done */
+                        if (turn_counter >= crossroad_turn_done/2)
+                        {
+                            turn_counter = 0;
+                            crossroad_detected = false;
+                            performing_turn = false;
+                        }
                     }
+                    else {
+                        if (turn_counter >= crossroad_turn_done)
+                        {
+                            turn_counter = 0;
+                            crossroad_detected = false;
+                            performing_turn = false;
+                        }
+                    }
+                    
                 }
 
             }

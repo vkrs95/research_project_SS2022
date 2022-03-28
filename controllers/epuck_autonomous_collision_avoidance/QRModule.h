@@ -1,19 +1,20 @@
 #include "epuck_autonomous_collision_avoidance.h"
 #pragma once
 
-#include <zbar.h>
-
-#include <opencv2/core/core.hpp>
-#include <opencv2/highgui/highgui.hpp>
 
 class QRModule
 {
 public:
-	QRModule();
-	~QRModule();
-	bool ReadCoordinatesFromQrImage(std::string qr_file, unsigned int* start_index, unsigned int* goal_index, unsigned int* map_dimension);
+	/*
+	*	virtual function header to read a QR code from camera/image/etc.
+	*/
+	//virtual void readQRCode() = 0;
+	
+	/*
+	*	extension of readQRCode where the QR code must include a start and goal 
+	*	position as well as the dimension of the environment as a single digit
+	*/
+	virtual bool readQRCode(std::string qrFilePath, unsigned int* startIndex, unsigned int* goalIndex, unsigned int* mapDimension) = 0;
 
-private:
-	//std::string robot_name = "unnamed";
 };
 

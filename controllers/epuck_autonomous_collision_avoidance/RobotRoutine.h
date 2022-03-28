@@ -46,5 +46,6 @@ class RobotRoutine
 		void EnableEpuckCam(void);
 		void DisableEpuckCam(void);
 		void TakeCameraSnapshot(void);
+		bool IsEpuckCamEnabled(void);
 };
 
