@@ -10,7 +10,7 @@ int main(int argc, char **argv) {
     RobotRoutine* robotroutine = new RobotRoutine(robot);
     Pathplanner* pathplanner = new Pathplanner();
     ObstacleAvoidance* obstacleavoidance = new ObstacleAvoidance;
-    QRModule* qrmodule = new QRModuleEPuckSGD();
+    QRModule<SGDQRParams>* qrmodule = new QRModuleEPuckSGD();
 
     
     /*** define local variables ***/
@@ -35,7 +35,7 @@ int main(int argc, char **argv) {
     AStar::Vec2i predPost;
     AStar::CoordinateList newWall;
 
-    QRModule::QRParams qrCodeParams;
+    SGDQRParams qrCodeParams;
 
 
     /* robot routine flags */

@@ -1,28 +1,18 @@
 #include "epuck_autonomous_collision_avoidance.h"
 #pragma once
 
+template<typename T>
 
 class QRModule
 {
 public:
 
-	struct QRParams {
-		unsigned int startIndex;
-		unsigned int goalIndex;
-		unsigned int mapDimension;
-	};
-
-
 	/*
-	*	virtual function header to read a QR code from camera/image/etc.
+	*	Virtual function to read a QR code from camera/image/etc.
+	*	A file path of the QR code is necessary as well as a type/structure to store the content 
+	*	of the encoded QR code.
 	*/
-	//virtual void readQRCode() = 0;
-	
-	/*
-	*	extension of readQRCode where the QR code must include a start and goal 
-	*	position as well as the dimension of the environment as a single digit
-	*/
-	virtual bool readQRCode(std::string qrFilePath, QRParams* qrContent) = 0;
+	virtual bool readQRCode(std::string qrFilePath, T* qrContent) = 0;
 
 };
 

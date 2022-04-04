@@ -39,17 +39,23 @@
 *       p4  p5  p6
 * 
 */
+class SGDQRParams {
+public:
+    unsigned int startIndex;
+    unsigned int goalIndex;
+    unsigned int mapDimension;
+};
+
 class QRModuleEPuckSGD :
-    public QRModule
+    public QRModule<SGDQRParams>
 {
 public:
     QRModuleEPuckSGD();
     ~QRModuleEPuckSGD();
 
-    bool readQRCode(std::string qrFilePath, QRParams* qrContent);
+    bool readQRCode(std::string qrFilePath, SGDQRParams* qrContent) override;
 
 private:
     std::string getContentStringFromQrImage(std::string qrFilePath);
 
 };
-
