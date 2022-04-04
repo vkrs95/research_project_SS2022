@@ -43,7 +43,7 @@ std::string QRModuleEPuckSGD::getContentStringFromQrImage(std::string qrFilePath
     return qrContent;
 }
 
-bool QRModuleEPuckSGD::readQRCode(std::string qrFilePath, qrParams* qrContent)
+bool QRModuleEPuckSGD::readQRCode(std::string qrFilePath, QRParams* qrContent)
 {
 
     /*** get text content from QR code image ****/

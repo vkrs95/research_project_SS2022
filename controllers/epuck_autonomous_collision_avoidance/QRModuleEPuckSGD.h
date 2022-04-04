@@ -46,7 +46,7 @@ public:
     QRModuleEPuckSGD();
     ~QRModuleEPuckSGD();
 
-    bool readQRCode(std::string qrFilePath, qrParams* qrContent); 
+    bool readQRCode(std::string qrFilePath, QRParams* qrContent);
 
 private:
     std::string getContentStringFromQrImage(std::string qrFilePath);

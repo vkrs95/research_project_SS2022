@@ -6,7 +6,7 @@ class QRModule
 {
 public:
 
-	struct qrParams {
+	struct QRParams {
 		unsigned int startIndex;
 		unsigned int goalIndex;
 		unsigned int mapDimension;
@@ -22,7 +22,7 @@ public:
 	*	extension of readQRCode where the QR code must include a start and goal 
 	*	position as well as the dimension of the environment as a single digit
 	*/
-	virtual bool readQRCode(std::string qrFilePath, qrParams* qrContent) = 0;
+	virtual bool readQRCode(std::string qrFilePath, QRParams* qrContent) = 0;
 
 };
 

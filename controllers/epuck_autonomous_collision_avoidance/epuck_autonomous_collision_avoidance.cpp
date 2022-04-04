@@ -35,7 +35,7 @@ int main(int argc, char **argv) {
     AStar::Vec2i predPost;
     AStar::CoordinateList newWall;
 
-    QRModule::qrParams qrCodeParams;
+    QRModule::QRParams qrCodeParams;
 
 
     /* robot routine flags */
