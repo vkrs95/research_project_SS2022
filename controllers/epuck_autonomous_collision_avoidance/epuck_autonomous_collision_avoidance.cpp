@@ -35,9 +35,7 @@ int main(int argc, char **argv) {
     AStar::Vec2i pred_post;
     AStar::CoordinateList new_wall;
 
-    unsigned int world_dimension = 0;
-    unsigned int start_pos_index = 0;
-    unsigned int goal_pos_index = 0;
+    QRModule::qrParams qrCodeParams;
 
 
     /* robot routine flags */
@@ -112,24 +110,24 @@ int main(int argc, char **argv) {
                     }
 
                     // get content from QR image
-                    bool readSuccessful = qrmodule->readQRCode(robotroutine->qr_img_file_name, &start_pos_index, &goal_pos_index, &world_dimension);
+                    bool readSuccessful = qrmodule->readQRCode(robotroutine->qr_img_file_name, &qrCodeParams);
 
                     if (readSuccessful) {
 
                         // deactivate epuck camera since reading was successful
                         robotroutine->DisableEpuckCam();
 
-                        pathplanner->SetMatrixDimension(world_dimension);
+                        pathplanner->SetMatrixDimension(qrCodeParams.mapDimension);
 
                         // save positions read from QR code
-                        start_position = pathplanner->MP_List.at(start_pos_index);
-                        goal_position = pathplanner->MP_List.at(goal_pos_index);
+                        start_position = pathplanner->MP_List.at(qrCodeParams.startIndex);
+                        goal_position = pathplanner->MP_List.at(qrCodeParams.goalIndex);
 
                         // debug output of start/goal information
                         std::cout << "------------------------" << "\n";
-                        std::cout << "E-Puck: this is " << robotroutine->epuck_name << " in " << world_dimension << "x" << world_dimension << " map\n";
-                        std::cout << "Start Position: P" << start_pos_index + 1 << "(" << start_position.x << ", " << start_position.y <<
-                            ")\nGoal Position: P" << goal_pos_index + 1 << "(" << goal_position.x << ", " << goal_position.y << ")" << "\n";
+                        std::cout << "E-Puck: " << robotroutine->epuck_name << " in " << qrCodeParams.mapDimension << "x" << qrCodeParams.mapDimension << " map\n";
+                        std::cout << "Start Position: P" << qrCodeParams.startIndex + 1 << "(" << start_position.x << ", " << start_position.y <<
+                            ")\nGoal Position: P" << qrCodeParams.goalIndex + 1 << "(" << goal_position.x << ", " << goal_position.y << ")" << "\n";
                     }
                     else {
                         

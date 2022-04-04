@@ -5,6 +5,14 @@
 class QRModule
 {
 public:
+
+	struct qrParams {
+		unsigned int startIndex;
+		unsigned int goalIndex;
+		unsigned int mapDimension;
+	};
+
+
 	/*
 	*	virtual function header to read a QR code from camera/image/etc.
 	*/
@@ -14,7 +22,7 @@ public:
 	*	extension of readQRCode where the QR code must include a start and goal 
 	*	position as well as the dimension of the environment as a single digit
 	*/
-	virtual bool readQRCode(std::string qrFilePath, unsigned int* startIndex, unsigned int* goalIndex, unsigned int* mapDimension) = 0;
+	virtual bool readQRCode(std::string qrFilePath, qrParams* qrContent) = 0;
 
 };
 

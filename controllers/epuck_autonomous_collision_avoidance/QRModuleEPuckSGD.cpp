@@ -43,7 +43,7 @@ std::string QRModuleEPuckSGD::getContentStringFromQrImage(std::string qrFilePath
     return qrContent;
 }
 
-bool QRModuleEPuckSGD::readQRCode(std::string qrFilePath, unsigned int* startIndex, unsigned int* goalIndex, unsigned int* mapDimension)
+bool QRModuleEPuckSGD::readQRCode(std::string qrFilePath, qrParams* qrContent)
 {
 
     /*** get text content from QR code image ****/
@@ -66,9 +66,9 @@ bool QRModuleEPuckSGD::readQRCode(std::string qrFilePath, unsigned int* startInd
     if (mapPositions.size() >= 3) {
 
         // set start and goal position, value-1 since P1 is list index 0
-        *startIndex = mapPositions.at(0) - 1;
-        *goalIndex = mapPositions.at(1) - 1;
-        *mapDimension = mapPositions.at(2);
+        qrContent->startIndex = mapPositions.at(0) - 1;
+        qrContent->goalIndex = mapPositions.at(1) - 1;
+        qrContent->mapDimension = mapPositions.at(2);
 
     }
     else {
