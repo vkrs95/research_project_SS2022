@@ -47,7 +47,7 @@ constexpr auto GS_RIGHT = 2;
 
 // 8 LEDs
 constexpr auto NB_LEDS = 8;
-constexpr unsigned int led_time_step = 320; // [ms]
+constexpr unsigned int ledTimeStep = 320; // [ms]
 
 // Moving directions
 enum MovingDirection {
