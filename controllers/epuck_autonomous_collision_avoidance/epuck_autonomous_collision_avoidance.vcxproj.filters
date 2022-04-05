@@ -107,7 +107,7 @@
     <ClCompile Include="ObstacleAvoidance.cpp" />
     <ClCompile Include="Pathplanner.cpp" />
     <ClCompile Include="RobotRoutine.cpp" />
-    <ClCompile Include="QRModule.cpp" />
+    <ClCompile Include="QRModuleEPuckSGD.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="a_star\AStar.hpp">
@@ -118,6 +118,7 @@
     <ClInclude Include="Pathplanner.h" />
     <ClInclude Include="RobotRoutine.h" />
     <ClInclude Include="QRModule.h" />
+    <ClInclude Include="QRModuleEPuckSGD.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Webots">

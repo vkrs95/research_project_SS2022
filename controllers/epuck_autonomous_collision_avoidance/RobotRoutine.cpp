@@ -160,3 +160,9 @@ void RobotRoutine::TakeCameraSnapshot(void)
     epuck_cam->saveImage(qr_img_file_name, 100);
     //DisableEpuckCam();
 }
+
+bool RobotRoutine::IsEpuckCamEnabled(void)
+{
+    // if sampling period is 0, camera is currently disabled
+    return epuck_cam->getSamplingPeriod() == 0 ? false : true;
+}

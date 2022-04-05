@@ -1,7 +1,7 @@
 #include "RobotRoutine.h"
 #include "Pathplanner.h"
 #include "ObstacleAvoidance.h"
-#include "QRModule.h"
+#include "QRModuleEPuckSGD.h"
 
 int main(int argc, char **argv) {
 
@@ -10,53 +10,51 @@ int main(int argc, char **argv) {
     RobotRoutine* robotroutine = new RobotRoutine(robot);
     Pathplanner* pathplanner = new Pathplanner();
     ObstacleAvoidance* obstacleavoidance = new ObstacleAvoidance;
-    QRModule* qrmodule = new QRModule();
+    QRModule<SGDQRParams>* qrmodule = new QRModuleEPuckSGD();
 
     
     /*** define local variables ***/
     int timeStep = (int)robot->getBasicTimeStep();
-    unsigned int path_direction_list_iterator = 0;
-    unsigned int crossroad_turn_done = 3500;
-    unsigned int turn_around_done = crossroad_turn_done;
+    unsigned int pathDirectionListIterator = 0;
+    unsigned int crossroadTurnDone = 3500;
+    unsigned int turnAroundDone = crossroadTurnDone;
 
 
     /* robot parameters */
-    unsigned int led_counter = 1;
-    int ground_sensor_jitter = 0;
-    bool epuck_endless_mode = true;
-    unsigned int qr_distance_to_scan_pos = 2000;
-    unsigned int init_procedure_distance_to_scan_counter = 0;
+    unsigned int ledCounter = 1;
+    int groundSensorJitter = 0;
+    bool epuckEndlessMode = true;
+    unsigned int qrDistanceToScanPos = 2000;
+    unsigned int initProcedureDistanceToScanCounter = 0;
 
 
     /* world parameters */
-    AStar::Vec2i start_position;
-    AStar::Vec2i goal_position;
+    AStar::Vec2i startPosition;
+    AStar::Vec2i goalPosition;
 
-    AStar::Vec2i pred_post;
-    AStar::CoordinateList new_wall;
+    AStar::Vec2i predPost;
+    AStar::CoordinateList newWall;
 
-    unsigned int world_dimension = 0;
-    unsigned int start_pos_index = 0;
-    unsigned int goal_pos_index = 0;
+    SGDQRParams qrCodeParams;
 
 
     /* robot routine flags */
-    bool obstacle_detected = false;
-    bool crossroad_detected = false;
-    bool get_next_direction = true;
-    bool performing_turn = false;
-    bool avoid_second_collision = false;
-    bool performing_turn_on_crossroad = false;
-    bool end_of_line_goal_reached = false;
-    unsigned int turn_counter = 0;
-    unsigned int end_of_line_detection_counter = 0;
-    bool init_procedure_done = false;
-    bool path_planning_completed = false;
-
+    bool obstacleDetected = false;
+    bool crossroadDetected = false;
+    bool getNextDirection = true;
+    bool performingTurn = false;
+    bool avoidSecondCollision = false;
+    bool performingTurnOnCrossroad = false;
+    bool endOfLineGoalReached = false;
+    unsigned int turnCounter = 0;
+    bool initProcedureDone = false;
+    bool pathPlanningCompleted = false;
+    unsigned int readQrCodeAttemptCounter = 0;
+    unsigned int readQrCodeAttemptLimit = 3;
 
     /* path parameters */
-    unsigned int path_iterator = 1;    
-    MovingDirection currentdirection;
+    unsigned int pathIterator = 1;    
+    MovingDirection currentDirection;
 
     // bool temporary_helper = false;
 
@@ -69,101 +67,118 @@ int main(int argc, char **argv) {
         robotroutine->ReadSensors();
 
         // LED cycle
-        if (end_of_line_goal_reached) 
+        if (endOfLineGoalReached) 
         {
             robotroutine->AllLightsOnLED();
         }
         else 
         {
-            if ((timeStep * led_counter++) >= led_time_step)
+            if ((timeStep * ledCounter++) >= ledTimeStep)
             {
                 robotroutine->CyclicBlinkingLED();
-                led_counter = 1;
+                ledCounter = 1;
             }
         }
 
         /********** INIT PROCEDURE **********/
-        if (!init_procedure_done) {
+        if (!initProcedureDone) {
 
-            if (path_planning_completed) {
+            if (pathPlanningCompleted) {
 
                 robotroutine->PerformTurnAround();
-                turn_counter += timeStep;
+                turnCounter += timeStep;
 
-                if (turn_counter >= turn_around_done) {
-                    turn_counter = 0;
-                    init_procedure_done = true;
+                if (turnCounter >= turnAroundDone) {
+                    turnCounter = 0;
+                    initProcedureDone = true;
                 }
             }
             else {
-                if (init_procedure_distance_to_scan_counter >= qr_distance_to_scan_pos) {
+                if (initProcedureDistanceToScanCounter >= qrDistanceToScanPos) {
 
-                    robotroutine->PerformHalt();
+                    /* check if camera is enabled and take a snapshot via camera while robot is facing towards QR code*/
+                    if (robotroutine->IsEpuckCamEnabled()) {
 
-                    robotroutine->TakeCameraSnapshot();
-                    robotroutine->DisableEpuckCam();
+                        robotroutine->PerformHalt();
+                        robotroutine->TakeCameraSnapshot();
+                    }
+                    else {
+                        // enable camera and finish this step of routine 
+                        robotroutine->EnableEpuckCam();
+                        continue;
+                    }
 
-                    AStar::Vec2i start_goal_coordinates[2];
-                    if (qrmodule->ReadCoordinatesFromQrImage(robotroutine->qr_img_file_name, &start_pos_index, &goal_pos_index, &world_dimension)) {
+                    // get content from QR image
+                    bool readSuccessful = qrmodule->readQRCode(robotroutine->qr_img_file_name, &qrCodeParams);
 
+                    if (readSuccessful) {
 
-                        pathplanner->SetMatrixDimension(world_dimension);
+                        // deactivate epuck camera since reading was successful
+                        robotroutine->DisableEpuckCam();
+
+                        pathplanner->SetMatrixDimension(qrCodeParams.mapDimension);
 
                         // save positions read from QR code
-                        start_position = pathplanner->MP_List.at(start_pos_index);
-                        goal_position = pathplanner->MP_List.at(goal_pos_index);
+                        startPosition = pathplanner->MP_List.at(qrCodeParams.startIndex);
+                        goalPosition = pathplanner->MP_List.at(qrCodeParams.goalIndex);
 
+                        // debug output of start/goal information
                         std::cout << "------------------------" << "\n";
-                        std::cout << "E-Puck: " << robotroutine->epuck_name << " in " << world_dimension << "x" << world_dimension << " map\n";
-                        std::cout << "Start Position: P" << start_pos_index + 1 << "(" << start_position.x << ", " << start_position.y <<
-                            ")\nGoal Position: P" << goal_pos_index + 1 << "(" << goal_position.x << ", " << goal_position.y << ")" << "\n";
-
+                        std::cout << "E-Puck: " << robotroutine->epuck_name << " in " << qrCodeParams.mapDimension << "x" << qrCodeParams.mapDimension << " map\n";
+                        std::cout << "Start Position: P" << qrCodeParams.startIndex + 1 << "(" << startPosition.x << ", " << startPosition.y <<
+                            ")\nGoal Position: P" << qrCodeParams.goalIndex + 1 << "(" << goalPosition.x << ", " << goalPosition.y << ")" << "\n";
                     }
-                    // check if invalid coordinates have been written into the vectors
                     else {
-                        end_of_line_goal_reached = true;
-                        // TODO: error handling if image could not be read
-                        return -1;
+                        
+                        if (readQrCodeAttemptCounter < readQrCodeAttemptLimit) {
+                            readQrCodeAttemptCounter++;
+                            continue; // finish this routine step 
+                        }
+                        else {
+                            // number of attempts exceeded, handle error
+                            endOfLineGoalReached = true;
+                            return -1;
+                        }
                     }
 
                     /* path planning */
-                    pathplanner->PathPlanning(start_position, goal_position);
+                    pathplanner->PathPlanning(startPosition, goalPosition);
 
-                    init_procedure_distance_to_scan_counter = 0;
-                    path_planning_completed = true;
+                    initProcedureDistanceToScanCounter = 0;
+                    pathPlanningCompleted = true;
                 }
                 else {
                     robotroutine->LineFollowingModule();
-                    init_procedure_distance_to_scan_counter += timeStep;
+                    initProcedureDistanceToScanCounter += timeStep;
                 }
             }
         }
         /********** MOVE TO GOAL PROCEDURE *********/
-        else if(!end_of_line_goal_reached) {
+        else if(!endOfLineGoalReached) {
 
             if (robotroutine->DetectLineCrossroad())
             {
-                ground_sensor_jitter++;
-                if (ground_sensor_jitter > 4 && !performing_turn)
+                groundSensorJitter++;
+                if (groundSensorJitter > 4 && !performingTurn)
                 {
                     robotroutine->AllLightsOnLED();
-                    crossroad_detected = true;
-                    get_next_direction = true;
-                    ground_sensor_jitter = 0;
+                    crossroadDetected = true;
+                    getNextDirection = true;
+                    groundSensorJitter = 0;
                 }
             }
 
             // set flag if a crossroad has been detected
             //if (robotroutine->DetectLineCrossroad())
             //{
-            //    performing_turn_on_crossroad = true;
+            //    performingTurnOnCrossroad = true;
             //}
 
-            if (crossroad_detected)
+            if (crossroadDetected)
             {
-                //if (path_direction_list_iterator < pathplanner->path_direction_list.size())
+                //if (pathDirectionListIterator < pathplanner->path_direction_list.size())
                 //{
-                //    MovingDirection next_direction = pathplanner->path_direction_list.at(path_direction_list_iterator);
+                //    MovingDirection next_direction = pathplanner->path_direction_list.at(pathDirectionListIterator);
                 //    if (next_direction == turn_left)
                 //        robotroutine->OnCrossroadTurnLeft();
                 //    else if (next_direction == turn_right)
@@ -174,45 +189,46 @@ int main(int argc, char **argv) {
                 //        robotroutine->lfm_speed[RIGHT] = robotroutine->LFM_FORWARD_SPEED;
                 //    }
 
-                //    turn_counter += timeStep;
+                //    turnCounter += timeStep;
 
-                //    if (turn_counter >= crossroad_turn_done)
+                //    if (turnCounter >= crossroadTurnDone)
                 //    {
-                //        turn_counter = 0;
-                //        performing_turn_on_crossroad = false;
-                //        path_direction_list_iterator++;
+                //        turnCounter = 0;
+                //        performingTurnOnCrossroad = false;
+                //        pathDirectionListIterator++;
                 //    }
                 //}
 
-                if (get_next_direction)
+                if (getNextDirection)
                 {
                     AStar::Vec2i predecessor;
                     
-                    predecessor = pathplanner->coordinate_list.at(path_iterator - 1);
+                    predecessor = pathplanner->coordinate_list.at(pathIterator - 1);
 
-                    AStar::Vec2i current = pathplanner->coordinate_list.at(path_iterator);
-                    AStar::Vec2i successor = pathplanner->coordinate_list.at(path_iterator + 1);
+                    AStar::Vec2i current = pathplanner->coordinate_list.at(pathIterator);
+                    AStar::Vec2i successor = pathplanner->coordinate_list.at(pathIterator + 1);
 
-                    currentdirection = pathplanner->EvaluateDirection(predecessor, current, successor);
+                    currentDirection = pathplanner->EvaluateDirection(predecessor, current, successor);
 
                     /*std::cout << "Epuck:" << "( " << robot->getName() << " )\n";
-                    std::cout << "Pathplanning in iteration:" << "( " << path_iterator << " )\n";
-                    std::cout << "New direction (0 = Straight, 1 = left, 2 = right)" << "(" << currentdirection << ")\n";
+                    std::cout << "Pathplanning in iteration:" << "( " << pathIterator << " )\n";
+                    std::cout << "New direction (0 = Straight, 1 = left, 2 = right)" << "(" << currentDirection << ")\n";
                     std::cout << "Predecessor P" << "(" << predecessor.x << ", " << predecessor.y << ")\n";
                     std::cout << "Current P" << "(" << current.x << ", " << current.y << ")\n";
                     std::cout << "Successor P" << "(" << successor.x << ", " << successor.y << ")\n";
                     std::cout << "---------------------------------------\n";*/
 
-                    get_next_direction = false;
-                    performing_turn = true;
+                    getNextDirection = false;
+                    performingTurn = true;
                     
-                    path_iterator += 2; // because of padding coordinates
+                    pathIterator += 2; // because of padding coordinates
                 }
                 else
                 {
-                    if (currentdirection == turn_left)
+                    /* set speed of each wheel depening on executing movement */
+                    if (currentDirection == turn_left)
                         robotroutine->OnCrossroadTurnLeft();
-                    else if (currentdirection == turn_right)
+                    else if (currentDirection == turn_right)
                         robotroutine->OnCrossroadTurnRight();
                     else
                     {
@@ -220,38 +236,51 @@ int main(int argc, char **argv) {
                         robotroutine->lfm_speed[RIGHT] = robotroutine->LFM_FORWARD_SPEED;
                     }
 
-                    turn_counter += timeStep;
+                    turnCounter += timeStep;
 
-                    if (turn_counter >= crossroad_turn_done)
-                    {
-                        turn_counter = 0;
-                        crossroad_detected = false;
-                        performing_turn = false;
+                    /* turn maneuver should be finished after turn counter has exceeded threshold */
+                    if (currentDirection == straight_on) {
+                        /* when moving straight ahead on a crossroad, use reduced threshold until movement is done */
+                        if (turnCounter >= crossroadTurnDone/2)
+                        {
+                            turnCounter = 0;
+                            crossroadDetected = false;
+                            performingTurn = false;
+                        }
                     }
+                    else {
+                        if (turnCounter >= crossroadTurnDone)
+                        {
+                            turnCounter = 0;
+                            crossroadDetected = false;
+                            performingTurn = false;
+                        }
+                    }
+                    
                 }
 
             }
 
-            else if (obstacle_detected)
+            else if (obstacleDetected)
             {
                 robotroutine->LFM_FORWARD_SPEED = 200;
                 robotroutine->OnCrossroadTurnDegree();
 
-                turn_counter += timeStep;
+                turnCounter += timeStep;
 
-                if (turn_counter >= crossroad_turn_done)
+                if (turnCounter >= crossroadTurnDone)
                 {
-                    new_wall.push_back(pathplanner->coordinate_list[path_iterator]);
-                    start_position = pathplanner->coordinate_list[path_iterator - 1];
+                    newWall.push_back(pathplanner->coordinate_list[pathIterator]);
+                    startPosition = pathplanner->coordinate_list[pathIterator - 1];
 
                     //temporary_helper = true;
-                    pred_post = pathplanner->coordinate_list[path_iterator];
+                    predPost = pathplanner->coordinate_list[pathIterator];
 
-                    pathplanner->PathPlanning(new_wall, start_position, goal_position);
+                    pathplanner->PathPlanning(newWall, startPosition, goalPosition);
 
-                    turn_counter = 0;
-                    path_iterator = 1;
-                    obstacle_detected = false;
+                    turnCounter = 0;
+                    pathIterator = 1;
+                    obstacleDetected = false;
                 }
             }
 
@@ -262,7 +291,7 @@ int main(int argc, char **argv) {
                 //    robotroutine->LFM_FORWARD_SPEED = 0;
                 //    robotroutine->lfm_speed[LEFT] = 0;
                 //    robotroutine->lfm_speed[RIGHT] = 0;
-                //    avoid_second_collision = true;
+                //    avoidSecondCollision = true;
                 //}
                 //else
                 //{
@@ -270,37 +299,37 @@ int main(int argc, char **argv) {
                     robotroutine->LFM_FORWARD_SPEED = -200;
                     robotroutine->lfm_speed[LEFT] = -200;
                     robotroutine->lfm_speed[RIGHT] = -200;
-                    obstacle_detected = true;
+                    obstacleDetected = true;
 //                }
             }
 
             else
             {
                 if (pathplanner->coordinate_list.size() > 0 && // direction command list has been initialized already
-                    path_iterator >= pathplanner->coordinate_list.size()) // all direction commands have been executed
+                    pathIterator >= pathplanner->coordinate_list.size()) // all direction commands have been executed
                 {
                     /********** GOAL REACHED PROCEDURE **********/
-                    if (epuck_endless_mode) {
+                    if (epuckEndlessMode) {
 
                         // reset variables -> reset_controller_state();
-                        start_position.x = 0; start_position.y = 0;
-                        goal_position.x = 0; goal_position.y = 0;
-                        path_planning_completed = false;
-                        init_procedure_done = false;
-                        path_iterator = 1;
-                        new_wall.clear();
+                        startPosition.x = 0; startPosition.y = 0;
+                        goalPosition.x = 0; goalPosition.y = 0;
+                        pathPlanningCompleted = false;
+                        initProcedureDone = false;
+                        pathIterator = 1;
+                        newWall.clear();
 
                         robotroutine->EnableEpuckCam();
                     }
                     else {
                         // if no endless mode move until end of line and stop
                         if (robotroutine->DetectEndOfLine()) {
-                            if (ground_sensor_jitter >= 10) {
+                            if (groundSensorJitter >= 10) {
                                 robotroutine->PerformHalt();
-                                end_of_line_goal_reached = true;
-                                ground_sensor_jitter = 0;
+                                endOfLineGoalReached = true;
+                                groundSensorJitter = 0;
                             }
-                            ground_sensor_jitter++;
+                            groundSensorJitter++;
                         }
                         else {
                             robotroutine->LineFollowingModule();

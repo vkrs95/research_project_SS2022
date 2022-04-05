@@ -54,16 +54,21 @@ void Pathplanner::GeneratePointCoordinateList()
         MP_List.push_back({ i, 0 });
     }
 
-    // left and right side points
-    for (i = 1; i < MATRIX_N; i += 2) {
-        MP_List.push_back({ 0, i });
-        MP_List.push_back({ MATRIX_N, i });
-    }
-
     // bottom point row
     for (i = 1; i < MATRIX_N; i += 2) {
         MP_List.push_back({ i, MATRIX_N });
     }
+
+    // left side points
+    for (i = 1; i < MATRIX_N; i += 2) {
+        MP_List.push_back({ 0, i });
+    }
+
+    // right side points
+    for (i = 1; i < MATRIX_N; i += 2) {
+        MP_List.push_back({ MATRIX_N, i });
+    }
+
 }
 
 void Pathplanner::AlternativePlanning(AStar::Vec2i new_wall, AStar::Vec2i start_pos, AStar::Vec2i goal_pos, RobotHeading currentheading)

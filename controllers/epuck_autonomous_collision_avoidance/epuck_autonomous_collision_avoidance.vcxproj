@@ -163,7 +163,7 @@
     <ClCompile Include="epuck_autonomous_collision_avoidance.cpp" />
     <ClCompile Include="ObstacleAvoidance.cpp" />
     <ClCompile Include="Pathplanner.cpp" />
-    <ClCompile Include="QRModule.cpp" />
+    <ClCompile Include="QRModuleEPuckSGD.cpp" />
     <ClCompile Include="RobotRoutine.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -172,6 +172,7 @@
     <ClInclude Include="ObstacleAvoidance.h" />
     <ClInclude Include="Pathplanner.h" />
     <ClInclude Include="QRModule.h" />
+    <ClInclude Include="QRModuleEPuckSGD.h" />
     <ClInclude Include="RobotRoutine.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
