@@ -91,19 +91,25 @@ bool RobotRoutine::DetectEndOfLine(void) {
     return false;
 }
 
-void RobotRoutine::OnCrossroadTurnLeft(void) 
+void RobotRoutine::setWheelSpeedMoveStraightAhead(void)
+{
+    lfm_speed[LEFT] = LFM_FORWARD_SPEED;
+    lfm_speed[RIGHT] = LFM_FORWARD_SPEED;
+}
+
+void RobotRoutine::setWheelSpeedTurnLeft(void)
 {
     lfm_speed[LEFT] = 0;
     lfm_speed[RIGHT] = LFM_FORWARD_SPEED;
 }
 
-void RobotRoutine::OnCrossroadTurnRight(void) 
+void RobotRoutine::setWheelSpeedTurnRight(void)
 {
     lfm_speed[LEFT] = LFM_FORWARD_SPEED;
     lfm_speed[RIGHT] = 0;
 }
 
-void RobotRoutine::OnCrossroadTurnDegree(void)
+void RobotRoutine::setWheelSpeedTurnAround(void)
 {
     lfm_speed[LEFT] = 200;
     lfm_speed[RIGHT] = -200;

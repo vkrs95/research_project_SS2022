@@ -17,7 +17,7 @@ public:
     void AlternativePlanning(AStar::Vec2i new_wall, AStar::Vec2i start_pos, AStar::Vec2i goal_pos, RobotHeading currentheading);
     void GeneratePointCoordinateList();
     void SetMatrixDimension(unsigned int dimension);
-    MovingDirection EvaluateDirection(AStar::Vec2i predecessor, AStar::Vec2i current, AStar::Vec2i successor);
+    MovingDirection getNextMovingDirection(size_t pathIterator);
 
     std::vector<AStar::Vec2i> MP_List = {};
 

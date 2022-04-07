@@ -16,8 +16,8 @@ int main(int argc, char **argv) {
     /*** define local variables ***/
     int timeStep = (int)robot->getBasicTimeStep();
     unsigned int pathDirectionListIterator = 0;
-    unsigned int crossroadTurnDone = 3500;
-    unsigned int turnAroundDone = crossroadTurnDone;
+    const unsigned int CROSSROADTURNTHRESHOLD = 3500;
+    const unsigned int TURNAROUNDTHRESHOLD = CROSSROADTURNTHRESHOLD;
 
 
     /* robot parameters */
@@ -53,8 +53,8 @@ int main(int argc, char **argv) {
     unsigned int readQrCodeAttemptLimit = 3;
 
     /* path parameters */
-    unsigned int pathIterator = 1;    
-    MovingDirection currentDirection;
+    size_t pathIterator = 1;
+    MovingDirection nextMovingDirection;
 
     /* before entering main loop init camera by enabling it */
     robotroutine->EnableEpuckCam();
@@ -78,7 +78,7 @@ int main(int argc, char **argv) {
 
         /*************************************/
         /********** LED CYCLE BLOCK **********/
-        if (endOfLineGoalReached) 
+        if (endOfLineGoalReached || obstacleDetected /* || crossroadDetected */ )
         {
             robotroutine->AllLightsOnLED();
         }
@@ -104,7 +104,7 @@ int main(int argc, char **argv) {
                 robotroutine->PerformTurnAround();
                 turnCounter += timeStep;
 
-                if (turnCounter >= turnAroundDone) {
+                if (turnCounter >= TURNAROUNDTHRESHOLD) {
                     turnCounter = 0;
                     initProcedureDone = true;
                 }
@@ -182,7 +182,6 @@ int main(int argc, char **argv) {
             *   execute the corresponding behaviour   
             */
 
-
             if (robotroutine->DetectLineCrossroad())
             {
                 /*
@@ -198,51 +197,35 @@ int main(int argc, char **argv) {
                     *   by setting predecessor, current position and successor;
                     *   set flag to continue performing turn on crossroad
                     */
-                    robotroutine->AllLightsOnLED();
                     crossroadDetected = true;
                     groundSensorJitter = 0;
 
+                    /*
+                    *   get next moving direction to perform on the crossroad
+                    */
+                    nextMovingDirection = pathplanner->getNextMovingDirection(pathIterator);
 
+                    /*
+                    *   configure wheel speed according to moving direction
+                    */
+                    if (nextMovingDirection == turn_left)           robotroutine->setWheelSpeedTurnLeft();
+                    else if (nextMovingDirection == turn_right)     robotroutine->setWheelSpeedTurnRight();
+                    else /* nextMovingDirection == straight_on */   robotroutine->setWheelSpeedMoveStraightAhead();
 
-                    AStar::Vec2i predecessor = pathplanner->coordinate_list.at(pathIterator - 1);
-                    AStar::Vec2i current = pathplanner->coordinate_list.at(pathIterator);
-                    AStar::Vec2i successor = pathplanner->coordinate_list.at(pathIterator + 1);
-
-                    currentDirection = pathplanner->EvaluateDirection(predecessor, current, successor);
-
-                    /*std::cout << "Epuck:" << "( " << robot->getName() << " )\n";
-                    std::cout << "Pathplanning in iteration:" << "( " << pathIterator << " )\n";
-                    std::cout << "New direction (0 = Straight, 1 = left, 2 = right)" << "(" << currentDirection << ")\n";
-                    std::cout << "Predecessor P" << "(" << predecessor.x << ", " << predecessor.y << ")\n";
-                    std::cout << "Current P" << "(" << current.x << ", " << current.y << ")\n";
-                    std::cout << "Successor P" << "(" << successor.x << ", " << successor.y << ")\n";
-                    std::cout << "---------------------------------------\n";*/
 
                     performingTurn = true;
-
                     pathIterator += 2; // because of padding coordinates
                 }
             }
 
             if (crossroadDetected)
             {                
-                /* set speed of each wheel depening on executing movement */
-                if (currentDirection == turn_left)
-                    robotroutine->OnCrossroadTurnLeft();
-                else if (currentDirection == turn_right)
-                    robotroutine->OnCrossroadTurnRight();
-                else
-                {
-                    robotroutine->lfm_speed[LEFT] = robotroutine->LFM_FORWARD_SPEED;
-                    robotroutine->lfm_speed[RIGHT] = robotroutine->LFM_FORWARD_SPEED;
-                }
-
                 turnCounter += timeStep;
 
                 /* turn maneuver should be finished after turn counter has exceeded threshold */
-                if (currentDirection == straight_on) {
+                if (nextMovingDirection == straight_on) {
                     /* when moving straight ahead on a crossroad, use reduced threshold until movement is done */
-                    if (turnCounter >= crossroadTurnDone/2)
+                    if (turnCounter >= CROSSROADTURNTHRESHOLD/2)
                     {
                         turnCounter = 0;
                         crossroadDetected = false;
@@ -250,7 +233,7 @@ int main(int argc, char **argv) {
                     }
                 }
                 else {
-                    if (turnCounter >= crossroadTurnDone)
+                    if (turnCounter >= CROSSROADTURNTHRESHOLD)
                     {
                         turnCounter = 0;
                         crossroadDetected = false;
@@ -259,14 +242,19 @@ int main(int argc, char **argv) {
                 }
             }
 
-            else if (obstacleDetected)
+            /*
+            *   check if an obstacle has been detected or if obstacle avoidance
+            *   procedure is already activated
+            */
+            else if (obstacleDetected || obstacleavoidance->ObstacleDetection(robotroutine->ps_value))
             {
-                robotroutine->LFM_FORWARD_SPEED = 200;
-                robotroutine->OnCrossroadTurnDegree();
+                obstacleDetected = true;
+
+                robotroutine->setWheelSpeedTurnAround();
 
                 turnCounter += timeStep;
 
-                if (turnCounter >= crossroadTurnDone)
+                if (turnCounter >= TURNAROUNDTHRESHOLD)
                 {
                     newWall.push_back(pathplanner->coordinate_list[pathIterator]);
                     startPosition = pathplanner->coordinate_list[pathIterator - 1];
@@ -281,14 +269,6 @@ int main(int argc, char **argv) {
                 }
             }
 
-            else if (obstacleavoidance->ObstacleDetection(robotroutine->ps_value))
-            {
-                robotroutine->AllLightsOnLED();
-                robotroutine->LFM_FORWARD_SPEED = -200;
-                robotroutine->lfm_speed[LEFT] = -200;
-                robotroutine->lfm_speed[RIGHT] = -200;
-                obstacleDetected = true;
-            }
             
             /*************************************/
             /****** GOAL REACHED PROCEDURE *******/

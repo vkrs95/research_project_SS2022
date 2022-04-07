@@ -35,9 +35,10 @@ class RobotRoutine
 		void LineFollowingModule(void);
 		bool DetectLineCrossroad(void);
 		bool DetectEndOfLine(void);
-		void OnCrossroadTurnLeft(void);
-		void OnCrossroadTurnRight(void);
-		void OnCrossroadTurnDegree(void);
+		void setWheelSpeedMoveStraightAhead(void);
+		void setWheelSpeedTurnLeft(void);
+		void setWheelSpeedTurnRight(void);
+		void setWheelSpeedTurnAround(void);
 		void CyclicBlinkingLED(void);
 		void AllLightsOnLED(void);
 		void SetSpeedAndVelocity(void);

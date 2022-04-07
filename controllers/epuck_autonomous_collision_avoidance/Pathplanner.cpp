@@ -263,8 +263,14 @@ void Pathplanner::SetMatrixDimension(unsigned int dimension)
 }
 
 
-MovingDirection Pathplanner::EvaluateDirection(AStar::Vec2i predecessor, AStar::Vec2i current, AStar::Vec2i successor)
+MovingDirection Pathplanner::getNextMovingDirection(size_t pathIterator)// AStar::Vec2i predecessor, AStar::Vec2i current, AStar::Vec2i successor)
 {
+    MovingDirection nextDirection;
+
+    AStar::Vec2i predecessor = coordinate_list.at(pathIterator - 1);
+    AStar::Vec2i current = coordinate_list.at(pathIterator);
+    AStar::Vec2i successor = coordinate_list.at(pathIterator + 1);
+
     predecessor.x = predecessor.x - current.x;
     predecessor.y = predecessor.y - current.y;
 
@@ -276,7 +282,7 @@ MovingDirection Pathplanner::EvaluateDirection(AStar::Vec2i predecessor, AStar::
 
     if (sum_x == 0 && sum_y == 0)
     {
-        return MovingDirection(straight_on);
+        nextDirection = MovingDirection(straight_on);
     }
     else
     {
@@ -285,11 +291,21 @@ MovingDirection Pathplanner::EvaluateDirection(AStar::Vec2i predecessor, AStar::
 
         if (vector_sum_xy - pred_suc_sum == 0)
         {
-            return MovingDirection(turn_left);
+            nextDirection = MovingDirection(turn_left);
         }
         else
         {
-            return MovingDirection(turn_right);
+            nextDirection = MovingDirection(turn_right);
         }
     }
+
+    /* debug output for node coordinates */
+    //std::cout << "Pathplanning in iteration:" << "( " << pathIterator << " )\n";
+    //std::cout << "New direction (0 = Straight, 1 = left, 2 = right)" << "(" << nextDirection << ")\n";
+    //std::cout << "Predecessor P" << "(" << predecessor.x << ", " << predecessor.y << ")\n";
+    //std::cout << "Current P" << "(" << current.x << ", " << current.y << ")\n";
+    //std::cout << "Successor P" << "(" << successor.x << ", " << successor.y << ")\n";
+    //std::cout << "---------------------------------------\n";
+
+    return nextDirection;
 }
