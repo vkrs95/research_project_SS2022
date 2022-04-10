@@ -103,8 +103,8 @@ void PathPlannerEPuckAStar::setInstuctionList(AStar::CoordinateList path)
         epuckCurrentHeading = alternativeHeading;
         alternativePlanningActive = false;
 
-        headingList.clear();
-        pathDirectionList.clear();
+        // headingList.clear();     // TODO: can be removed ?
+        // pathDirectionList.clear(); // TODO: can be removed ?
     }
     else
         epuckCurrentHeading = determineEpuckInitHeading(path.at(0));
@@ -183,8 +183,8 @@ void PathPlannerEPuckAStar::setInstuctionList(AStar::CoordinateList path)
 
         if (lastPosX % 2 != 0 && lastPosY % 2 != 0) 
         {
-            pathDirectionList.push_back(nextDirection);
-            headingList.push_back(nextHeading);
+            //pathDirectionList.push_back(nextDirection); // TODO: can be removed ?
+            //headingList.push_back(nextHeading);       // TODO: can be removed ?
         }
 
         lastPosX = path.at(i).x;

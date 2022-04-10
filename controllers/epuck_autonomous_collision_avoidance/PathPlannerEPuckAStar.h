@@ -22,13 +22,12 @@ class PathPlannerEPuckAStar:
     public PathPlanningModule<AStar::Vec2i, void>
 {
 public:
-    std::vector<MovingDirection> pathDirectionList;
-    std::vector<RobotHeading> headingList;
     AStar::CoordinateList coordinateList;
 
     RobotHeading alternativeHeading;
     bool alternativePlanningActive;
 
+    /* constructor */
     PathPlannerEPuckAStar();
 
     /* overriding abstract parent function */
@@ -37,17 +36,21 @@ public:
     /* provide additional public functions to use this planner */
     void findPath(AStar::CoordinateList newWallsList, AStar::Vec2i startPosition, AStar::Vec2i goalPosition);
     void findAlternativePath(AStar::Vec2i newWall, AStar::Vec2i startPosition, AStar::Vec2i goalPosition, RobotHeading currentHeading);
-    void generatePointCoordinateList();
+
     void setMatrixDimension(unsigned int dimension);
     MovingDirection getNextMovingDirection(size_t pathIterator);
 
     std::vector<AStar::Vec2i> MPList = {};
 
 private:
+    void generatePointCoordinateList();
     void setInstuctionList(AStar::CoordinateList path);
     RobotHeading determineEpuckInitHeading(AStar::Vec2i currentPos);
     RobotHeading inverseHeading(RobotHeading currentHeading);
     void addWallsToWorldGenerator(AStar::Generator* generator);
+
+    //std::vector<MovingDirection> pathDirectionList;
+    //std::vector<RobotHeading> headingList;    // TODO: remove since not used ?
 
     int ARENA_NUMBER_OF_LINES_PER_SIDE;
     int MATRIX_N;

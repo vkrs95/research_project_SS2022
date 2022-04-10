@@ -34,7 +34,7 @@ int main(int argc, char **argv) {
     AStar::Vec2i goalPosition;
 
     AStar::Vec2i predPost;
-    AStar::CoordinateList newWall;
+    AStar::CoordinateList newWallList;
 
     SGDQRParams qrCodeParams;
 
@@ -256,12 +256,12 @@ int main(int argc, char **argv) {
 
                 if (turnCounter >= TURNAROUNDTHRESHOLD)
                 {
-                    newWall.push_back(pathplanner->coordinateList[pathIterator]);
+                    newWallList.push_back(pathplanner->coordinateList[pathIterator]);
                     startPosition = pathplanner->coordinateList[pathIterator - 1];
 
                     predPost = pathplanner->coordinateList[pathIterator];
 
-                    pathplanner->findPath(newWall, startPosition, goalPosition);
+                    pathplanner->findPath(newWallList, startPosition, goalPosition);
 
                     turnCounter = 0;
                     pathIterator = 1;
@@ -291,7 +291,7 @@ int main(int argc, char **argv) {
                         pathPlanningCompleted = false;
                         initProcedureDone = false;
                         pathIterator = 1;
-                        newWall.clear();
+                        newWallList.clear();
 
                         robotroutine->EnableEpuckCam();
                     }
