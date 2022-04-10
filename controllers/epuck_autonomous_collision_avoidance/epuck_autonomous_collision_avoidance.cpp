@@ -1,5 +1,5 @@
 #include "RobotRoutine.h"
-#include "Pathplanner.h"
+#include "PathPlannerEPuckAStar.h"
 #include "ObstacleAvoidance.h"
 #include "QRModuleEPuckSGD.h"
 
@@ -8,7 +8,7 @@ int main(int argc, char **argv) {
     /*** create all Object instances ***/
     Robot* robot = new Robot();
     RobotRoutine* robotroutine = new RobotRoutine(robot);
-    Pathplanner* pathplanner = new Pathplanner();
+    PathPlannerEPuckAStar* pathplanner = new PathPlannerEPuckAStar();
     ObstacleAvoidance* obstacleavoidance = new ObstacleAvoidance;
     QRModule<SGDQRParams>* qrmodule = new QRModuleEPuckSGD();
 
@@ -132,11 +132,11 @@ int main(int argc, char **argv) {
                         // deactivate epuck camera since reading was successful
                         robotroutine->DisableEpuckCam();
 
-                        pathplanner->SetMatrixDimension(qrCodeParams.mapDimension);
-
+                        pathplanner->setMatrixDimension(qrCodeParams.mapDimension);
+                        
                         // save positions read from QR code
-                        startPosition = pathplanner->MP_List.at(qrCodeParams.startIndex);
-                        goalPosition = pathplanner->MP_List.at(qrCodeParams.goalIndex);
+                        startPosition = pathplanner->MPList.at(qrCodeParams.startIndex);
+                        goalPosition = pathplanner->MPList.at(qrCodeParams.goalIndex);
 
                         // debug output of start/goal information
                         std::cout << "------------------------" << "\n";
@@ -158,7 +158,7 @@ int main(int argc, char **argv) {
                     }
 
                     /* path planning */
-                    pathplanner->PathPlanning(startPosition, goalPosition);
+                    pathplanner->findPath(startPosition, goalPosition);
 
                     initProcedureDistanceToScanCounter = 0;
                     pathPlanningCompleted = true;
@@ -208,9 +208,9 @@ int main(int argc, char **argv) {
                     /*
                     *   configure wheel speed according to moving direction
                     */
-                    if (nextMovingDirection == turn_left)           robotroutine->setWheelSpeedTurnLeft();
-                    else if (nextMovingDirection == turn_right)     robotroutine->setWheelSpeedTurnRight();
-                    else /* nextMovingDirection == straight_on */   robotroutine->setWheelSpeedMoveStraightAhead();
+                    if (nextMovingDirection == turnLeft)           robotroutine->setWheelSpeedTurnLeft();
+                    else if (nextMovingDirection == turnRight)     robotroutine->setWheelSpeedTurnRight();
+                    else /* nextMovingDirection == straightOn */   robotroutine->setWheelSpeedMoveStraightAhead();
 
 
                     performingTurn = true;
@@ -223,7 +223,7 @@ int main(int argc, char **argv) {
                 turnCounter += timeStep;
 
                 /* turn maneuver should be finished after turn counter has exceeded threshold */
-                if (nextMovingDirection == straight_on) {
+                if (nextMovingDirection == straightOn) {
                     /* when moving straight ahead on a crossroad, use reduced threshold until movement is done */
                     if (turnCounter >= CROSSROADTURNTHRESHOLD/2)
                     {
@@ -256,12 +256,12 @@ int main(int argc, char **argv) {
 
                 if (turnCounter >= TURNAROUNDTHRESHOLD)
                 {
-                    newWall.push_back(pathplanner->coordinate_list[pathIterator]);
-                    startPosition = pathplanner->coordinate_list[pathIterator - 1];
+                    newWall.push_back(pathplanner->coordinateList[pathIterator]);
+                    startPosition = pathplanner->coordinateList[pathIterator - 1];
 
-                    predPost = pathplanner->coordinate_list[pathIterator];
+                    predPost = pathplanner->coordinateList[pathIterator];
 
-                    pathplanner->PathPlanning(newWall, startPosition, goalPosition);
+                    pathplanner->findPath(newWall, startPosition, goalPosition);
 
                     turnCounter = 0;
                     pathIterator = 1;
@@ -277,8 +277,8 @@ int main(int argc, char **argv) {
                 /* 
                 *   check if state 'goal reached' is reached
                 */
-                if (pathplanner->coordinate_list.size() > 0 && // direction command list has been initialized already
-                    pathIterator >= pathplanner->coordinate_list.size()) // all direction commands have been executed
+                if (pathplanner->coordinateList.size() > 0 && // direction command list has been initialized already
+                    pathIterator >= pathplanner->coordinateList.size()) // all direction commands have been executed
                 {                    
                     if (epuckEndlessMode) 
                     {

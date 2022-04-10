@@ -162,7 +162,7 @@
     <ClCompile Include="a_star\AStar.cpp" />
     <ClCompile Include="epuck_autonomous_collision_avoidance.cpp" />
     <ClCompile Include="ObstacleAvoidance.cpp" />
-    <ClCompile Include="Pathplanner.cpp" />
+    <ClCompile Include="PathPlannerEPuckAStar.cpp" />
     <ClCompile Include="QRModuleEPuckSGD.cpp" />
     <ClCompile Include="RobotRoutine.cpp" />
   </ItemGroup>
@@ -170,7 +170,8 @@
     <ClInclude Include="a_star\AStar.hpp" />
     <ClInclude Include="epuck_autonomous_collision_avoidance.h" />
     <ClInclude Include="ObstacleAvoidance.h" />
-    <ClInclude Include="Pathplanner.h" />
+    <ClInclude Include="PathPlannerEPuckAStar.h" />
+    <ClInclude Include="PathPlanningModule.h" />
     <ClInclude Include="QRModule.h" />
     <ClInclude Include="QRModuleEPuckSGD.h" />
     <ClInclude Include="RobotRoutine.h" />

@@ -48,18 +48,3 @@ constexpr auto GS_RIGHT = 2;
 // 8 LEDs
 constexpr auto NB_LEDS = 8;
 constexpr unsigned int ledTimeStep = 320; // [ms]
-
-// Moving directions
-enum MovingDirection {
-    straight_on = 0,
-    turn_left,
-    turn_right,
-    turn_around
-};
-
-enum RobotHeading {
-    HEADING_NORTH = 0,
-    HEADING_EAST,
-    HEADING_SOUTH,
-    HEADING_WEST
-};

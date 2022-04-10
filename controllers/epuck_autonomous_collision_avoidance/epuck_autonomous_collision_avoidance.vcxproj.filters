@@ -105,7 +105,7 @@
     </ClCompile>
     <ClCompile Include="epuck_autonomous_collision_avoidance.cpp" />
     <ClCompile Include="ObstacleAvoidance.cpp" />
-    <ClCompile Include="Pathplanner.cpp" />
+    <ClCompile Include="PathPlannerEPuckAStar.cpp" />
     <ClCompile Include="RobotRoutine.cpp" />
     <ClCompile Include="QRModuleEPuckSGD.cpp" />
   </ItemGroup>
@@ -115,10 +115,11 @@
     </ClInclude>
     <ClInclude Include="epuck_autonomous_collision_avoidance.h" />
     <ClInclude Include="ObstacleAvoidance.h" />
-    <ClInclude Include="Pathplanner.h" />
+    <ClInclude Include="PathPlannerEPuckAStar.h" />
     <ClInclude Include="RobotRoutine.h" />
     <ClInclude Include="QRModule.h" />
     <ClInclude Include="QRModuleEPuckSGD.h" />
+    <ClInclude Include="PathPlanningModule.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Webots">

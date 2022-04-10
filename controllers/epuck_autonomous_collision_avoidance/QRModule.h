@@ -1,5 +1,5 @@
-#include "epuck_autonomous_collision_avoidance.h"
 #pragma once
+#include <string>
 
 template<typename T>
 
