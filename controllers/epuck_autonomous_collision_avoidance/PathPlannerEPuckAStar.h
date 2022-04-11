@@ -22,36 +22,55 @@ class PathPlannerEPuckAStar:
     public PathPlanningModule<AStar::Vec2i, void>
 {
 public:
-    AStar::CoordinateList coordinateList;
-
     RobotHeading alternativeHeading;
     bool alternativePlanningActive;
 
     /* constructor */
     PathPlannerEPuckAStar();
 
-    /* overriding abstract parent function */
-    void findPath(AStar::Vec2i startPosition, AStar::Vec2i goalPosition) override;
+    /*
+    *   planner function to find path between a given start and goal position.
+    *   if no arguments are passed, use start and goal variables that have been 
+    *   configured beforehand.
+    */
+    void findPath(AStar::Vec2i startPosition = {}, AStar::Vec2i goalPosition = {}) override;
 
     /* provide additional public functions to use this planner */
-    void findPath(AStar::CoordinateList newWallsList, AStar::Vec2i startPosition, AStar::Vec2i goalPosition);
-    void findAlternativePath(AStar::Vec2i newWall, AStar::Vec2i startPosition, AStar::Vec2i goalPosition, RobotHeading currentHeading);
-
+    void findAlternativePath(void);
+    bool pathCompleted(void);
     void setMatrixDimension(unsigned int dimension);
-    MovingDirection getNextMovingDirection(size_t pathIterator);
+    void setStartGoalPositionByIndex(unsigned int startIndex, unsigned int goalIndex);
 
-    std::vector<AStar::Vec2i> MPList = {};
+    MovingDirection getNextMovingDirection(void);
 
 private:
-    void generatePointCoordinateList();
+    void generateEdgeNodeList();
     void setInstuctionList(AStar::CoordinateList path);
     RobotHeading determineEpuckInitHeading(AStar::Vec2i currentPos);
     RobotHeading inverseHeading(RobotHeading currentHeading);
     void addWallsToWorldGenerator(AStar::Generator* generator);
 
-    //std::vector<MovingDirection> pathDirectionList;
-    //std::vector<RobotHeading> headingList;    // TODO: remove since not used ?
+    /*
+    *   List of all edge nodes as 2D coordinates.
+    *   Nodes are saved in the following order: top, bottom, left, right.
+    *   The list must be generated beforehand in order to calculate a path
+    *   between a start and goal edge node.
+    */
+    std::vector<AStar::Vec2i> edgeNodeList = {};
 
+    /* list of (x,y) coordinates from start to goal position */
+    AStar::CoordinateList pathCoordinatesList;
+    
+    /* internal iterator to work through pathCoordinatesList step by step */
+    size_t pathIterator;
+
+    /* current start and goal of the robot */
+    AStar::Vec2i startPosition, goalPosition;
+
+    /* list of detected obstacles */
+    AStar::CoordinateList obstacleList;
+
+    /* constants */
     int ARENA_NUMBER_OF_LINES_PER_SIDE;
     int MATRIX_N;
 };

@@ -7,6 +7,18 @@ PathPlannerEPuckAStar::PathPlannerEPuckAStar()
 
 void PathPlannerEPuckAStar::findPath(AStar::Vec2i startPosition, AStar::Vec2i goalPosition)
 {
+    if (startPosition.x == 0 && startPosition.y == 0 &&
+        goalPosition.x == 0 && goalPosition.y == 0) {
+        /* no parameters passed, use preconfigured start and goal position */
+        
+        // *nothing to do here* 
+    } 
+    else {
+        /* save passed positions in internal variables */
+        this->startPosition = startPosition;
+        this->goalPosition = goalPosition;
+    }
+
     AStar::Generator* generator = new AStar::Generator;
 
     generator->setWorldSize({ MATRIX_N + 1, MATRIX_N + 1 });
@@ -15,79 +27,88 @@ void PathPlannerEPuckAStar::findPath(AStar::Vec2i startPosition, AStar::Vec2i go
 
     addWallsToWorldGenerator(generator);
 
-    coordinateList = generator->findPath(goalPosition, startPosition);
+    pathCoordinatesList = generator->findPath(this->goalPosition, this->startPosition);
+    
+    /* initiate internal iterator, must be 1 to have predecessor at index 0 */
+    pathIterator = 1;
 
-    //// debug print
-    //for (int i = 0; i < coordinateList.size(); i++) {
-    //    std::cout << "(" << coordinateList.at(i).x << ", " << coordinateList.at(i).y << "); ";
-    //}
-    //std::cout << "\n";
+    /* first time path planning, initiate list of obstacles */
+    obstacleList.clear();
 }
 
-void PathPlannerEPuckAStar::findPath(AStar::CoordinateList newWallsList, AStar::Vec2i startPosition, AStar::Vec2i goalPosition)
+void PathPlannerEPuckAStar::findAlternativePath(void)
 {
-    coordinateList.clear();
+    /*
+    *   >>> NOTE: this behaviour can be changed -> maybe it makes more sense if 
+    *   the robots has only one current obstacle registered instead of adding them
+    *   to a list of obstacles?
+    */
+
+    /* add position of current successor as new detected obstacle */
+    obstacleList.push_back(pathCoordinatesList[pathIterator]);
+
+    /*
+    *   To circumnavigate the obstacle the robot turns around and 
+    *   sets the position of the predecessor as its new start position. After this
+    *   a new path is planned with the updated nodes and obstacles.
+    */
+    startPosition = pathCoordinatesList[pathIterator - 1];
+
+    pathCoordinatesList.clear();
     AStar::Generator* generator = new AStar::Generator;
 
     generator->setWorldSize({ MATRIX_N + 1, MATRIX_N + 1});
     generator->setHeuristic(AStar::Heuristic::euclidean);
     generator->setDiagonalMovement(false);
 
-    for (int i = 0; i < newWallsList.size(); i++)
+    for (int i = 0; i < obstacleList.size(); i++)
     {
-        generator->addCollision(newWallsList.at(i));
+        generator->addCollision(obstacleList.at(i));
     }
 
     addWallsToWorldGenerator(generator); // add default walls
 
-    coordinateList = generator->findPath(goalPosition, startPosition);
+    pathCoordinatesList = generator->findPath(goalPosition, startPosition);
+
+    /* new path generated, reset internal iterator */
+    pathIterator = 1;
 }
 
 
+bool PathPlannerEPuckAStar::pathCompleted(void)
+{
+    /*
+    *   coordinate list must have been initialized and iterator has 
+    *   processed pathCoordinatesList completely
+    */
+    return pathCoordinatesList.size() > 0 && pathIterator >= pathCoordinatesList.size();
+}
 
-void PathPlannerEPuckAStar::generatePointCoordinateList()
+
+void PathPlannerEPuckAStar::generateEdgeNodeList()
 {
     int i;
 
     // top point row
     for (i = 1; i < MATRIX_N; i += 2) {
-        MPList.push_back({ i, 0 });
+        edgeNodeList.push_back({ i, 0 });
     }
 
     // bottom point row
     for (i = 1; i < MATRIX_N; i += 2) {
-        MPList.push_back({ i, MATRIX_N });
+        edgeNodeList.push_back({ i, MATRIX_N });
     }
 
     // left side points
     for (i = 1; i < MATRIX_N; i += 2) {
-        MPList.push_back({ 0, i });
+        edgeNodeList.push_back({ 0, i });
     }
 
     // right side points
     for (i = 1; i < MATRIX_N; i += 2) {
-        MPList.push_back({ MATRIX_N, i });
+        edgeNodeList.push_back({ MATRIX_N, i });
     }
 
-}
-
-void PathPlannerEPuckAStar::findAlternativePath(AStar::Vec2i newWall, AStar::Vec2i startPosition, AStar::Vec2i goalPosition, RobotHeading currentHeading)
-{
-    AStar::Generator* generator = new AStar::Generator;
-
-    generator->setWorldSize({ MATRIX_N + 1, MATRIX_N + 1 });
-    generator->setHeuristic(AStar::Heuristic::euclidean);
-    generator->setDiagonalMovement(false);
-
-    addWallsToWorldGenerator(generator);
-    generator->addCollision(newWall);
-
-    alternativeHeading = inverseHeading(currentHeading);
-    alternativePlanningActive = true;
-
-    coordinateList.clear();
-    coordinateList = generator->findPath(goalPosition, startPosition);
-    setInstuctionList(coordinateList);
 }
 
 
@@ -102,9 +123,6 @@ void PathPlannerEPuckAStar::setInstuctionList(AStar::CoordinateList path)
     {
         epuckCurrentHeading = alternativeHeading;
         alternativePlanningActive = false;
-
-        // headingList.clear();     // TODO: can be removed ?
-        // pathDirectionList.clear(); // TODO: can be removed ?
     }
     else
         epuckCurrentHeading = determineEpuckInitHeading(path.at(0));
@@ -260,18 +278,30 @@ void PathPlannerEPuckAStar::setMatrixDimension(unsigned int dimension)
     ARENA_NUMBER_OF_LINES_PER_SIDE = dimension;
     MATRIX_N = ARENA_NUMBER_OF_LINES_PER_SIDE * 2;
 
-    // dynamically initialize list of coordinates 
-    generatePointCoordinateList();
+    // dynamically initialize list of edge node coordinates 
+    generateEdgeNodeList();
+}
+
+void PathPlannerEPuckAStar::setStartGoalPositionByIndex(unsigned int startIndex, unsigned int goalIndex)
+{
+    startPosition = edgeNodeList.at(startIndex);
+    goalPosition = edgeNodeList.at(goalIndex);
+
+    // debug output of start/goal information
+    std::cout << "------------------------" << "\n";
+    std::cout << "E-Puck in " << ARENA_NUMBER_OF_LINES_PER_SIDE << "x" << ARENA_NUMBER_OF_LINES_PER_SIDE << " map\n";
+    std::cout << "Start Position: P" << startIndex + 1 << "(" << startPosition.x << ", " << startPosition.y <<
+        ")\nGoal Position: P" << goalIndex + 1 << "(" << goalPosition.x << ", " << goalPosition.y << ")" << "\n";
 }
 
 
-MovingDirection PathPlannerEPuckAStar::getNextMovingDirection(size_t pathIterator)// AStar::Vec2i predecessor, AStar::Vec2i current, AStar::Vec2i successor)
+MovingDirection PathPlannerEPuckAStar::getNextMovingDirection(void)
 {
     MovingDirection nextDirection;
 
-    AStar::Vec2i predecessor = coordinateList.at(pathIterator - 1);
-    AStar::Vec2i current = coordinateList.at(pathIterator);
-    AStar::Vec2i successor = coordinateList.at(pathIterator + 1);
+    AStar::Vec2i predecessor = pathCoordinatesList.at(pathIterator - 1);
+    AStar::Vec2i current = pathCoordinatesList.at(pathIterator);
+    AStar::Vec2i successor = pathCoordinatesList.at(pathIterator + 1);
 
     predecessor.x = predecessor.x - current.x;
     predecessor.y = predecessor.y - current.y;
@@ -288,7 +318,7 @@ MovingDirection PathPlannerEPuckAStar::getNextMovingDirection(size_t pathIterato
     }
     else
     {
-        int vectorSumXY = (sumX + sumY) * 0.5;
+        int vectorSumXY = static_cast<int>( (sumX + sumY) * 0.5 );
         int predSucSum = predecessor.y + successor.x + successor.y;
 
         if (vectorSumXY - predSucSum == 0)
@@ -300,6 +330,9 @@ MovingDirection PathPlannerEPuckAStar::getNextMovingDirection(size_t pathIterato
             nextDirection = MovingDirection(turnRight);
         }
     }
+
+    /* update iterator, add 2 because of padding coordinates */
+    pathIterator += 2;
 
     /* debug output for node coordinates */
     //std::cout << "Pathplanning in iteration:" << "( " << pathIterator << " )\n";
