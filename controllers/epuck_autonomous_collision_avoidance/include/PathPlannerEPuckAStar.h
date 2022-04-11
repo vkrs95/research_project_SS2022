@@ -1,5 +1,5 @@
 #include "PathPlanningModule.h"
-#include "a_star/AStar.hpp"
+#include "AStar.hpp"
 
 #include <iostream>
 #pragma once
