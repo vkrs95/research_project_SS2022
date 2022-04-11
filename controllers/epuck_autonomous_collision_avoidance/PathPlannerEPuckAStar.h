@@ -26,7 +26,7 @@ public:
     bool alternativePlanningActive;
 
     /* constructor */
-    PathPlannerEPuckAStar();
+    PathPlannerEPuckAStar(std::string robotName = "E-Puck");
 
     /*
     *   planner function to find path between a given start and goal position.
@@ -71,6 +71,9 @@ private:
     AStar::CoordinateList obstacleList;
 
     /* constants */
-    int ARENA_NUMBER_OF_LINES_PER_SIDE;
-    int MATRIX_N;
+    int ARENA_NUMBER_OF_LINES_PER_SIDE = 0;
+    int MATRIX_N = 0;
+
+    /* optional name of robot for debug output */
+    std::string robotName = "";
 };

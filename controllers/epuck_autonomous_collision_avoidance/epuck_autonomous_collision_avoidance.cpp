@@ -8,13 +8,14 @@ int main(int argc, char **argv) {
     /*** create all Object instances ***/
     Robot* robot = new Robot();
     RobotRoutine* robotroutine = new RobotRoutine(robot);
-    PathPlannerEPuckAStar* pathplanner = new PathPlannerEPuckAStar();
+    PathPlannerEPuckAStar* pathplanner = new PathPlannerEPuckAStar(robotroutine->epuck_name);
     ObstacleAvoidance* obstacleavoidance = new ObstacleAvoidance;
     QRModule<SGDQRParams>* qrmodule = new QRModuleEPuckSGD();
 
     
     /*** define local variables ***/
     int timeStep = (int)robot->getBasicTimeStep();
+    unsigned int turnCounter = 0;
     unsigned int crossroadManeuverThreshold;    // is set when next direction is read  
     const unsigned int TURNLEFTRIGHTTHRESHOLD = 3500;
     const unsigned int TURNAROUNDTHRESHOLD = TURNLEFTRIGHTTHRESHOLD;
@@ -29,18 +30,11 @@ int main(int argc, char **argv) {
     unsigned int initProcedureDistanceToScanCounter = 0;
 
 
-    /* world parameters */
-    SGDQRParams qrCodeParams;
-
-
     /* robot routine flags */
     bool obstacleDetected = false;
-    bool crossroadDetected = false;
+    bool crossroadManeuverActive = false;
     bool performingTurn = false;
-    bool avoidSecondCollision = false;
-    bool performingTurnOnCrossroad = false;
     bool endOfLineGoalReached = false;
-    unsigned int turnCounter = 0;
     bool initProcedureDone = false;
     bool pathPlanningCompleted = false;
     unsigned int readQrCodeAttemptCounter = 0;
@@ -49,7 +43,9 @@ int main(int argc, char **argv) {
     /* before entering main loop init camera by enabling it */
     robotroutine->EnableEpuckCam();
 
-    /********** Main Loop **********/
+
+    /*************************************/
+    /************* MAIN LOOP *************/
     /*
     *   During the lifetime of the robot the controller main loop is executed periodically.
     *   The loop is constructed as a state machine.
@@ -68,7 +64,7 @@ int main(int argc, char **argv) {
 
         /*************************************/
         /********** LED CYCLE BLOCK **********/
-        if (endOfLineGoalReached || obstacleDetected /* || crossroadDetected */ )
+        if (endOfLineGoalReached || obstacleDetected /* || crossroadManeuverActive */ )
         {
             robotroutine->AllLightsOnLED();
         }
@@ -80,7 +76,6 @@ int main(int argc, char **argv) {
                 ledCounter = 1;
             }
         }
-
         /*************************************/
         /*************************************/
 
@@ -91,7 +86,7 @@ int main(int argc, char **argv) {
 
             if (pathPlanningCompleted) {
 
-                robotroutine->PerformTurnAround();
+                robotroutine->setWheelSpeedTurnAround();
                 turnCounter += timeStep;
 
                 if (turnCounter >= TURNAROUNDTHRESHOLD) {
@@ -100,6 +95,7 @@ int main(int argc, char **argv) {
                 }
             }
             else {
+                /* move towards QR code at start edge node */
                 if (initProcedureDistanceToScanCounter >= qrDistanceToScanPos) {
 
                     /* check if camera is enabled and take a snapshot via camera while robot is facing towards QR code*/
@@ -113,6 +109,9 @@ int main(int argc, char **argv) {
                         robotroutine->EnableEpuckCam();
                         continue;
                     }
+
+                    // generate structure to save read parameters into
+                    SGDQRParams qrCodeParams;
 
                     // get content from QR image
                     bool readSuccessful = qrmodule->readQRCode(robotroutine->qr_img_file_name, &qrCodeParams);
@@ -166,74 +165,90 @@ int main(int argc, char **argv) {
 
         /*************************************/
         /**** MOVE TO GOAL PROCEDURE BLOCK ***/
+        /*
+        *   while following the line check if one or more states occure and
+        *   execute the corresponding behaviour
+        */
         else if(!endOfLineGoalReached) {
 
+
+            /*************************************/
+            /***** CROSSROAD MANEUVER BLOCK ******/
             /*
-            *   while following the line check if one or more states occure and
-            *   execute the corresponding behaviour   
+            *   check if the ground sensors of the robot have detected a crossroad or
+            *   if the crossroad maneuver behaviour is already active
             */
-
-            if (robotroutine->DetectLineCrossroad())
+            if (crossroadManeuverActive || robotroutine->DetectLineCrossroad())
             {
-                /*
-                *   in case a crossroad has been detected increase groundSensorJitter
-                *   until a threshold is exceeded. This is necessary to avoid false detection 
-                *   of a crossroad due to a sensor flaw
-                */
-                groundSensorJitter++;
-                if (groundSensorJitter > groundSensorJitterThreshold && !performingTurn)
-                {
+                if (crossroadManeuverActive) {
                     /*
-                    *   crossroad detection valid, load current position from coordinate list
-                    *   by setting predecessor, current position and successor;
-                    *   set flag to continue performing turn on crossroad
+                    *   A crossroad has been detected and the turn maneuver is activated.
+                    *   Repeat executing this state until maneuver is performed
                     */
-                    crossroadDetected = true;
-                    groundSensorJitter = 0;
+                    turnCounter += timeStep;
 
-                    /*
-                    *   get next moving direction to perform on the crossroad
-                    */
-                    MovingDirection nextMovingDirection = pathplanner->getNextMovingDirection();
-
-                    /*
-                    *   configure wheel speed and maneuver threshold according to moving direction
-                    */
-                    if (nextMovingDirection == turnLeft) {
-                        robotroutine->setWheelSpeedTurnLeft();
-                        crossroadManeuverThreshold = TURNLEFTRIGHTTHRESHOLD;
+                    /* turn maneuver should be finished after turn counter has exceeded threshold */
+                    if (turnCounter >= crossroadManeuverThreshold)
+                    {
+                        turnCounter = 0;
+                        crossroadManeuverActive = false;
+                        performingTurn = false;
                     }
-                    else if (nextMovingDirection == turnRight) {
-                        robotroutine->setWheelSpeedTurnRight();
-                        crossroadManeuverThreshold = TURNLEFTRIGHTTHRESHOLD;
-                    }
-                    else {
+                }
+                else {
+                    /*
+                    *   Crossroad maneuver is not active yet. However, a crossroad has been 
+                    *   detected by the ground sensors. Increase groundSensorJitter until a 
+                    *   threshold is exceeded. This is necessary to avoid false detection of 
+                    *   a crossroad due to sensor measurement errors
+                    */
+                    groundSensorJitter++;
+                    if (groundSensorJitter > groundSensorJitterThreshold && !performingTurn)
+                    {
                         /*
-                        *   nextMovingDirection == straightOn, configure wheel speed and maneuver threshold.
-                        *   when moving straight ahead on a crossroad, use reduced threshold until movement is done
-                        */   
-                        robotroutine->setWheelSpeedMoveStraightAhead();
-                        crossroadManeuverThreshold = TURNLEFTRIGHTTHRESHOLD/2;
+                        *   crossroad detection valid, load current position from coordinate list
+                        *   by setting predecessor, current position and successor;
+                        *   set flag to continue performing turn on crossroad
+                        */
+                        crossroadManeuverActive = true;
+                        groundSensorJitter = 0;
+
+                        /*
+                        *   get next moving direction to perform on the crossroad
+                        */
+                        MovingDirection nextMovingDirection = pathplanner->getNextMovingDirection();
+
+                        /*
+                        *   configure wheel speed and maneuver threshold according to moving direction
+                        */
+                        if (nextMovingDirection == turnLeft) {
+                            robotroutine->setWheelSpeedTurnLeft();
+                            crossroadManeuverThreshold = TURNLEFTRIGHTTHRESHOLD;
+                        }
+                        else if (nextMovingDirection == turnRight) {
+                            robotroutine->setWheelSpeedTurnRight();
+                            crossroadManeuverThreshold = TURNLEFTRIGHTTHRESHOLD;
+                        }
+                        else {
+                            /*
+                            *   nextMovingDirection == straightOn, configure wheel speed and maneuver threshold.
+                            *   when moving straight ahead on a crossroad, use reduced threshold until movement is done
+                            */
+                            robotroutine->setWheelSpeedMoveStraightAhead();
+                            crossroadManeuverThreshold = TURNLEFTRIGHTTHRESHOLD / 2;
+                        }
+
+
+                        performingTurn = true;
                     }
-
-
-                    performingTurn = true;
                 }
             }
+            /*************************************/
+            /*************************************/
 
-            if (crossroadDetected)
-            {                
-                turnCounter += timeStep;
 
-                /* turn maneuver should be finished after turn counter has exceeded threshold */                
-                if (turnCounter >= crossroadManeuverThreshold)
-                {
-                    turnCounter = 0;
-                    crossroadDetected = false;
-                    performingTurn = false;
-                }                
-            }
-
+            /**************************************/
+            /* OBSTACLE AVOIDANCE PROCEDURE BLOCK */
             /*
             *   check if an obstacle has been detected or if obstacle avoidance
             *   procedure is already activated
@@ -255,8 +270,10 @@ int main(int argc, char **argv) {
                     obstacleDetected = false;
                 }
             }
-
+            /*************************************/
+            /*************************************/
             
+
             /*************************************/
             /****** GOAL REACHED PROCEDURE *******/
             else
@@ -298,12 +315,11 @@ int main(int argc, char **argv) {
                 else
                 {
                     /*
-                    *   coordinate list not empty --> goal not reached, continue following line
+                    *   following path not completed yet, continue following line
                     */
                     robotroutine->LineFollowingModule();
                 }
             }
-
             /*************************************/
             /*************************************/
         }
@@ -314,6 +330,8 @@ int main(int argc, char **argv) {
         robotroutine->SetSpeedAndVelocity();
 
     };  // END OF MAIN LOOP
+    /*************************************/
+    /*************************************/
 
     /*  optional cleanup  */
     delete robot;

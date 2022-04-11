@@ -1,7 +1,8 @@
 #include "PathPlannerEPuckAStar.h"
 
-PathPlannerEPuckAStar::PathPlannerEPuckAStar()
+PathPlannerEPuckAStar::PathPlannerEPuckAStar(std::string robotsName)
 {
+    this->robotName = robotsName;
     alternativePlanningActive = false;
 }
 
@@ -44,9 +45,13 @@ void PathPlannerEPuckAStar::findAlternativePath(void)
     *   to a list of obstacles?
     */
 
+    // a robot can only avoid one obstacle at a time thus remove all known ones 
+    // before a new obstacle
+    obstacleList.clear();
+
     /* add position of current successor as new detected obstacle */
     obstacleList.push_back(pathCoordinatesList[pathIterator]);
-
+        
     /*
     *   To circumnavigate the obstacle the robot turns around and 
     *   sets the position of the predecessor as its new start position. After this
@@ -69,6 +74,17 @@ void PathPlannerEPuckAStar::findAlternativePath(void)
     addWallsToWorldGenerator(generator); // add default walls
 
     pathCoordinatesList = generator->findPath(goalPosition, startPosition);
+
+    // prepare for debug outout
+    unsigned int obstaclePosX = obstacleList.at(obstacleList.size() - 1).x;
+    unsigned int obstaclePosY = obstacleList.at(obstacleList.size() - 1).y;
+
+    // debug output of start/goal information
+    std::cout << "------------------------" << "\n";
+    std::cout << "E-Puck '" << robotName << "' in " << ARENA_NUMBER_OF_LINES_PER_SIDE << "x" << ARENA_NUMBER_OF_LINES_PER_SIDE << " map\n";
+    std::cout << "Collision detected at (" << obstaclePosX << ", " << obstaclePosY << ")! Alternative path planning:" << "\n";
+    std::cout << "New Start Position: (" << startPosition.x << ", " << startPosition.y <<
+        ")\nGoal Position: (" << goalPosition.x << ", " << goalPosition.y << ")" << "\n";
 
     /* new path generated, reset internal iterator */
     pathIterator = 1;
@@ -289,7 +305,7 @@ void PathPlannerEPuckAStar::setStartGoalPositionByIndex(unsigned int startIndex,
 
     // debug output of start/goal information
     std::cout << "------------------------" << "\n";
-    std::cout << "E-Puck in " << ARENA_NUMBER_OF_LINES_PER_SIDE << "x" << ARENA_NUMBER_OF_LINES_PER_SIDE << " map\n";
+    std::cout << "E-Puck '" << robotName << "' in " << ARENA_NUMBER_OF_LINES_PER_SIDE << "x" << ARENA_NUMBER_OF_LINES_PER_SIDE << " map\n";
     std::cout << "Start Position: P" << startIndex + 1 << "(" << startPosition.x << ", " << startPosition.y <<
         ")\nGoal Position: P" << goalIndex + 1 << "(" << goalPosition.x << ", " << goalPosition.y << ")" << "\n";
 }
