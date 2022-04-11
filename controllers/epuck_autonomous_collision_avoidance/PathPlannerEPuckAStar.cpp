@@ -20,19 +20,11 @@ void PathPlannerEPuckAStar::findPath(AStar::Vec2i startPosition, AStar::Vec2i go
         this->goalPosition = goalPosition;
     }
 
+    /* initate generator object and calculate path between start and goal */
     AStar::Generator* generator = new AStar::Generator;
-
-    generator->setWorldSize({ MATRIX_N + 1, MATRIX_N + 1 });
-    generator->setHeuristic(AStar::Heuristic::euclidean);
-    generator->setDiagonalMovement(false);
-
-    addWallsToWorldGenerator(generator);
-
+    prepareWorldGenerator(generator);
     pathCoordinatesList = generator->findPath(this->goalPosition, this->startPosition);
     
-    /* initiate internal iterator, must be 1 to have predecessor at index 0 */
-    pathIterator = 1;
-
     /* first time path planning, initiate list of obstacles */
     obstacleList.clear();
 }
@@ -54,35 +46,21 @@ void PathPlannerEPuckAStar::findAlternativePath(void)
     */
     startPosition = pathCoordinatesList[pathIterator - 1];
 
-    pathCoordinatesList.clear();
+    /* initate generator object and calculate path between start and goal */
     AStar::Generator* generator = new AStar::Generator;
-
-    generator->setWorldSize({ MATRIX_N + 1, MATRIX_N + 1});
-    generator->setHeuristic(AStar::Heuristic::euclidean);
-    generator->setDiagonalMovement(false);
-
-    for (int i = 0; i < obstacleList.size(); i++)
-    {
-        generator->addCollision(obstacleList.at(i));
-    }
-
-    addWallsToWorldGenerator(generator); // add default walls
-
+    prepareWorldGenerator(generator, true);
     pathCoordinatesList = generator->findPath(goalPosition, startPosition);
 
-    // prepare for debug outout
+
+    /* debug output of start / goal information */
     unsigned int obstaclePosX = obstacleList.at(obstacleList.size() - 1).x;
     unsigned int obstaclePosY = obstacleList.at(obstacleList.size() - 1).y;
 
-    // debug output of start/goal information
     std::cout << "------------------------" << "\n";
     std::cout << "E-Puck '" << robotName << "' in " << ARENA_NUMBER_OF_LINES_PER_SIDE << "x" << ARENA_NUMBER_OF_LINES_PER_SIDE << " map\n";
     std::cout << "Collision detected at (" << obstaclePosX << ", " << obstaclePosY << ")! Alternative path planning:" << "\n";
     std::cout << "New Start Position: (" << startPosition.x << ", " << startPosition.y <<
         ")\nGoal Position: (" << goalPosition.x << ", " << goalPosition.y << ")" << "\n";
-
-    /* new path generated, reset internal iterator */
-    pathIterator = 1;
 }
 
 
@@ -122,10 +100,20 @@ void PathPlannerEPuckAStar::generateEdgeNodeList()
 
 }
 
-void PathPlannerEPuckAStar::addWallsToWorldGenerator(AStar::Generator* generator)
+void PathPlannerEPuckAStar::prepareWorldGenerator(AStar::Generator* generator, bool addObstaclesFromList)
 {
     int i, j;
 
+    /* reset planner parameters*/
+    pathCoordinatesList.clear();
+    pathIterator = 1;               // initiate internal iterator, must be 1 to have predecessor at index 0 
+
+    /* initiate generator and planner parameters*/
+    generator->setWorldSize({ MATRIX_N + 1, MATRIX_N + 1 });
+    generator->setHeuristic(AStar::Heuristic::euclidean);
+    generator->setDiagonalMovement(false);
+
+    /* add default walls as collision points to world generator */
     for (i = 0; i < MATRIX_N + 1; i++) {
         if (i % 2 == 0) {
             for (j = 0; j < MATRIX_N + 1; j++) {
@@ -133,6 +121,14 @@ void PathPlannerEPuckAStar::addWallsToWorldGenerator(AStar::Generator* generator
                     generator->addCollision({ j,i });
                 }
             }
+        }
+    }
+
+    /* if flag is set, add obstacles from list as additional collision points to world generator */
+    if (addObstaclesFromList) {
+        for (int i = 0; i < obstacleList.size(); i++)
+        {
+            generator->addCollision(obstacleList.at(i));
         }
     }
 }

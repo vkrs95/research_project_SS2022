@@ -125,12 +125,6 @@ int main(int argc, char **argv) {
                         pathplanner->setMatrixDimension(qrCodeParams.mapDimension);
                         pathplanner->setStartGoalPositionByIndex(qrCodeParams.startIndex, qrCodeParams.goalIndex);
                         
-                        //// debug output of start/goal information
-                        //std::cout << "------------------------" << "\n";
-                        //std::cout << "E-Puck: " << robotroutine->epuck_name << " in " << qrCodeParams.mapDimension << "x" << qrCodeParams.mapDimension << " map\n";
-                        //std::cout << "Start Position: P" << qrCodeParams.startIndex + 1 << "(" << startPosition.x << ", " << startPosition.y <<
-                        //    ")\nGoal Position: P" << qrCodeParams.goalIndex + 1 << "(" << goalPosition.x << ", " << goalPosition.y << ")" << "\n";
-
                         /* 
                         *   do path planning, no parameters necessary since start and goal are 
                         *   known by pathplanner through call of setStartGoalPositionByIndex() 

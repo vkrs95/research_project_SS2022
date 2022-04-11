@@ -35,7 +35,7 @@ public:
 
 private:
     void generateEdgeNodeList();
-    void addWallsToWorldGenerator(AStar::Generator* generator);
+    void prepareWorldGenerator(AStar::Generator* generator, bool addObstaclesFromList = false);
 
     /*
     *   List of all edge nodes as 2D coordinates.
