@@ -3,16 +3,16 @@
 PathPlannerEPuckAStar::PathPlannerEPuckAStar(std::string robotsName)
 {
     this->robotName = robotsName;
-    alternativePlanningActive = false;
 }
 
 void PathPlannerEPuckAStar::findPath(AStar::Vec2i startPosition, AStar::Vec2i goalPosition)
 {
     if (startPosition.x == 0 && startPosition.y == 0 &&
         goalPosition.x == 0 && goalPosition.y == 0) {
-        /* no parameters passed, use preconfigured start and goal position */
-        
-        // *nothing to do here* 
+        /*
+        *   no parameters passed, use preconfigured start and goal position 
+        *   --> nothing to do here
+        */ 
     } 
     else {
         /* save passed positions in internal variables */
@@ -39,12 +39,7 @@ void PathPlannerEPuckAStar::findPath(AStar::Vec2i startPosition, AStar::Vec2i go
 
 void PathPlannerEPuckAStar::findAlternativePath(void)
 {
-    /*
-    *   >>> NOTE: this behaviour can be changed -> maybe it makes more sense if 
-    *   the robots has only one current obstacle registered instead of adding them
-    *   to a list of obstacles?
-    */
-
+    // TODO: change ?
     // a robot can only avoid one obstacle at a time thus remove all known ones 
     // before a new obstacle
     obstacleList.clear();
@@ -127,153 +122,6 @@ void PathPlannerEPuckAStar::generateEdgeNodeList()
 
 }
 
-
-void PathPlannerEPuckAStar::setInstuctionList(AStar::CoordinateList path)
-{
-    int diffX, diffY;
-    MovingDirection nextDirection;
-    RobotHeading nextHeading;
-    RobotHeading epuckCurrentHeading;
-
-    if (alternativePlanningActive)
-    {
-        epuckCurrentHeading = alternativeHeading;
-        alternativePlanningActive = false;
-    }
-    else
-        epuckCurrentHeading = determineEpuckInitHeading(path.at(0));
-
-
-    auto firstPos = path.at(1);
-    unsigned int lastPosX = firstPos.x;
-    unsigned int lastPosY = firstPos.y;
-
-    for (int i = 2; i < path.size(); i++) {
-        diffX = path.at(i).x - lastPosX;
-        diffY = path.at(i).y - lastPosY;
-
-        if (diffX != 0) 
-        {
-            switch (epuckCurrentHeading)
-            {
-            case HEADING_NORTH:
-                nextDirection = diffX == 1 ? turnRight : turnLeft;
-                nextHeading = HEADING_NORTH;
-                break;
-            case HEADING_EAST:
-                nextDirection = diffX == 1 ? straightOn : turnAround;
-                nextHeading = HEADING_EAST;
-                break;
-            case HEADING_SOUTH:
-                nextDirection = diffX == 1 ? turnLeft : turnRight;
-                nextHeading = HEADING_SOUTH;
-                break;
-            case HEADING_WEST:
-                nextDirection = diffX == 1 ? turnAround : straightOn;
-                nextHeading = HEADING_WEST;
-                break;
-            default:
-                std::cout << "Couldnt determine Heading " << "\n";
-                throw std::logic_error("Programm should not reach this state: unknown RobotHeading state reached");
-                break;
-            }
-            epuckCurrentHeading = diffX == 1 ? HEADING_EAST : HEADING_WEST;
-        }
-                
-        else if (diffY != 0) 
-        {
-            switch (epuckCurrentHeading)
-            {
-            case HEADING_NORTH:
-                nextDirection = diffY == 1 ? turnAround : straightOn;
-                nextHeading = HEADING_NORTH;
-                break;
-            case HEADING_EAST:
-                nextDirection = diffY == 1 ? turnRight : turnLeft;
-                nextHeading = HEADING_EAST;
-                break;
-            case HEADING_SOUTH:
-                nextDirection = diffY == 1 ? straightOn : turnAround;
-                nextHeading = HEADING_SOUTH;
-                break;
-            case HEADING_WEST:
-                nextDirection = diffY == 1 ? turnLeft : turnRight;
-                nextHeading = HEADING_WEST;
-                break;
-            default:
-                std::cout << "Couldnt determine Heading " << "\n";
-                throw std::logic_error("Programm should not reach this state: unknown RobotHeading state reached");
-                break;
-            }
-            epuckCurrentHeading = diffY == 1 ? HEADING_SOUTH : HEADING_NORTH;
-        }
-
-        else {
-            throw std::logic_error("Programm should not reach this state: neither x nor y has changed");
-        }
-
-        if (nextDirection == turnAround)
-            printf(">>>> Next direction shall be turnAround.");
-
-        if (lastPosX % 2 != 0 && lastPosY % 2 != 0) 
-        {
-            //pathDirectionList.push_back(nextDirection); // TODO: can be removed ?
-            //headingList.push_back(nextHeading);       // TODO: can be removed ?
-        }
-
-        lastPosX = path.at(i).x;
-        lastPosY = path.at(i).y;
-    }
-}
-
-
-RobotHeading PathPlannerEPuckAStar::determineEpuckInitHeading(AStar::Vec2i currentPos)
-{
-    RobotHeading epuckHeading;
-    unsigned int xPos = currentPos.x;
-    unsigned int yPos = currentPos.y;
-
-    if (yPos == 0) {
-        epuckHeading = HEADING_SOUTH;
-    }
-    else if (yPos == MATRIX_N) {
-        epuckHeading = HEADING_NORTH;
-    }
-    else if (xPos == 0) {
-        epuckHeading = HEADING_EAST;
-    }
-    else {
-        epuckHeading = HEADING_WEST;
-    }
-
-    return epuckHeading;
-}
-
-RobotHeading PathPlannerEPuckAStar::inverseHeading(RobotHeading currentHeading)
-{
-    RobotHeading epuckHeading;
-
-    if (currentHeading == HEADING_NORTH) 
-    {
-        epuckHeading = HEADING_SOUTH;
-    }
-    else if (currentHeading == HEADING_SOUTH)
-    {
-        epuckHeading = HEADING_NORTH;
-    }
-    else if (currentHeading == HEADING_WEST)
-    {
-        epuckHeading = HEADING_EAST;
-    }
-    else if (currentHeading == HEADING_EAST)
-    {
-        epuckHeading = HEADING_WEST;
-    }
-
-    return epuckHeading;
-}
-
-
 void PathPlannerEPuckAStar::addWallsToWorldGenerator(AStar::Generator* generator)
 {
     int i, j;
@@ -349,14 +197,6 @@ MovingDirection PathPlannerEPuckAStar::getNextMovingDirection(void)
 
     /* update iterator, add 2 because of padding coordinates */
     pathIterator += 2;
-
-    /* debug output for node coordinates */
-    //std::cout << "Pathplanning in iteration:" << "( " << pathIterator << " )\n";
-    //std::cout << "New direction (0 = Straight, 1 = left, 2 = right)" << "(" << nextDirection << ")\n";
-    //std::cout << "Predecessor P" << "(" << predecessor.x << ", " << predecessor.y << ")\n";
-    //std::cout << "Current P" << "(" << current.x << ", " << current.y << ")\n";
-    //std::cout << "Successor P" << "(" << successor.x << ", " << successor.y << ")\n";
-    //std::cout << "---------------------------------------\n";
 
     return nextDirection;
 }

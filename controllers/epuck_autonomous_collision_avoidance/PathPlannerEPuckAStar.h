@@ -11,20 +11,10 @@ enum MovingDirection {
     turnAround
 };
 
-enum RobotHeading {
-    HEADING_NORTH = 0,
-    HEADING_EAST,
-    HEADING_SOUTH,
-    HEADING_WEST
-};
-
 class PathPlannerEPuckAStar: 
     public PathPlanningModule<AStar::Vec2i, void>
 {
 public:
-    RobotHeading alternativeHeading;
-    bool alternativePlanningActive;
-
     /* constructor */
     PathPlannerEPuckAStar(std::string robotName = "E-Puck");
 
@@ -45,9 +35,6 @@ public:
 
 private:
     void generateEdgeNodeList();
-    void setInstuctionList(AStar::CoordinateList path);
-    RobotHeading determineEpuckInitHeading(AStar::Vec2i currentPos);
-    RobotHeading inverseHeading(RobotHeading currentHeading);
     void addWallsToWorldGenerator(AStar::Generator* generator);
 
     /*
