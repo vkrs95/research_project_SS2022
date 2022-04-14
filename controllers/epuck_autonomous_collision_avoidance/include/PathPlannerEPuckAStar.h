@@ -1,5 +1,5 @@
 #include "PathPlanningModule.h"
-#include "AStar.hpp"
+#include "path_planning/a_star.hpp"
 
 #include <iostream>
 #pragma once
@@ -12,7 +12,7 @@ enum MovingDirection {
 };
 
 class PathPlannerEPuckAStar: 
-    public PathPlanningModule<AStar::Vec2i, void>
+    public PathPlanningModule<Node, void>
 {
 public:
     /* constructor */
@@ -23,7 +23,7 @@ public:
     *   if no arguments are passed, use start and goal variables that have been 
     *   configured beforehand.
     */
-    void findPath(AStar::Vec2i startPosition = {}, AStar::Vec2i goalPosition = {}) override;
+    void findPath(Node startPosition = {}, Node goalPosition = {}) override;
 
     /* provide additional public functions to use this planner */
     void findAlternativePath(void);
@@ -35,7 +35,7 @@ public:
 
 private:
     void generateEdgeNodeList();
-    void prepareWorldGenerator(AStar::Generator* generator, bool addObstaclesFromList = false);
+    void prepareWorldGrid(bool addObstaclesFromList = false);
 
     /*
     *   List of all edge nodes as 2D coordinates.
@@ -43,19 +43,19 @@ private:
     *   The list must be generated beforehand in order to calculate a path
     *   between a start and goal edge node.
     */
-    std::vector<AStar::Vec2i> edgeNodeList = {};
+    std::vector<Node> edgeNodeList = {};
 
     /* list of (x,y) coordinates from start to goal position */
-    AStar::CoordinateList pathCoordinatesList;
+    std::vector<Node> pathCoordinatesList;
     
     /* internal iterator to work through pathCoordinatesList step by step */
     size_t pathIterator;
 
     /* current start and goal of the robot */
-    AStar::Vec2i startPosition, goalPosition;
+    Node startPosition, goalPosition;
 
     /* list of detected obstacles */
-    AStar::CoordinateList obstacleList;
+    std::vector<Node> obstacleList;
 
     /* constants */
     int ARENA_NUMBER_OF_LINES_PER_SIDE = 0;
@@ -63,4 +63,8 @@ private:
 
     /* optional name of robot for debug output */
     std::string robotName = "";
+
+    bool lastPathPlanningSuccessful = false;
+
+    std::vector<std::vector<int>> worldGrid; // TODO: must be initialized in setMatrixDimension() with set ARENA_NUMBER_OF_LINES_PER_SIDE
 };

@@ -118,6 +118,12 @@
     <ClCompile Include="lib\a_star\AStar.cpp">
       <Filter>lib\a_star</Filter>
     </ClCompile>
+    <ClCompile Include="lib\path_planning\lib\utils\src\utils.cpp">
+      <Filter>lib\path_planning\lib\utils\src</Filter>
+    </ClCompile>
+    <ClCompile Include="lib\path_planning\src\a_star.cpp">
+      <Filter>lib\path_planning\src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\RobotRoutine.h">
@@ -147,6 +153,12 @@
     <ClInclude Include="lib\a_star\AStar.hpp">
       <Filter>lib\a_star</Filter>
     </ClInclude>
+    <ClInclude Include="lib\path_planning\lib\utils\include\utils\utils.hpp">
+      <Filter>lib\path_planning\lib\utils\include\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\path_planning\include\path_planning\a_star.hpp">
+      <Filter>lib\path_planning\include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Webots">
@@ -163,6 +175,30 @@
     </Filter>
     <Filter Include="lib\a_star">
       <UniqueIdentifier>{3d20961c-6a2b-420b-95eb-1fde3de41446}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="lib\path_planning">
+      <UniqueIdentifier>{b2d0a494-4f37-48c7-b125-cd7a4e7b75c0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="lib\path_planning\src">
+      <UniqueIdentifier>{4f90f8e1-ab18-4c37-af7b-0df91a084b83}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="lib\path_planning\include">
+      <UniqueIdentifier>{08a69b94-0afe-4443-aa6d-5d069997b50b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="lib\path_planning\lib">
+      <UniqueIdentifier>{a1053a81-d19c-4f64-8275-eac60e06b2c2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="lib\path_planning\lib\utils">
+      <UniqueIdentifier>{304c1f1c-7840-4f73-98cd-2cf78649aa8a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="lib\path_planning\lib\utils\include">
+      <UniqueIdentifier>{bd91bc6c-74de-42d6-be18-24f029ba75de}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="lib\path_planning\lib\utils\include\utils">
+      <UniqueIdentifier>{d05da2e6-7d83-4b13-a95e-7c414e9451f6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="lib\path_planning\lib\utils\src">
+      <UniqueIdentifier>{9f98fdb4-bdc4-4c52-8709-dc6de26e9b49}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

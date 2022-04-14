@@ -5,10 +5,10 @@ PathPlannerEPuckAStar::PathPlannerEPuckAStar(std::string robotsName)
     this->robotName = robotsName;
 }
 
-void PathPlannerEPuckAStar::findPath(AStar::Vec2i startPosition, AStar::Vec2i goalPosition)
+void PathPlannerEPuckAStar::findPath(Node startPosition, Node goalPosition)
 {
-    if (startPosition.x == 0 && startPosition.y == 0 &&
-        goalPosition.x == 0 && goalPosition.y == 0) {
+    if (startPosition.x_ == 0 && startPosition.y_ == 0 &&
+        goalPosition.x_ == 0 && goalPosition.y_ == 0) {
         /*
         *   no parameters passed, use preconfigured start and goal position 
         *   --> nothing to do here
@@ -20,10 +20,19 @@ void PathPlannerEPuckAStar::findPath(AStar::Vec2i startPosition, AStar::Vec2i go
         this->goalPosition = goalPosition;
     }
 
-    /* initate generator object and calculate path between start and goal */
-    AStar::Generator* generator = new AStar::Generator;
-    prepareWorldGenerator(generator);
-    pathCoordinatesList = generator->findPath(this->goalPosition, this->startPosition);
+    /* initate world grid and calculate path between start and goal */    
+    prepareWorldGrid();
+    AStar aStarPlanning(worldGrid);    
+    auto[planningSuccessful, pathVector] = aStarPlanning.Plan(this->startPosition, this->goalPosition);
+
+    lastPathPlanningSuccessful = planningSuccessful;
+    pathCoordinatesList = pathVector;
+
+    /*
+    *   pathCoordinatesList is ordered goal to start, 
+    *   reverse list to have steps from start to goal instead 
+    */
+    std::reverse(pathCoordinatesList.begin(), pathCoordinatesList.end());
     
     /* first time path planning, initiate list of obstacles */
     obstacleList.clear();
@@ -46,21 +55,20 @@ void PathPlannerEPuckAStar::findAlternativePath(void)
     */
     startPosition = pathCoordinatesList[pathIterator - 1];
 
-    /* initate generator object and calculate path between start and goal */
-    AStar::Generator* generator = new AStar::Generator;
-    prepareWorldGenerator(generator, true);
-    pathCoordinatesList = generator->findPath(goalPosition, startPosition);
-
+    /* initate world grid and calculate path between start and goal */
+    prepareWorldGrid();
+    AStar aStarPlanning(worldGrid);
+    auto [lastPathPlanningSuccessful, pathCoordinatesList] = aStarPlanning.Plan(this->startPosition, this->goalPosition);
 
     /* debug output of start / goal information */
-    unsigned int obstaclePosX = obstacleList.at(obstacleList.size() - 1).x;
-    unsigned int obstaclePosY = obstacleList.at(obstacleList.size() - 1).y;
+    unsigned int obstaclePosX = obstacleList.at(obstacleList.size() - 1).x_;
+    unsigned int obstaclePosY = obstacleList.at(obstacleList.size() - 1).y_;
 
     std::cout << "------------------------" << "\n";
     std::cout << "E-Puck '" << robotName << "' in " << ARENA_NUMBER_OF_LINES_PER_SIDE << "x" << ARENA_NUMBER_OF_LINES_PER_SIDE << " map\n";
     std::cout << "Collision detected at (" << obstaclePosX << ", " << obstaclePosY << ")! Alternative path planning:" << "\n";
-    std::cout << "New Start Position: (" << startPosition.x << ", " << startPosition.y <<
-        ")\nGoal Position: (" << goalPosition.x << ", " << goalPosition.y << ")" << "\n";
+    std::cout << "New Start Position: (" << startPosition.x_ << ", " << startPosition.y_ <<
+        ")\nGoal Position: (" << goalPosition.x_ << ", " << goalPosition.y_ << ")" << "\n";
 }
 
 
@@ -100,25 +108,21 @@ void PathPlannerEPuckAStar::generateEdgeNodeList()
 
 }
 
-void PathPlannerEPuckAStar::prepareWorldGenerator(AStar::Generator* generator, bool addObstaclesFromList)
+void PathPlannerEPuckAStar::prepareWorldGrid(bool addObstaclesFromList)
 {
-    int i, j;
+    int n = MATRIX_N + 1;
 
     /* reset planner parameters*/
     pathCoordinatesList.clear();
     pathIterator = 1;               // initiate internal iterator, must be 1 to have predecessor at index 0 
+    worldGrid.resize(n, std::vector<int>(n, 0));
 
-    /* initiate generator and planner parameters*/
-    generator->setWorldSize({ MATRIX_N + 1, MATRIX_N + 1 });
-    generator->setHeuristic(AStar::Heuristic::euclidean);
-    generator->setDiagonalMovement(false);
-
-    /* add default walls as collision points to world generator */
-    for (i = 0; i < MATRIX_N + 1; i++) {
+    /* add default walls as collision points to world grid */
+    for (int i = 0; i < n; i++) {
         if (i % 2 == 0) {
-            for (j = 0; j < MATRIX_N + 1; j++) {
+            for (int j = 0; j < n; j++) {
                 if (j % 2 == 0) {
-                    generator->addCollision({ j,i });
+                    worldGrid[j][i] = 1;            // add wall
                 }
             }
         }
@@ -128,10 +132,49 @@ void PathPlannerEPuckAStar::prepareWorldGenerator(AStar::Generator* generator, b
     if (addObstaclesFromList) {
         for (int i = 0; i < obstacleList.size(); i++)
         {
-            generator->addCollision(obstacleList.at(i));
+            Node obNode = obstacleList.at(i);
+            worldGrid[obNode.x_][obNode.y_] = 1;
         }
     }
+
+    startPosition.id_ = startPosition.x_ * n + startPosition.y_;
+    startPosition.pid_ = startPosition.x_ * n + startPosition.y_;
+    goalPosition.id_ = goalPosition.x_ * n + goalPosition.y_;
+    startPosition.h_cost_ = abs(startPosition.x_ - goalPosition.x_) + abs(startPosition.y_ - goalPosition.y_);
 }
+
+//void PathPlannerEPuckAStar::prepareWorldGenerator(AStar::Generator* generator, bool addObstaclesFromList)
+//{
+//    int i, j;
+//
+//    /* reset planner parameters*/
+//    pathCoordinatesList.clear();
+//    pathIterator = 1;               // initiate internal iterator, must be 1 to have predecessor at index 0 
+//
+//    /* initiate generator and planner parameters*/
+//    generator->setWorldSize({ MATRIX_N + 1, MATRIX_N + 1 });
+//    generator->setHeuristic(AStar::Heuristic::euclidean);
+//    generator->setDiagonalMovement(false);
+//
+//    /* add default walls as collision points to world generator */
+//    for (i = 0; i < MATRIX_N + 1; i++) {
+//        if (i % 2 == 0) {
+//            for (j = 0; j < MATRIX_N + 1; j++) {
+//                if (j % 2 == 0) {
+//                    generator->addCollision({ j,i });
+//                }
+//            }
+//        }
+//    }
+//
+//    /* if flag is set, add obstacles from list as additional collision points to world generator */
+//    if (addObstaclesFromList) {
+//        for (int i = 0; i < obstacleList.size(); i++)
+//        {
+//            generator->addCollision(obstacleList.at(i));
+//        }
+//    }
+//}
 
 void PathPlannerEPuckAStar::setMatrixDimension(unsigned int dimension)
 {
@@ -150,8 +193,8 @@ void PathPlannerEPuckAStar::setStartGoalPositionByIndex(unsigned int startIndex,
     // debug output of start/goal information
     std::cout << "------------------------" << "\n";
     std::cout << "E-Puck '" << robotName << "' in " << ARENA_NUMBER_OF_LINES_PER_SIDE << "x" << ARENA_NUMBER_OF_LINES_PER_SIDE << " map\n";
-    std::cout << "Start Position: P" << startIndex + 1 << "(" << startPosition.x << ", " << startPosition.y <<
-        ")\nGoal Position: P" << goalIndex + 1 << "(" << goalPosition.x << ", " << goalPosition.y << ")" << "\n";
+    std::cout << "Start Position: P" << startIndex + 1 << "(" << startPosition.x_ << ", " << startPosition.y_ <<
+        ")\nGoal Position: P" << goalIndex + 1 << "(" << goalPosition.x_ << ", " << goalPosition.y_ << ")" << "\n";
 }
 
 
@@ -159,18 +202,18 @@ MovingDirection PathPlannerEPuckAStar::getNextMovingDirection(void)
 {
     MovingDirection nextDirection;
 
-    AStar::Vec2i predecessor = pathCoordinatesList.at(pathIterator - 1);
-    AStar::Vec2i current = pathCoordinatesList.at(pathIterator);
-    AStar::Vec2i successor = pathCoordinatesList.at(pathIterator + 1);
+    Node predecessor = pathCoordinatesList.at(pathIterator - 1);
+    Node current = pathCoordinatesList.at(pathIterator);
+    Node successor = pathCoordinatesList.at(pathIterator + 1);
 
-    predecessor.x = predecessor.x - current.x;
-    predecessor.y = predecessor.y - current.y;
+    predecessor.x_ = predecessor.x_ - current.x_;
+    predecessor.y_ = predecessor.y_ - current.y_;
 
-    successor.x = successor.x - current.x;
-    successor.y = successor.y - current.y;
+    successor.x_ = successor.x_ - current.x_;
+    successor.y_ = successor.y_ - current.y_;
 
-    int sumX = predecessor.x + successor.x;
-    int sumY = predecessor.y + successor.y;
+    int sumX = predecessor.x_ + successor.x_;
+    int sumY = predecessor.y_ + successor.y_;
 
     if (sumX == 0 && sumY == 0)
     {
@@ -179,7 +222,7 @@ MovingDirection PathPlannerEPuckAStar::getNextMovingDirection(void)
     else
     {
         int vectorSumXY = static_cast<int>( (sumX + sumY) * 0.5 );
-        int predSucSum = predecessor.y + successor.x + successor.y;
+        int predSucSum = predecessor.y_ + successor.x_ + successor.y_;
 
         if (vectorSumXY - predSucSum == 0)
         {
