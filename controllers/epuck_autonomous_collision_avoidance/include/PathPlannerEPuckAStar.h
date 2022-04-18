@@ -35,7 +35,8 @@ public:
 
 private:
     void generateEdgeNodeList();
-    void prepareWorldGrid(bool addObstaclesFromList = false);
+    void prepareGridAndRunPlanner(bool addObstaclesFromList = false);
+    void prepareWorldGrid(bool addObstaclesFromList);
 
     /*
     *   List of all edge nodes as 2D coordinates.

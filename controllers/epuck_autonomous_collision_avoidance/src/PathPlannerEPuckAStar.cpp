@@ -5,6 +5,27 @@ PathPlannerEPuckAStar::PathPlannerEPuckAStar(std::string robotsName)
     this->robotName = robotsName;
 }
 
+void PathPlannerEPuckAStar::prepareGridAndRunPlanner(bool addObstaclesFromList)
+{
+
+    /* initate world grid */
+    prepareWorldGrid(addObstaclesFromList);
+    AStar aStarPlanning(worldGrid);
+
+    /* calculate path between start and goal */
+    auto [planningSuccessful, pathVector] = aStarPlanning.Plan(this->startPosition, this->goalPosition);
+
+    /* assign results to member variables */
+    lastPathPlanningSuccessful = planningSuccessful;
+    pathCoordinatesList = pathVector;
+
+    /*
+    *   pathCoordinatesList is ordered goal to start,
+    *   reverse list to have steps from start to goal instead
+    */
+    std::reverse(pathCoordinatesList.begin(), pathCoordinatesList.end());
+}
+
 void PathPlannerEPuckAStar::findPath(Node startPosition, Node goalPosition)
 {
     if (startPosition.x_ == 0 && startPosition.y_ == 0 &&
@@ -21,18 +42,7 @@ void PathPlannerEPuckAStar::findPath(Node startPosition, Node goalPosition)
     }
 
     /* initate world grid and calculate path between start and goal */    
-    prepareWorldGrid();
-    AStar aStarPlanning(worldGrid);    
-    auto[planningSuccessful, pathVector] = aStarPlanning.Plan(this->startPosition, this->goalPosition);
-
-    lastPathPlanningSuccessful = planningSuccessful;
-    pathCoordinatesList = pathVector;
-
-    /*
-    *   pathCoordinatesList is ordered goal to start, 
-    *   reverse list to have steps from start to goal instead 
-    */
-    std::reverse(pathCoordinatesList.begin(), pathCoordinatesList.end());
+    prepareGridAndRunPlanner();
     
     /* first time path planning, initiate list of obstacles */
     obstacleList.clear();
@@ -55,10 +65,12 @@ void PathPlannerEPuckAStar::findAlternativePath(void)
     */
     startPosition = pathCoordinatesList[pathIterator - 1];
 
-    /* initate world grid and calculate path between start and goal */
-    prepareWorldGrid();
-    AStar aStarPlanning(worldGrid);
-    auto [lastPathPlanningSuccessful, pathCoordinatesList] = aStarPlanning.Plan(this->startPosition, this->goalPosition);
+    /* 
+    *   initate world grid with additional obstacles and 
+    *   calculate path between start and goal 
+    */
+    prepareGridAndRunPlanner(true);
+
 
     /* debug output of start / goal information */
     unsigned int obstaclePosX = obstacleList.at(obstacleList.size() - 1).x_;
@@ -140,7 +152,8 @@ void PathPlannerEPuckAStar::prepareWorldGrid(bool addObstaclesFromList)
     startPosition.id_ = startPosition.x_ * n + startPosition.y_;
     startPosition.pid_ = startPosition.x_ * n + startPosition.y_;
     goalPosition.id_ = goalPosition.x_ * n + goalPosition.y_;
-    startPosition.h_cost_ = abs(startPosition.x_ - goalPosition.x_) + abs(startPosition.y_ - goalPosition.y_);
+    // use static cast to avoid overflow warning when casting a 4 byte result to an 8 byte value
+    startPosition.h_cost_ = abs(static_cast<double>(startPosition.x_) - goalPosition.x_) + abs(static_cast<double>(startPosition.y_) - goalPosition.y_);
 }
 
 //void PathPlannerEPuckAStar::prepareWorldGenerator(AStar::Generator* generator, bool addObstaclesFromList)
