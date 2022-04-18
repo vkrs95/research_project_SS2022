@@ -19,6 +19,11 @@ void PathPlannerEPuckAStar::prepareGridAndRunPlanner(bool addObstaclesFromList)
     lastPathPlanningSuccessful = planningSuccessful;
     pathCoordinatesList = pathVector;
 
+    /* add obstacle as entry to determine direction on first crossroad */
+    if (addObstaclesFromList) {
+        pathCoordinatesList.push_back(obstacleList.at(0));
+    }
+
     /*
     *   pathCoordinatesList is ordered goal to start,
     *   reverse list to have steps from start to goal instead
@@ -56,14 +61,14 @@ void PathPlannerEPuckAStar::findAlternativePath(void)
     obstacleList.clear();
 
     /* add position of current successor as new detected obstacle */
-    obstacleList.push_back(pathCoordinatesList[pathIterator]);
+    obstacleList.push_back(pathCoordinatesList[pathIterator - 1]);
         
     /*
     *   To circumnavigate the obstacle the robot turns around and 
     *   sets the position of the predecessor as its new start position. After this
     *   a new path is planned with the updated nodes and obstacles.
     */
-    startPosition = pathCoordinatesList[pathIterator - 1];
+    startPosition = pathCoordinatesList[pathIterator - 2];
 
     /* 
     *   initate world grid with additional obstacles and 
