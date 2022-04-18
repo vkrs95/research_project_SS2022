@@ -17,8 +17,8 @@ int main(int argc, char **argv) {
     int timeStep = (int)robot->getBasicTimeStep();
     unsigned int turnCounter = 0;
     unsigned int crossroadManeuverThreshold;    // is set when next direction is read  
-    const unsigned int TURNLEFTRIGHTTHRESHOLD = 3500;
-    const unsigned int TURNAROUNDTHRESHOLD = TURNLEFTRIGHTTHRESHOLD;
+    const unsigned int TURNLEFTRIGHTTHRESHOLD = 3200;
+    const unsigned int TURNAROUNDTHRESHOLD = 3500; // TURNLEFTRIGHTTHRESHOLD;
 
 
     /* robot parameters */
@@ -229,7 +229,7 @@ int main(int argc, char **argv) {
                             *   when moving straight ahead on a crossroad, use reduced threshold until movement is done
                             */
                             robotroutine->setWheelSpeedMoveStraightAhead();
-                            crossroadManeuverThreshold = TURNLEFTRIGHTTHRESHOLD / 2;
+                            crossroadManeuverThreshold = TURNLEFTRIGHTTHRESHOLD / 8;
                         }
 
 
