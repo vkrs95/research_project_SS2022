@@ -10,10 +10,12 @@ void PathPlannerEPuckAStar::prepareGridAndRunPlanner(bool addObstaclesFromList)
 
     /* initate world grid */
     prepareWorldGrid(addObstaclesFromList);
-    AStar aStarPlanning(worldGrid);
+    //AStar aStarPlanning(worldGrid);
+    Dijkstra dijkstraPlanning(worldGrid);
 
     /* calculate path between start and goal */
-    auto [planningSuccessful, pathVector] = aStarPlanning.Plan(this->startPosition, this->goalPosition);
+    //auto [planningSuccessful, pathVector] = aStarPlanning.Plan(this->startPosition, this->goalPosition);
+    auto [planningSuccessful, pathVector] = dijkstraPlanning.Plan(this->startPosition, this->goalPosition);
 
     /* assign results to member variables */
     lastPathPlanningSuccessful = planningSuccessful;
@@ -160,39 +162,6 @@ void PathPlannerEPuckAStar::prepareWorldGrid(bool addObstaclesFromList)
     // use static cast to avoid overflow warning when casting a 4 byte result to an 8 byte value
     startPosition.h_cost_ = abs(static_cast<double>(startPosition.x_) - goalPosition.x_) + abs(static_cast<double>(startPosition.y_) - goalPosition.y_);
 }
-
-//void PathPlannerEPuckAStar::prepareWorldGenerator(AStar::Generator* generator, bool addObstaclesFromList)
-//{
-//    int i, j;
-//
-//    /* reset planner parameters*/
-//    pathCoordinatesList.clear();
-//    pathIterator = 1;               // initiate internal iterator, must be 1 to have predecessor at index 0 
-//
-//    /* initiate generator and planner parameters*/
-//    generator->setWorldSize({ MATRIX_N + 1, MATRIX_N + 1 });
-//    generator->setHeuristic(AStar::Heuristic::euclidean);
-//    generator->setDiagonalMovement(false);
-//
-//    /* add default walls as collision points to world generator */
-//    for (i = 0; i < MATRIX_N + 1; i++) {
-//        if (i % 2 == 0) {
-//            for (j = 0; j < MATRIX_N + 1; j++) {
-//                if (j % 2 == 0) {
-//                    generator->addCollision({ j,i });
-//                }
-//            }
-//        }
-//    }
-//
-//    /* if flag is set, add obstacles from list as additional collision points to world generator */
-//    if (addObstaclesFromList) {
-//        for (int i = 0; i < obstacleList.size(); i++)
-//        {
-//            generator->addCollision(obstacleList.at(i));
-//        }
-//    }
-//}
 
 void PathPlannerEPuckAStar::setMatrixDimension(unsigned int dimension)
 {

@@ -161,9 +161,9 @@
     <ClCompile Include="$(WEBOTS_HOME)\resources\languages\cpp\Speaker.cpp" />
     <ClCompile Include="$(WEBOTS_HOME)\resources\languages\cpp\Supervisor.cpp" />
     <ClCompile Include="$(WEBOTS_HOME)\resources\languages\cpp\TouchSensor.cpp" />
-    <ClCompile Include="lib\a_star\AStar.cpp" />
     <ClCompile Include="lib\path_planning\lib\utils\src\utils.cpp" />
     <ClCompile Include="lib\path_planning\src\a_star.cpp" />
+    <ClCompile Include="lib\path_planning\src\dijkstra.cpp" />
     <ClCompile Include="src\epuck_autonomous_collision_avoidance.cpp" />
     <ClCompile Include="src\ObstacleAvoidance.cpp" />
     <ClCompile Include="src\PathPlannerEPuckAStar.cpp" />
@@ -172,15 +172,14 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\epuck_autonomous_collision_avoidance.h" />
-    <ClInclude Include="include\GlobalMetaData.h" />
     <ClInclude Include="include\ObstacleAvoidance.h" />
     <ClInclude Include="include\PathPlannerEPuckAStar.h" />
     <ClInclude Include="include\PathPlanningModule.h" />
     <ClInclude Include="include\QRModule.h" />
     <ClInclude Include="include\QRModuleEPuckSGD.h" />
     <ClInclude Include="include\RobotRoutine.h" />
-    <ClInclude Include="lib\a_star\AStar.hpp" />
     <ClInclude Include="lib\path_planning\include\path_planning\a_star.hpp" />
+    <ClInclude Include="lib\path_planning\include\path_planning\dijkstra.hpp" />
     <ClInclude Include="lib\path_planning\lib\utils\include\utils\utils.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
