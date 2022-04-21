@@ -166,14 +166,14 @@
     <ClCompile Include="lib\path_planning\src\dijkstra.cpp" />
     <ClCompile Include="src\epuck_autonomous_collision_avoidance.cpp" />
     <ClCompile Include="src\ObstacleAvoidance.cpp" />
-    <ClCompile Include="src\PathPlannerEPuckAStar.cpp" />
+    <ClCompile Include="src\PathPlannerEPuck.cpp" />
     <ClCompile Include="src\QRModuleEPuckSGD.cpp" />
     <ClCompile Include="src\RobotRoutine.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\epuck_autonomous_collision_avoidance.h" />
     <ClInclude Include="include\ObstacleAvoidance.h" />
-    <ClInclude Include="include\PathPlannerEPuckAStar.h" />
+    <ClInclude Include="include\PathPlannerEPuck.h" />
     <ClInclude Include="include\PathPlanningModule.h" />
     <ClInclude Include="include\QRModule.h" />
     <ClInclude Include="include\QRModuleEPuckSGD.h" />

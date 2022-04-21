@@ -1,5 +1,5 @@
 #include "RobotRoutine.h"
-#include "PathPlannerEPuckAStar.h"
+#include "PathPlannerEPuck.h"
 #include "ObstacleAvoidance.h"
 #include "QRModuleEPuckSGD.h"
 
@@ -8,7 +8,7 @@ int main(int argc, char **argv) {
     /*** create all Object instances ***/
     Robot* robot = new Robot();
     RobotRoutine* robotroutine = new RobotRoutine(robot);
-    PathPlannerEPuckAStar* pathplanner = new PathPlannerEPuckAStar(robotroutine->epuck_name);
+    PathPlannerEPuck* pathplanner = new PathPlannerEPuck(robotroutine->epuck_name);
     ObstacleAvoidance* obstacleavoidance = new ObstacleAvoidance;
     QRModule<SGDQRParams>* qrmodule = new QRModuleEPuckSGD();
 

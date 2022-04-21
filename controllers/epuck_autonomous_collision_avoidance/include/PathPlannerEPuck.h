@@ -12,12 +12,12 @@ enum MovingDirection {
     turnAround
 };
 
-class PathPlannerEPuckAStar: 
+class PathPlannerEPuck: 
     public PathPlanningModule<Node, void>
 {
 public:
     /* constructor */
-    PathPlannerEPuckAStar(std::string robotName = "E-Puck");
+    PathPlannerEPuck(std::string robotName = "E-Puck");
 
     /*
     *   planner function to find path between a given start and goal position.

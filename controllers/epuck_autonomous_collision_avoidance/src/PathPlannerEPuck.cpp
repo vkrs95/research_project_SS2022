@@ -1,11 +1,11 @@
-#include "PathPlannerEPuckAStar.h"
+#include "PathPlannerEPuck.h"
 
-PathPlannerEPuckAStar::PathPlannerEPuckAStar(std::string robotsName)
+PathPlannerEPuck::PathPlannerEPuck(std::string robotsName)
 {
     this->robotName = robotsName;
 }
 
-void PathPlannerEPuckAStar::prepareGridAndRunPlanner(bool addObstaclesFromList)
+void PathPlannerEPuck::prepareGridAndRunPlanner(bool addObstaclesFromList)
 {
 
     /* initate world grid */
@@ -33,7 +33,7 @@ void PathPlannerEPuckAStar::prepareGridAndRunPlanner(bool addObstaclesFromList)
     std::reverse(pathCoordinatesList.begin(), pathCoordinatesList.end());
 }
 
-void PathPlannerEPuckAStar::findPath(Node startPosition, Node goalPosition)
+void PathPlannerEPuck::findPath(Node startPosition, Node goalPosition)
 {
     if (startPosition.x_ == 0 && startPosition.y_ == 0 &&
         goalPosition.x_ == 0 && goalPosition.y_ == 0) {
@@ -55,7 +55,7 @@ void PathPlannerEPuckAStar::findPath(Node startPosition, Node goalPosition)
     obstacleList.clear();
 }
 
-void PathPlannerEPuckAStar::findAlternativePath(void)
+void PathPlannerEPuck::findAlternativePath(void)
 {
     // TODO: change ?
     // a robot can only avoid one obstacle at a time thus remove all known ones 
@@ -91,7 +91,7 @@ void PathPlannerEPuckAStar::findAlternativePath(void)
 }
 
 
-bool PathPlannerEPuckAStar::pathCompleted(void)
+bool PathPlannerEPuck::pathCompleted(void)
 {
     /*
     *   coordinate list must have been initialized and iterator has 
@@ -101,7 +101,7 @@ bool PathPlannerEPuckAStar::pathCompleted(void)
 }
 
 
-void PathPlannerEPuckAStar::generateEdgeNodeList()
+void PathPlannerEPuck::generateEdgeNodeList()
 {
     int i;
 
@@ -127,7 +127,7 @@ void PathPlannerEPuckAStar::generateEdgeNodeList()
 
 }
 
-void PathPlannerEPuckAStar::prepareWorldGrid(bool addObstaclesFromList)
+void PathPlannerEPuck::prepareWorldGrid(bool addObstaclesFromList)
 {
     int n = MATRIX_N + 1;
 
@@ -163,7 +163,7 @@ void PathPlannerEPuckAStar::prepareWorldGrid(bool addObstaclesFromList)
     startPosition.h_cost_ = abs(static_cast<double>(startPosition.x_) - goalPosition.x_) + abs(static_cast<double>(startPosition.y_) - goalPosition.y_);
 }
 
-void PathPlannerEPuckAStar::setMatrixDimension(unsigned int dimension)
+void PathPlannerEPuck::setMatrixDimension(unsigned int dimension)
 {
     ARENA_NUMBER_OF_LINES_PER_SIDE = dimension;
     MATRIX_N = ARENA_NUMBER_OF_LINES_PER_SIDE * 2;
@@ -172,7 +172,7 @@ void PathPlannerEPuckAStar::setMatrixDimension(unsigned int dimension)
     generateEdgeNodeList();
 }
 
-void PathPlannerEPuckAStar::setStartGoalPositionByIndex(unsigned int startIndex, unsigned int goalIndex)
+void PathPlannerEPuck::setStartGoalPositionByIndex(unsigned int startIndex, unsigned int goalIndex)
 {
     startPosition = edgeNodeList.at(startIndex);
     goalPosition = edgeNodeList.at(goalIndex);
@@ -185,7 +185,7 @@ void PathPlannerEPuckAStar::setStartGoalPositionByIndex(unsigned int startIndex,
 }
 
 
-MovingDirection PathPlannerEPuckAStar::getNextMovingDirection(void)
+MovingDirection PathPlannerEPuck::getNextMovingDirection(void)
 {
     MovingDirection nextDirection;
 

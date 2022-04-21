@@ -106,7 +106,7 @@
     <ClCompile Include="src\ObstacleAvoidance.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="src\PathPlannerEPuckAStar.cpp">
+    <ClCompile Include="src\PathPlannerEPuck.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\QRModuleEPuckSGD.cpp">
@@ -138,7 +138,7 @@
     <ClInclude Include="include\PathPlanningModule.h">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="include\PathPlannerEPuckAStar.h">
+    <ClInclude Include="include\PathPlannerEPuck.h">
       <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="include\ObstacleAvoidance.h">
