@@ -1,6 +1,8 @@
 #pragma once
 #include "QRModule.h"
 
+#include <iostream>
+
 #include <zbar.h>
 
 #include <opencv2/core/core.hpp>
