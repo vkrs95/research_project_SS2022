@@ -42,7 +42,6 @@ class RobotRoutine
 		void CyclicBlinkingLED(void);
 		void AllLightsOnLED(void);
 		void SetSpeedAndVelocity(void);
-		void PerformTurnAround(void);
 		void PerformHalt(void);
 		void EnableEpuckCam(void);
 		void DisableEpuckCam(void);

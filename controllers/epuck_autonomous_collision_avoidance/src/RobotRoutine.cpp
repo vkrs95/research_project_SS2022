@@ -111,8 +111,8 @@ void RobotRoutine::setWheelSpeedTurnRight(void)
 
 void RobotRoutine::setWheelSpeedTurnAround(void)
 {
-    lfm_speed[LEFT] = 200;
-    lfm_speed[RIGHT] = -200;
+    lfm_speed[LEFT] = LFM_FORWARD_SPEED;
+    lfm_speed[RIGHT] = -LFM_FORWARD_SPEED;
 }
 
 void RobotRoutine::CyclicBlinkingLED(void) 
@@ -136,11 +136,6 @@ void RobotRoutine::SetSpeedAndVelocity(void)
 
     motor_left->setVelocity(0.00628 * speed[LEFT]);
     motor_right->setVelocity(0.00628 * speed[RIGHT]);
-}
-
-void RobotRoutine::PerformTurnAround(void) {
-    lfm_speed[LEFT] = LFM_FORWARD_SPEED;
-    lfm_speed[RIGHT] = -LFM_FORWARD_SPEED;
 }
 
 void RobotRoutine::PerformHalt(void)

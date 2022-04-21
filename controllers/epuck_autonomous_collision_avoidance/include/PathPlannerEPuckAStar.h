@@ -1,5 +1,6 @@
 #include "PathPlanningModule.h"
-#include "a_star/AStar.hpp"
+#include "path_planning/a_star.hpp"
+#include "path_planning/dijkstra.hpp"
 
 #include <iostream>
 #pragma once
@@ -11,29 +12,19 @@ enum MovingDirection {
     turnAround
 };
 
-enum RobotHeading {
-    HEADING_NORTH = 0,
-    HEADING_EAST,
-    HEADING_SOUTH,
-    HEADING_WEST
-};
-
 class PathPlannerEPuckAStar: 
-    public PathPlanningModule<AStar::Vec2i, void>
+    public PathPlanningModule<Node, void>
 {
 public:
-    RobotHeading alternativeHeading;
-    bool alternativePlanningActive;
-
     /* constructor */
-    PathPlannerEPuckAStar();
+    PathPlannerEPuckAStar(std::string robotName = "E-Puck");
 
     /*
     *   planner function to find path between a given start and goal position.
     *   if no arguments are passed, use start and goal variables that have been 
     *   configured beforehand.
     */
-    void findPath(AStar::Vec2i startPosition = {}, AStar::Vec2i goalPosition = {}) override;
+    void findPath(Node startPosition = {}, Node goalPosition = {}) override;
 
     /* provide additional public functions to use this planner */
     void findAlternativePath(void);
@@ -45,10 +36,8 @@ public:
 
 private:
     void generateEdgeNodeList();
-    void setInstuctionList(AStar::CoordinateList path);
-    RobotHeading determineEpuckInitHeading(AStar::Vec2i currentPos);
-    RobotHeading inverseHeading(RobotHeading currentHeading);
-    void addWallsToWorldGenerator(AStar::Generator* generator);
+    void prepareGridAndRunPlanner(bool addObstaclesFromList = false);
+    void prepareWorldGrid(bool addObstaclesFromList);
 
     /*
     *   List of all edge nodes as 2D coordinates.
@@ -56,21 +45,28 @@ private:
     *   The list must be generated beforehand in order to calculate a path
     *   between a start and goal edge node.
     */
-    std::vector<AStar::Vec2i> edgeNodeList = {};
+    std::vector<Node> edgeNodeList = {};
 
     /* list of (x,y) coordinates from start to goal position */
-    AStar::CoordinateList pathCoordinatesList;
+    std::vector<Node> pathCoordinatesList;
     
     /* internal iterator to work through pathCoordinatesList step by step */
     size_t pathIterator;
 
     /* current start and goal of the robot */
-    AStar::Vec2i startPosition, goalPosition;
+    Node startPosition, goalPosition;
 
     /* list of detected obstacles */
-    AStar::CoordinateList obstacleList;
+    std::vector<Node> obstacleList;
 
     /* constants */
-    int ARENA_NUMBER_OF_LINES_PER_SIDE;
-    int MATRIX_N;
+    int ARENA_NUMBER_OF_LINES_PER_SIDE = 0;
+    int MATRIX_N = 0;
+
+    /* optional name of robot for debug output */
+    std::string robotName = "";
+
+    bool lastPathPlanningSuccessful = false;
+
+    std::vector<std::vector<int>> worldGrid; // TODO: must be initialized in setMatrixDimension() with set ARENA_NUMBER_OF_LINES_PER_SIDE
 };

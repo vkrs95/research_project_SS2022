@@ -4,8 +4,6 @@
 #include <webots/LED.hpp>
 #include <webots/Camera.hpp>
 
-#include <AStar.hpp>
-
 #include <array>
 #include <vector>
 #include <stdexcept>

@@ -100,33 +100,99 @@
     <ClCompile Include="$(WEBOTS_HOME)\resources\languages\cpp\TouchSensor.cpp">
       <Filter>Webots</Filter>
     </ClCompile>
-    <ClCompile Include="a_star\AStar.cpp">
-      <Filter>a_star</Filter>
+    <ClCompile Include="src\epuck_autonomous_collision_avoidance.cpp">
+      <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="epuck_autonomous_collision_avoidance.cpp" />
-    <ClCompile Include="ObstacleAvoidance.cpp" />
-    <ClCompile Include="PathPlannerEPuckAStar.cpp" />
-    <ClCompile Include="RobotRoutine.cpp" />
-    <ClCompile Include="QRModuleEPuckSGD.cpp" />
+    <ClCompile Include="src\ObstacleAvoidance.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\PathPlannerEPuckAStar.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\QRModuleEPuckSGD.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\RobotRoutine.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="lib\path_planning\lib\utils\src\utils.cpp">
+      <Filter>lib\path_planning\lib\utils\src</Filter>
+    </ClCompile>
+    <ClCompile Include="lib\path_planning\src\a_star.cpp">
+      <Filter>lib\path_planning\src</Filter>
+    </ClCompile>
+    <ClCompile Include="lib\path_planning\src\dijkstra.cpp">
+      <Filter>lib\path_planning\src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="a_star\AStar.hpp">
-      <Filter>a_star</Filter>
+    <ClInclude Include="include\RobotRoutine.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="epuck_autonomous_collision_avoidance.h" />
-    <ClInclude Include="ObstacleAvoidance.h" />
-    <ClInclude Include="PathPlannerEPuckAStar.h" />
-    <ClInclude Include="RobotRoutine.h" />
-    <ClInclude Include="QRModule.h" />
-    <ClInclude Include="QRModuleEPuckSGD.h" />
-    <ClInclude Include="PathPlanningModule.h" />
+    <ClInclude Include="include\QRModuleEPuckSGD.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\QRModule.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\PathPlanningModule.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\PathPlannerEPuckAStar.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ObstacleAvoidance.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\epuck_autonomous_collision_avoidance.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\path_planning\lib\utils\include\utils\utils.hpp">
+      <Filter>lib\path_planning\lib\utils\include\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\path_planning\include\path_planning\a_star.hpp">
+      <Filter>lib\path_planning\include</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\path_planning\include\path_planning\dijkstra.hpp">
+      <Filter>lib\path_planning\include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Webots">
       <UniqueIdentifier>{1803c599-ab01-4c2e-99b0-cad896e0e11e}</UniqueIdentifier>
     </Filter>
-    <Filter Include="a_star">
-      <UniqueIdentifier>{3d20961c-6a2b-420b-95eb-1fde3de41446}</UniqueIdentifier>
+    <Filter Include="include">
+      <UniqueIdentifier>{1ef85636-12d0-428a-a160-9f73df629167}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src">
+      <UniqueIdentifier>{1fdc8cd8-8425-45e4-ac52-6049a577684e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="lib">
+      <UniqueIdentifier>{b991566b-7967-4123-bdb6-df195b47ca13}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="lib\path_planning">
+      <UniqueIdentifier>{b2d0a494-4f37-48c7-b125-cd7a4e7b75c0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="lib\path_planning\src">
+      <UniqueIdentifier>{4f90f8e1-ab18-4c37-af7b-0df91a084b83}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="lib\path_planning\include">
+      <UniqueIdentifier>{08a69b94-0afe-4443-aa6d-5d069997b50b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="lib\path_planning\lib">
+      <UniqueIdentifier>{a1053a81-d19c-4f64-8275-eac60e06b2c2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="lib\path_planning\lib\utils">
+      <UniqueIdentifier>{304c1f1c-7840-4f73-98cd-2cf78649aa8a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="lib\path_planning\lib\utils\include">
+      <UniqueIdentifier>{bd91bc6c-74de-42d6-be18-24f029ba75de}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="lib\path_planning\lib\utils\include\utils">
+      <UniqueIdentifier>{d05da2e6-7d83-4b13-a95e-7c414e9451f6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="lib\path_planning\lib\utils\src">
+      <UniqueIdentifier>{9f98fdb4-bdc4-4c52-8709-dc6de26e9b49}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>
