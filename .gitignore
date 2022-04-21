@@ -9,6 +9,9 @@ controllers/epuck_autonomous_collision_avoidance/epuck_autonomous_collision_avoi
 # e-puck camera captures
 controllers/epuck_autonomous_collision_avoidance/start_goal_*.jpg
 
+# world project files 
+worlds/.*.wbproj
+
 # User-specific files
 *.rsuser
 *.suo
