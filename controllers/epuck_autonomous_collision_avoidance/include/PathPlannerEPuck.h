@@ -1,5 +1,5 @@
 #include "PathPlanningModule.h"
-#include "path_planning/a_star.hpp"
+//#include "path_planning/a_star.hpp"
 #include "path_planning/dijkstra.hpp"
 
 #include <iostream>

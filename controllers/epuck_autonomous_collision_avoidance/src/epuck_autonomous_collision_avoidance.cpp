@@ -82,6 +82,14 @@ int main(int argc, char **argv) {
 
         /*************************************/
         /******* INIT PROCEDURE BLOCK ********/
+        /*
+        *   This block is executed when the robot (re-)starts and is facing towards 
+        *   the border wall of the environment. It shall try to scan a QR code which 
+        *   is placed at the border wall. 
+        *   The code should contain start and goal information based on which a path
+        *   can be computed. The robot then turns 180° and starts following the line and
+        *   its calculated path until it has reached its destination.
+        */
         if (!initProcedureDone) {
 
             if (pathPlanningCompleted) {
