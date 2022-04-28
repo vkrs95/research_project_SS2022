@@ -8,7 +8,7 @@ int main(int argc, char **argv) {
     /*** create all Object instances ***/
     Robot* robot = new Robot();
     RobotRoutine* robotroutine = new RobotRoutine(robot);
-    PathPlannerEPuck* pathplanner = new PathPlannerEPuck(robotroutine->epuck_name);
+    PathPlannerEPuck* pathplanner = new PathPlannerEPuck(robotroutine->robotName);
     ObstacleAvoidance* obstacleavoidance = new ObstacleAvoidance;
     QRModule<SGDQRParams>* qrmodule = new QRModuleEPuckSGD();
 
@@ -122,7 +122,7 @@ int main(int argc, char **argv) {
                     SGDQRParams qrCodeParams;
 
                     // get content from QR image
-                    bool readSuccessful = qrmodule->readQRCode(robotroutine->qr_img_file_name, &qrCodeParams);
+                    bool readSuccessful = qrmodule->readQRCode(robotroutine->qrImgFileName, &qrCodeParams);
 
                     if (readSuccessful) {
 

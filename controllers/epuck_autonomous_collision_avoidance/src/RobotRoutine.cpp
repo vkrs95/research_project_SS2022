@@ -6,14 +6,14 @@ RobotRoutine::RobotRoutine(Robot* robot)
     int i;
 
     // Motor initialization
-    motor_left = robot->getMotor("left wheel motor");
-    motor_right = robot->getMotor("right wheel motor");
+    motorLeft = robot->getMotor("left wheel motor");
+    motorRight = robot->getMotor("right wheel motor");
 
-    motor_left->setVelocity(0.0);
-    motor_right->setVelocity(0.0);
+    motorLeft->setVelocity(0.0);
+    motorRight->setVelocity(0.0);
 
-    motor_left->setPosition(INFINITY);
-    motor_right->setPosition(INFINITY);
+    motorLeft->setPosition(INFINITY);
+    motorRight->setPosition(INFINITY);
 
     lfm_speed[LEFT] = 0;
     lfm_speed[RIGHT] = 0;
@@ -24,41 +24,41 @@ RobotRoutine::RobotRoutine(Robot* robot)
     speed[RIGHT] = 0;
 
     // set robot name
-    epuck_name = robot->getName();
-    qr_img_file_name = "start_goal_" + epuck_name + ".jpg";
+    robotName = robot->getName();
+    qrImgFileName = "start_goal_" + robotName + ".jpg";
 
     // LED initialization
     for (i = 0; i < NB_LEDS; i++) 
     {
         sprintf_s(name, "led%d", i);
-        robot_leds[i] = robot->getLED(name); /* LEDs */
+        robotLEDs[i] = robot->getLED(name); /* LEDs */
     }
 
     // Sensor initialization
     for (i = 0; i < NB_DIST_SENS; i++) 
     {
         sprintf_s(name, "ps%d", i);
-        proxim_sensors[i] = robot->getDistanceSensor(name); /* proximity sensors */
-        proxim_sensors[i]->enable(timeStep);
+        proximSensors[i] = robot->getDistanceSensor(name); /* proximity sensors */
+        proximSensors[i]->enable(timeStep);
     }
 
     for (i = 0; i < NB_GROUND_SENS; i++) 
     {
         sprintf_s(name, "gs%d", i);
-        ground_sensors[i] = robot->getDistanceSensor(name); /* ground sensors */
-        ground_sensors[i]->enable(timeStep);
+        groundSensors[i] = robot->getDistanceSensor(name); /* ground sensors */
+        groundSensors[i]->enable(timeStep);
     }
 
     // epuck camera initialisation
-    epuck_cam = robot->getCamera("camera");
+    robotCamera = robot->getCamera("camera");
 }
 
 void RobotRoutine::ReadSensors()
 {
     for (int i = 0; i < NB_DIST_SENS; i++)
-        ps_value[i] = (int)proxim_sensors[i]->getValue();
+        ps_value[i] = (int)proximSensors[i]->getValue();
     for (int i = 0; i < NB_GROUND_SENS; i++)
-        gs_value[i] = (int)ground_sensors[i]->getValue();
+        gs_value[i] = (int)groundSensors[i]->getValue();
 }
 
 
@@ -117,15 +117,15 @@ void RobotRoutine::setWheelSpeedTurnAround(void)
 
 void RobotRoutine::CyclicBlinkingLED(void) 
 {
-    robot_leds[active_led]->set(0);
-    active_led = (active_led + 1) % NB_LEDS;
-    robot_leds[active_led]->set(1);
+    robotLEDs[activeLED]->set(0);
+    activeLED = (activeLED + 1) % NB_LEDS;
+    robotLEDs[activeLED]->set(1);
 }
 
 void RobotRoutine::AllLightsOnLED(void) 
 {
     for (int i = 0; i < NB_LEDS; i++) {
-        robot_leds[i]->set(1);
+        robotLEDs[i]->set(1);
     }
 }
 
@@ -134,8 +134,8 @@ void RobotRoutine::SetSpeedAndVelocity(void)
     speed[LEFT] = lfm_speed[LEFT];
     speed[RIGHT] = lfm_speed[RIGHT];
 
-    motor_left->setVelocity(0.00628 * speed[LEFT]);
-    motor_right->setVelocity(0.00628 * speed[RIGHT]);
+    motorLeft->setVelocity(0.00628 * speed[LEFT]);
+    motorRight->setVelocity(0.00628 * speed[RIGHT]);
 }
 
 void RobotRoutine::PerformHalt(void)
@@ -147,23 +147,23 @@ void RobotRoutine::PerformHalt(void)
 
 void RobotRoutine::EnableEpuckCam(void)
 {
-    epuck_cam->enable(50);
+    robotCamera->enable(50);
 }
 
 void RobotRoutine::DisableEpuckCam(void)
 {
-    epuck_cam->disable();
+    robotCamera->disable();
 }
 
 void RobotRoutine::TakeCameraSnapshot(void)
 {
     //EnableEpuckCam();
-    epuck_cam->saveImage(qr_img_file_name, 100);
+    robotCamera->saveImage(qrImgFileName, 100);
     //DisableEpuckCam();
 }
 
 bool RobotRoutine::IsEpuckCamEnabled(void)
 {
     // if sampling period is 0, camera is currently disabled
-    return epuck_cam->getSamplingPeriod() == 0 ? false : true;
+    return robotCamera->getSamplingPeriod() == 0 ? false : true;
 }

@@ -4,9 +4,9 @@
 class RobotRoutine
 {
 	private:
-		std::array<DistanceSensor*, NB_DIST_SENS> proxim_sensors;
-		std::array<DistanceSensor*, NB_GROUND_SENS> ground_sensors;
-		Camera* epuck_cam;
+		std::array<DistanceSensor*, NB_DIST_SENS> proximSensors;
+		std::array<DistanceSensor*, NB_GROUND_SENS> groundSensors;
+		Camera* robotCamera;
 
 		double LFM_K_GS_SPEED;
 
@@ -15,17 +15,17 @@ class RobotRoutine
 		int speed[2];
 
 		// name
-		std::string epuck_name;
-		std::string qr_img_file_name;
+		std::string robotName;
+		std::string qrImgFileName;
 
 		int lfm_speed[2];
 		int LFM_FORWARD_SPEED;
 
-		Motor* motor_left;
-		Motor* motor_right;
+		Motor* motorLeft;
+		Motor* motorRight;
 
-		std::array<LED*, NB_LEDS> robot_leds;
-		unsigned int active_led = 0;
+		std::array<LED*, NB_LEDS> robotLEDs;
+		unsigned int activeLED = 0;
 
 		int ps_value[NB_DIST_SENS] = { 0, 0, 0, 0, 0, 0, 0, 0 };
 		unsigned short gs_value[NB_GROUND_SENS] = { 0, 0, 0 };
