@@ -1,45 +1,25 @@
-#include "RobotRoutine.h"
-#include "PathPlannerEPuck.h"
-#include "ObstacleAvoidance.h"
-#include "QRModuleEPuckSGD.h"
+#include "epuck_autonomous_collision_avoidance.h"
+
+void robotActiveWait(unsigned int numOfSteps)
+{
+    for (int i = 0; i < numOfSteps; i++) {
+        if (robot->step(timeStep) == -1)
+            break;
+    }
+}
 
 int main(int argc, char **argv) {
 
     /*** create all Object instances ***/
-    Robot* robot = new Robot();
-    RobotRoutine* robotroutine = new RobotRoutine(robot);
-    PathPlannerEPuck* pathplanner = new PathPlannerEPuck(robotroutine->robotName);
-    ObstacleAvoidance* obstacleavoidance = new ObstacleAvoidance;
-    QRModule<SGDQRParams>* qrmodule = new QRModuleEPuckSGD();
-
-    
-    /*** define local variables ***/
-    int timeStep = (int)robot->getBasicTimeStep();
-    unsigned int turnCounter = 0;
-    unsigned int crossroadManeuverThreshold;    // is set when next direction is read  
-    const unsigned int TURNLEFTRIGHTTHRESHOLD = 3200;
-    const unsigned int TURNAROUNDTHRESHOLD = 3500; // TURNLEFTRIGHTTHRESHOLD;
-
-
-    /* robot parameters */
-    unsigned int ledCounter = 1;
-    unsigned int groundSensorJitter = 0;
-    unsigned int groundSensorJitterThreshold = 4;
-    bool epuckEndlessMode = true;
-    unsigned int qrDistanceToScanPos = 2000;
-    unsigned int initProcedureDistanceToScanCounter = 0;
-
-
-    /* robot routine flags */
-    bool obstacleDetected = false;
-    bool crossroadManeuverActive = false;
-    bool performingTurn = false;
-    bool endOfLineGoalReached = false;
-    bool initProcedureDone = false;
-    bool pathPlanningCompleted = false;
-    unsigned int readQrCodeAttemptCounter = 0;
-    unsigned int readQrCodeAttemptLimit = 3;
-
+    robot = new Robot();
+    robotroutine = new RobotRoutine(robot);
+    pathplanner = new PathPlannerEPuck(robotroutine->robotName);
+    obstacleavoidance = new ObstacleAvoidance;
+    qrmodule = new QRModuleEPuckSGD();
+        
+    /*** get time step from robot ***/
+    timeStep = (int)robot->getBasicTimeStep();
+   
     /* before entering main loop init camera by enabling it */
     robotroutine->EnableEpuckCam();
 
@@ -70,7 +50,7 @@ int main(int argc, char **argv) {
         }
         else 
         {
-            if ((timeStep * ledCounter++) >= ledTimeStep)
+            if ((timeStep * ledCounter++) >= RobotRoutine::LED_TIME_STEP)
             {
                 robotroutine->CyclicBlinkingLED();
                 ledCounter = 1;
@@ -109,12 +89,13 @@ int main(int argc, char **argv) {
                     /* check if camera is enabled and take a snapshot via camera while robot is facing towards QR code*/
                     if (robotroutine->IsEpuckCamEnabled()) {
 
-                        robotroutine->PerformHalt();
                         robotroutine->TakeCameraSnapshot();
                     }
                     else {
-                        // enable camera and finish this step of routine 
+                        // halt, enable camera and finish this step of routine 
+                        robotroutine->PerformHalt();
                         robotroutine->EnableEpuckCam();
+                        robotActiveWait(20);
                         continue;
                     }
 
@@ -294,7 +275,7 @@ int main(int argc, char **argv) {
                         pathPlanningCompleted = false;
                         initProcedureDone = false;
 
-                        robotroutine->EnableEpuckCam();
+                        // robotroutine->EnableEpuckCam();
                     }
                     else 
                     {

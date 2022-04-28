@@ -1,4 +1,4 @@
-#include "epuck_autonomous_collision_avoidance.h"
+#include "RobotRoutine.h"
 #pragma once
 
 constexpr auto OAM_OBST_THRESHOLD = 100;
@@ -13,10 +13,10 @@ class ObstacleAvoidance
 	private:
 		int oam_active, oam_reset;
 		int oam_speed[2];
-		int oam_side = NO_SIDE;
+		int oam_side = RobotRoutine::NO_SIDE;
 
 	public:
-		bool ObstacleDetection(int ps_value[NB_DIST_SENS]);
+		bool ObstacleDetection(int ps_value[RobotRoutine::NB_DIST_SENS]);
 		// ToDo: all the avoidance routines
 };
 

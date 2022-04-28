@@ -143,6 +143,8 @@ void RobotRoutine::PerformHalt(void)
     // HALT 
     lfm_speed[LEFT] = 0;
     lfm_speed[RIGHT] = 0;
+
+    SetSpeedAndVelocity();
 }
 
 void RobotRoutine::EnableEpuckCam(void)
