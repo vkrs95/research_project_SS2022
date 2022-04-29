@@ -239,7 +239,8 @@ int main(int argc, char **argv) {
             *   check if an obstacle has been detected or if obstacle avoidance
             *   procedure is already activated
             */
-            else if (obstacleDetected || robotroutine->detectObstacle())
+            else if (!pathplanner->pathCompleted() && /* border wall of goal position is no obstacle */
+                (obstacleDetected || robotroutine->detectObstacle()) )
             {
                 obstacleDetected = true;
 
@@ -285,13 +286,9 @@ int main(int argc, char **argv) {
                         /*
                         *   if no endless mode active, move until end of line and stop
                         */
-                        if (robotroutine->DetectEndOfLine()) {
-                            if (groundSensorJitter >= 10) {
-                                robotroutine->PerformHalt();
-                                endOfLineGoalReached = true;
-                                groundSensorJitter = 0;
-                            }
-                            groundSensorJitter++;
+                        if (robotroutine->detectObstacle()) {
+                            robotroutine->PerformHalt();
+                            endOfLineGoalReached = true;
                         }
                         else {
                             robotroutine->LineFollowingModule();

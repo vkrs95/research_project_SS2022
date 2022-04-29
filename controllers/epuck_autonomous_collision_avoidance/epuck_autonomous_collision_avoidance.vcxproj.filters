@@ -103,9 +103,6 @@
     <ClCompile Include="src\epuck_autonomous_collision_avoidance.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="src\ObstacleAvoidance.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
     <ClCompile Include="src\PathPlannerEPuck.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -139,9 +136,6 @@
       <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="include\PathPlannerEPuck.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="include\ObstacleAvoidance.h">
       <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="include\epuck_autonomous_collision_avoidance.h">
