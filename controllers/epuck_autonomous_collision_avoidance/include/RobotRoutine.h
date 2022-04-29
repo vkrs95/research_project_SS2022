@@ -97,6 +97,7 @@ private:
 	/* internal constants */
 	const double LFM_K_GS_SPEED = 0.4;
 	const int LFM_FORWARD_SPEED = 200;
+	const unsigned int MOTOR_RATIO = 0.00628;
 
 	/* internal constants obstacle avoidance module */
 	const static unsigned int OAM_OBST_THRESHOLD = 100;

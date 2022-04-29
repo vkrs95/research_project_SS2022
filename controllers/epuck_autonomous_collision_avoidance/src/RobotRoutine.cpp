@@ -135,8 +135,8 @@ void RobotRoutine::SetSpeedAndVelocity(void)
     speed[LEFT] = lfm_speed[LEFT];
     speed[RIGHT] = lfm_speed[RIGHT];
 
-    motorLeft->setVelocity(0.00628 * speed[LEFT]);
-    motorRight->setVelocity(0.00628 * speed[RIGHT]);
+    motorLeft->setVelocity(MOTOR_RATIO * speed[LEFT]);
+    motorRight->setVelocity(MOTOR_RATIO * speed[RIGHT]);
 }
 
 void RobotRoutine::PerformHalt(void)
