@@ -17,9 +17,9 @@ int main(int argc, char **argv) {
     obstacleavoidance = new ObstacleAvoidance;
     qrmodule = new QRModuleEPuckSGD();
         
-    /*** get time step from robot ***/
-    timeStep = (int)robot->getBasicTimeStep();
-   
+    /*** get time step from robot routine ***/
+    timeStep = robotroutine->basicTimeStep;
+
     /* before entering main loop init camera by enabling it */
     robotroutine->EnableEpuckCam();
 
@@ -92,7 +92,11 @@ int main(int argc, char **argv) {
                         robotroutine->TakeCameraSnapshot();
                     }
                     else {
-                        // halt, enable camera and finish this step of routine 
+                        /*
+                        *   halt, enable camera and wait for 20 steps to 
+                        *   ensure camera is fully enabled when taking a snapshot.
+                        *   Finish this step of routine afterwards
+                        */                          
                         robotroutine->PerformHalt();
                         robotroutine->EnableEpuckCam();
                         robotActiveWait(20);

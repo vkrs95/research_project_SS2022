@@ -22,8 +22,6 @@ public:
 	const static int NO_SIDE = -1;
 	const static unsigned int LEFT = 0;
 	const static unsigned int RIGHT = 1;
-	const static unsigned int WHITE = 0;
-	const static unsigned int BLACK = 1;
 	const static unsigned int TIME_STEP = 32;  // [ms]
 
 	// 8 IR proximity sensors
@@ -37,9 +35,6 @@ public:
 	const static unsigned int PS_LEFT_45 = 6;
 	const static unsigned int PS_LEFT_00 = 7;
 
-	const int PS_OFFSET_SIMULATION[NB_DIST_SENS] = { 300, 300, 300, 300, 300, 300, 300, 300 };
-	const int PS_OFFSET_REALITY[NB_DIST_SENS] = { 480, 170, 320, 500, 600, 680, 210, 640 };
-
 	// 3 IR ground color sensors
 	const static unsigned int NB_GROUND_SENS = 3;
 	const static unsigned int GS_BLACK = 310;
@@ -52,25 +47,17 @@ public:
 	const static unsigned int NB_LEDS = 8;
 	const static unsigned int LED_TIME_STEP = 320; // [ms]
 
-	char name[20];
-	int speed[2];
-
 	// name
 	std::string robotName;
 	std::string qrImgFileName;
 
-	int lfm_speed[2];
-	int LFM_FORWARD_SPEED;
+	// robot time step
+	int basicTimeStep = 0;
 
-	Motor* motorLeft;
-	Motor* motorRight;
-
-	std::array<LED*, NB_LEDS> robotLEDs;
-	unsigned int activeLED = 0;
-
+	/* proximity sensor values, accessed by obstacle avoidance */
 	int ps_value[NB_DIST_SENS] = { 0, 0, 0, 0, 0, 0, 0, 0 };
-	unsigned short gs_value[NB_GROUND_SENS] = { 0, 0, 0 };
 
+	/* public functions provided by robot routine module */
 	RobotRoutine(Robot* robot);
 	void ReadSensors();
 	void LineFollowingModule(void);
@@ -90,10 +77,24 @@ public:
 	bool IsEpuckCamEnabled(void);
 
 private:
+	/* robot sensor objects utilized by functions */
 	std::array<DistanceSensor*, NB_DIST_SENS> proximSensors;
 	std::array<DistanceSensor*, NB_GROUND_SENS> groundSensors;
+
+	Motor* motorLeft;
+	Motor* motorRight;
+
 	Camera* robotCamera;
 
-	double LFM_K_GS_SPEED;
+	unsigned short gs_value[NB_GROUND_SENS] = { 0, 0, 0 };
+
+	int lfm_speed[2];
+
+	unsigned int activeLED = 0;
+	std::array<LED*, NB_LEDS> robotLEDs;
+
+	/* internal constants */
+	const double LFM_K_GS_SPEED = 0.4;
+	const int LFM_FORWARD_SPEED = 200;
 };
 

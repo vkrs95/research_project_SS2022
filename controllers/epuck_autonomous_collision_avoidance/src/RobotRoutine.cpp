@@ -2,10 +2,9 @@
 
 RobotRoutine::RobotRoutine(Robot* robot)
 {
-    int timeStep = (int)robot->getBasicTimeStep();
-    int i;
+    basicTimeStep = (int)robot->getBasicTimeStep();
 
-    // Motor initialization
+    /* Motor initialization */
     motorLeft = robot->getMotor("left wheel motor");
     motorRight = robot->getMotor("right wheel motor");
 
@@ -17,36 +16,35 @@ RobotRoutine::RobotRoutine(Robot* robot)
 
     lfm_speed[LEFT] = 0;
     lfm_speed[RIGHT] = 0;
-    LFM_FORWARD_SPEED = 200;
-    LFM_K_GS_SPEED = 0.4;
-
-    speed[LEFT] = 0;
-    speed[RIGHT] = 0;
 
     // set robot name
     robotName = robot->getName();
     qrImgFileName = "start_goal_" + robotName + ".jpg";
 
-    // LED initialization
-    for (i = 0; i < NB_LEDS; i++) 
+    /* string to parse sensor names in it */
+    char name[20];
+
+    /* LED initialization */
+    for (int i = 0; i < NB_LEDS; i++) 
     {
         sprintf_s(name, "led%d", i);
         robotLEDs[i] = robot->getLED(name); /* LEDs */
     }
 
-    // Sensor initialization
-    for (i = 0; i < NB_DIST_SENS; i++) 
+    /* proximitys sensor initialization */
+    for (int i = 0; i < NB_DIST_SENS; i++) 
     {
         sprintf_s(name, "ps%d", i);
         proximSensors[i] = robot->getDistanceSensor(name); /* proximity sensors */
-        proximSensors[i]->enable(timeStep);
+        proximSensors[i]->enable(basicTimeStep);
     }
 
-    for (i = 0; i < NB_GROUND_SENS; i++) 
+    /* ground sensor initialization */
+    for (int i = 0; i < NB_GROUND_SENS; i++) 
     {
         sprintf_s(name, "gs%d", i);
         groundSensors[i] = robot->getDistanceSensor(name); /* ground sensors */
-        groundSensors[i]->enable(timeStep);
+        groundSensors[i]->enable(basicTimeStep);
     }
 
     // epuck camera initialisation
@@ -131,6 +129,9 @@ void RobotRoutine::AllLightsOnLED(void)
 
 void RobotRoutine::SetSpeedAndVelocity(void)
 {
+
+    int speed[2] = { 0,0 };
+
     speed[LEFT] = lfm_speed[LEFT];
     speed[RIGHT] = lfm_speed[RIGHT];
 
