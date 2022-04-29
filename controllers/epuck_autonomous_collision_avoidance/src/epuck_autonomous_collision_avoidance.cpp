@@ -155,7 +155,7 @@ int main(int argc, char **argv) {
         *   while following the line check if one or more states occure and
         *   execute the corresponding behaviour
         */
-        else if(!endOfLineGoalReached) {
+        else if(!endOfLineGoalReached && initProcedureDone) {
 
 
             /*************************************/

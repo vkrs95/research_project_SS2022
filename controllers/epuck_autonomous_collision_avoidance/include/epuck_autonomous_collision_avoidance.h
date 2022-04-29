@@ -24,8 +24,8 @@ const unsigned int TURNAROUNDTHRESHOLD = 3500; // TURNLEFTRIGHTTHRESHOLD;
 unsigned int ledCounter = 1;
 unsigned int groundSensorJitter = 0;
 unsigned int groundSensorJitterThreshold = 4;
-bool epuckEndlessMode = false;
-unsigned int qrDistanceToScanPos = 2000;
+bool epuckEndlessMode = true;
+unsigned int qrDistanceToScanPos = 2200;
 unsigned int initProcedureDistanceToScanCounter = 0;
 
 
