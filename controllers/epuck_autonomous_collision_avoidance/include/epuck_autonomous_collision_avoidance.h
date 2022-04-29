@@ -1,6 +1,5 @@
 #include "RobotRoutine.h"
 #include "PathPlannerEPuck.h"
-#include "ObstacleAvoidance.h"
 #include "QRModuleEPuckSGD.h"
 
 #pragma once
@@ -8,10 +7,8 @@
 /*** object pointers ***/
 Robot* robot;
 RobotRoutine* robotroutine;
-PathPlannerEPuck* pathplanner; 
-ObstacleAvoidance* obstacleavoidance;
+PathPlannerEPuck* pathplanner;
 QRModule<SGDQRParams>* qrmodule;
-
 
 void robotActiveWait(unsigned int numOfSteps);
 

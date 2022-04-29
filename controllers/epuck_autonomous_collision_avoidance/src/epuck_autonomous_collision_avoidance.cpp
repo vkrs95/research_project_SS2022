@@ -14,7 +14,6 @@ int main(int argc, char **argv) {
     robot = new Robot();
     robotroutine = new RobotRoutine(robot);
     pathplanner = new PathPlannerEPuck(robotroutine->robotName);
-    obstacleavoidance = new ObstacleAvoidance;
     qrmodule = new QRModuleEPuckSGD();
         
     /*** get time step from robot routine ***/
@@ -240,7 +239,7 @@ int main(int argc, char **argv) {
             *   check if an obstacle has been detected or if obstacle avoidance
             *   procedure is already activated
             */
-            else if (obstacleDetected || obstacleavoidance->ObstacleDetection(robotroutine->ps_value))
+            else if (obstacleDetected || robotroutine->detectObstacle())
             {
                 obstacleDetected = true;
 

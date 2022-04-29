@@ -75,6 +75,7 @@ public:
 	void DisableEpuckCam(void);
 	void TakeCameraSnapshot(void);
 	bool IsEpuckCamEnabled(void);
+	bool detectObstacle(void);
 
 private:
 	/* robot sensor objects utilized by functions */
@@ -96,5 +97,13 @@ private:
 	/* internal constants */
 	const double LFM_K_GS_SPEED = 0.4;
 	const int LFM_FORWARD_SPEED = 200;
+
+	/* internal constants obstacle avoidance module */
+	const static unsigned int OAM_OBST_THRESHOLD = 100;
+	const static unsigned int OAM_FORWARD_SPEED = 150;
+	const static unsigned int OAM_K_MAX_DELTAS = 600;
+	const double OAM_K_PS_90 = 0.2;
+	const double OAM_K_PS_45 = 0.9;
+	const double OAM_K_PS_00 = 1.2;
 };
 
