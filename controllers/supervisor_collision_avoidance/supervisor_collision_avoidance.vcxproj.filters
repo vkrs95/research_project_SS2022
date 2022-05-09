@@ -112,6 +112,9 @@
     <ClCompile Include="lib\path_planning\src\dijkstra.cpp">
       <Filter>lib\path_planning\src</Filter>
     </ClCompile>
+    <ClCompile Include="src\CommModuleSupervisor.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\supvervisor_collision_avoidance.h">
@@ -125,6 +128,9 @@
     </ClInclude>
     <ClInclude Include="lib\path_planning\include\path_planning\dijkstra.hpp">
       <Filter>lib\path_planning\include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\CommModuleSupervisor.h">
+      <Filter>include</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
