@@ -3,6 +3,7 @@
 #include <webots/DistanceSensor.hpp>
 #include <webots/LED.hpp>
 #include <webots/Camera.hpp>
+#include <webots/Receiver.hpp>
 
 #include <array>
 #include <vector>
@@ -60,22 +61,35 @@ public:
 	/* public functions provided by robot routine module */
 	RobotRoutine(Robot* robot);
 	void ReadSensors();
+
+	/* ground sensor functions */
 	void LineFollowingModule(void);
 	bool DetectLineCrossroad(void);
 	bool DetectEndOfLine(void);
+	
+	/* motor control functions */
 	void setWheelSpeedMoveStraightAhead(void);
 	void setWheelSpeedTurnLeft(void);
 	void setWheelSpeedTurnRight(void);
 	void setWheelSpeedTurnAround(void);
-	void CyclicBlinkingLED(void);
-	void AllLightsOnLED(void);
 	void SetSpeedAndVelocity(void);
 	void PerformHalt(void);
+
+	/* LED functions */
+	void CyclicBlinkingLED(void);
+	void AllLightsOnLED(void);
+	
+	/* camera functions */
 	void EnableEpuckCam(void);
 	void DisableEpuckCam(void);
 	void TakeCameraSnapshot(void);
 	bool IsEpuckCamEnabled(void);
+
+	/* obstacle functions */
 	bool detectObstacle(void);
+
+	/* receiver functions */
+	bool getNextPacket(int* dataPacket);
 
 private:
 	/* robot sensor objects utilized by functions */
@@ -87,6 +101,8 @@ private:
 
 	Camera* robotCamera;
 
+	Receiver* receiver;
+
 	unsigned short gs_value[NB_GROUND_SENS] = { 0, 0, 0 };
 
 	int lfm_speed[2];
@@ -97,7 +113,7 @@ private:
 	/* internal constants */
 	const double LFM_K_GS_SPEED = 0.4;
 	const int LFM_FORWARD_SPEED = 200;
-	const unsigned int MOTOR_RATIO = 0.00628;
+	const double MOTOR_RATIO = 0.00628;
 
 	/* internal constants obstacle avoidance module */
 	const static unsigned int OAM_OBST_THRESHOLD = 100;
@@ -106,5 +122,8 @@ private:
 	const double OAM_K_PS_90 = 0.2;
 	const double OAM_K_PS_45 = 0.9;
 	const double OAM_K_PS_00 = 1.2;
+
+	/* internal constant receiver */
+	const static unsigned int RECV_SAMPLING_PERIOD = 64; 
 };
 

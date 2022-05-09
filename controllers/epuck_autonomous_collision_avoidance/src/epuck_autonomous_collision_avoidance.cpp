@@ -1,6 +1,6 @@
 #include "epuck_autonomous_collision_avoidance.h"
 
-void robotActiveWait(unsigned int numOfSteps)
+void robotActiveWait(int numOfSteps)
 {
     for (int i = 0; i < numOfSteps; i++) {
         if (robot->step(timeStep) == -1)
@@ -15,6 +15,7 @@ int main(int argc, char **argv) {
     robotroutine = new RobotRoutine(robot);
     pathplanner = new PathPlannerEPuck(robotroutine->robotName);
     qrmodule = new QRModuleEPuckSGD();
+    //commWifi = new CommunicationModuleWifi();
         
     /*** get time step from robot routine ***/
     timeStep = robotroutine->basicTimeStep;
@@ -22,6 +23,28 @@ int main(int argc, char **argv) {
     /* before entering main loop init camera by enabling it */
     robotroutine->EnableEpuckCam();
 
+    /*
+    *   TEST: start wifi server locally on one of the epuck robots.
+    *   The other robots should then try to connect to it.
+    */
+    //std::string robName = robotroutine->robotName;
+
+    //if (robotroutine->robotName == "EPuck 1") {
+    //    /* EPuck 1 has to open a local wifi server */
+    //    int port = 1000;
+
+    //    /**** WIFI TEST ****/
+    //    int fd = 0;
+    //    int sfd = commWifi->create_socket_server(port);
+    //    commWifi->socket_set_non_blocking(sfd);
+
+    //    printf("Waiting for a connection on port %d...\n", port);
+    //    printf("SFD is %d...\n", sfd);
+    //}
+    //else {
+    //    /* all other EPuck shall try to connect to the wifi server */
+    //}
+        
 
     /*************************************/
     /************* MAIN LOOP *************/
@@ -39,6 +62,14 @@ int main(int argc, char **argv) {
     */
     while (robot->step(timeStep) != -1) {
 
+        /*   if (fd == 0) {
+            fd = commWifi->socket_accept(sfd);
+            if (fd > 0)
+                commWifi->socket_set_non_blocking(fd);
+            else if (fd < 0)
+                ;
+        }
+        */
         robotroutine->ReadSensors();
 
         /*************************************/
@@ -53,6 +84,23 @@ int main(int argc, char **argv) {
             {
                 robotroutine->CyclicBlinkingLED();
                 ledCounter = 1;
+            }
+        }
+        /*************************************/
+        /*************************************/
+        
+
+        /*************************************/
+        /********** RECEIVER BLOCK **********/
+        if (!supervisorDataReceived)
+        {
+            int* recvDataPacket = new int(0);
+            bool recvResult = robotroutine->getNextPacket(recvDataPacket);
+
+            if (recvResult) {
+                socketFD = *recvDataPacket;
+                supervisorDataReceived = true;
+                printf("%s: received SFD = %d from supervisor\n", robotroutine->robotName.c_str(), socketFD);
             }
         }
         /*************************************/

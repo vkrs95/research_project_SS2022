@@ -17,6 +17,10 @@ RobotRoutine::RobotRoutine(Robot* robot)
     lfm_speed[LEFT] = 0;
     lfm_speed[RIGHT] = 0;
 
+    /* receiver initialization */
+    receiver = robot->getReceiver("receiver");
+    receiver->enable(RECV_SAMPLING_PERIOD);
+
     // set robot name
     robotName = robot->getName();
     qrImgFileName = "start_goal_" + robotName + ".jpg";
@@ -195,5 +199,28 @@ bool RobotRoutine::detectObstacle(void)
         return true;
     }
 
+    return false;
+}
+
+bool RobotRoutine::getNextPacket(int* dataPacket)
+{
+    int* localCopy;
+
+    if (receiver->getQueueLength() > 0) {
+        localCopy = (int*) receiver->getData();
+
+        if (localCopy != 0) {
+            /* 
+            *   Received data is valid; try to get next data packet
+            */
+            memcpy(dataPacket, localCopy, sizeof(int));
+            receiver->nextPacket();
+
+            return true;
+        }
+    }
+    receiver->nextPacket();
+
+    /* queue is empty */
     return false;
 }
