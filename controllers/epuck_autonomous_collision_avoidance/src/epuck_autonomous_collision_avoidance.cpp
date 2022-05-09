@@ -15,36 +15,13 @@ int main(int argc, char **argv) {
     robotroutine = new RobotRoutine(robot);
     pathplanner = new PathPlannerEPuck(robotroutine->robotName);
     qrmodule = new QRModuleEPuckSGD();
-    //commWifi = new CommunicationModuleWifi();
+    commWifi = new CommunicationModuleWifi();
         
     /*** get time step from robot routine ***/
     timeStep = robotroutine->basicTimeStep;
 
     /* before entering main loop init camera by enabling it */
     robotroutine->EnableEpuckCam();
-
-    /*
-    *   TEST: start wifi server locally on one of the epuck robots.
-    *   The other robots should then try to connect to it.
-    */
-    //std::string robName = robotroutine->robotName;
-
-    //if (robotroutine->robotName == "EPuck 1") {
-    //    /* EPuck 1 has to open a local wifi server */
-    //    int port = 1000;
-
-    //    /**** WIFI TEST ****/
-    //    int fd = 0;
-    //    int sfd = commWifi->create_socket_server(port);
-    //    commWifi->socket_set_non_blocking(sfd);
-
-    //    printf("Waiting for a connection on port %d...\n", port);
-    //    printf("SFD is %d...\n", sfd);
-    //}
-    //else {
-    //    /* all other EPuck shall try to connect to the wifi server */
-    //}
-        
 
     /*************************************/
     /************* MAIN LOOP *************/
@@ -90,18 +67,14 @@ int main(int argc, char **argv) {
         /*************************************/
         
 
-        /*************************************/
-        /********** RECEIVER BLOCK **********/
-        if (!supervisorDataReceived)
-        {
-            int* recvDataPacket = new int(0);
-            bool recvResult = robotroutine->getNextPacket(recvDataPacket);
+        /*************************************************/
+        /********** CONNECT TO SUPERVISOR BLOCK **********/
+        if (!supervisorConnected)
+        {            
+            if (commWifi->tryToConnectToSupervisor()) {
 
-            if (recvResult) {
-                socketFD = *recvDataPacket;
-                supervisorDataReceived = true;
-                printf("%s: received SFD = %d from supervisor\n", robotroutine->robotName.c_str(), socketFD);
-            }
+                supervisorConnected = true;
+            }            
         }
         /*************************************/
         /*************************************/

@@ -121,6 +121,9 @@
     <ClCompile Include="lib\path_planning\src\dijkstra.cpp">
       <Filter>lib\path_planning\src</Filter>
     </ClCompile>
+    <ClCompile Include="CommunicationModuleWifi.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\RobotRoutine.h">
@@ -149,6 +152,12 @@
     </ClInclude>
     <ClInclude Include="lib\path_planning\include\path_planning\dijkstra.hpp">
       <Filter>lib\path_planning\include</Filter>
+    </ClInclude>
+    <ClInclude Include="CollisionSupervisorModule.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="CommunicationModuleWifi.h">
+      <Filter>include</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -23,7 +23,7 @@ std::string QRModuleEPuckSGD::getContentStringFromQrImage(std::string qrFilePath
     Mat im = imread(qrFilePath, IMREAD_GRAYSCALE);
 
     if (im.empty()) {
-        printf("Could not read image");
+        std::cout << "Could not read image" << std::endl;
         return std::string();               // return empty string 
     }
 

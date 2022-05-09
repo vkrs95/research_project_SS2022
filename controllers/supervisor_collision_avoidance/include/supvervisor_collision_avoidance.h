@@ -30,3 +30,16 @@ Emitter* emitter;
 
 
 /*** define member variables ***/
+unsigned int mClientCount = 0;
+std::vector<int> clientList;
+unsigned int mTimeStep = 0;
+
+/*** functions ***/
+bool	socket_init();
+bool	socket_set_non_blocking(int fd);
+int		socket_accept(int server_fd);
+bool	socket_close(int fd);
+bool	socket_cleanup();
+int		create_socket_server(int port);
+int		socket_send(SOCKET socket, char* sendBuffer, int sendBufferLen);
+void	robotActiveWait(int numOfSteps);

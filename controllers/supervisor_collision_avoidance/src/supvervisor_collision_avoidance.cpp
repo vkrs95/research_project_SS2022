@@ -1,5 +1,71 @@
 #include "supvervisor_collision_avoidance.h"
 
+int main(int argc, char **argv) {
+
+    /*** create all Object instances ***/
+    robot = new Robot();
+    emitter = robot->getEmitter("emitter");
+
+    /*************************************/
+    mTimeStep =(unsigned int)robot->getBasicTimeStep();
+
+    const int DEFAULT_BUFLEN = 512;
+    char sendbuf[DEFAULT_BUFLEN];
+    int sendbuflen = DEFAULT_BUFLEN;
+
+    /*
+    *   how to:
+    *   communication between one supvervisor entity and multiple robots.
+    *   communication medium is wifi. Supervisor opens up a server on a specific port.
+    *   Robots try to connect to the server.
+    *   When setting up a socket server, the result is a SFD value. 
+    *   The clients need this SFD value in order to connect to the correct port.
+    *   -> how to communicate this SFD value from supervisor entity to all clients ?
+    *   -> using emitter/receiver mechanism by webots as seen in webots' soccer example?
+    */
+    constexpr auto port = 1000;
+    int mSocket;
+
+    /* open a server on port 1000 */
+    mSocket = create_socket_server(port);
+
+    /* try to set socket non blocking */
+    if (!socket_set_non_blocking(mSocket)) {
+        /* failed to set server non-blocking */
+        return -1;
+    }
+
+    int clientSocket = 0;
+    
+    printf("Supervisor: Waiting for connections on port %d...\n", port);
+
+    sendbuf[0] = '4';
+    sendbuf[1] = '2';
+    sendbuf[2] = '\0';
+
+    while (robot->step(mTimeStep) != -1) {
+        //socket_send(clientSocket, sendbuf, sendbuflen);
+        //printf("Sent data %d...\n", socket_send(clientSocket, sendbuf, sendbuflen));
+
+        //emitter->send(&mSocket, sizeof(mSocket));
+
+        //robotActiveWait(1000);
+
+        clientSocket = socket_accept(mSocket);
+
+        if (clientSocket > 0) {
+            clientList.push_back(clientSocket);
+            printf("connection ID %d established on socket %d !\n", int(clientList.size() - 1), clientSocket);
+        }
+
+    }
+
+    /*  optional cleanup  */
+    delete robot;
+
+    return 0;
+}
+
 
 bool socket_init() {
 #ifdef _WIN32 /* initialize the socket API */
@@ -26,8 +92,8 @@ bool socket_set_non_blocking(int fd) {
 
 int socket_accept(int server_fd) {
     int cfd;
-    struct sockaddr_in client;
-    struct hostent* client_info;
+    //struct sockaddr_in client;
+    //struct hostent* client_info;
 
 #ifndef _WIN32
     socklen_t asize;
@@ -35,7 +101,7 @@ int socket_accept(int server_fd) {
     int asize;
 #endif
     asize = sizeof(struct sockaddr_in);
-    cfd = accept(server_fd, (struct sockaddr*)&client, &asize);
+    cfd = (int) accept(server_fd, NULL, NULL); // accept(server_fd, (struct sockaddr*)&client, &asize);
 
     if (cfd == -1) {
 #ifdef _WIN32
@@ -51,8 +117,8 @@ int socket_accept(int server_fd) {
         return -1;
     }
 
-    client_info = gethostbyname((char*)inet_ntoa(client.sin_addr));
-    printf("Accepted connection from: %s.\n", client_info->h_name);
+    //client_info = gethostbyname((char*)inet_ntoa(client.sin_addr));
+    //printf("Accepted connection from: %s.\n", client_info->h_name);
 
     return cfd;
 }
@@ -80,7 +146,7 @@ int create_socket_server(int port) {
     if (!socket_init())
         return -1;
 
-    sfd = socket(AF_INET, SOCK_STREAM, 0); // IPPROTO_TCP instead of 0 ?
+    sfd = (int) socket(AF_INET, SOCK_STREAM, IPPROTO_TCP); // IPPROTO_TCP instead of 0 ?
 
     if (sfd == -1) {
         fprintf(stderr, "Cannot create socket.\n");
@@ -108,47 +174,26 @@ int create_socket_server(int port) {
     return sfd;
 }
 
-int main(int argc, char **argv) {
+int socket_send(SOCKET socket, char* sendBuffer, int sendBufferLen)
+{
+    int sendResult;
 
-    /*** create all Object instances ***/
-    robot = new Robot();
-    emitter = robot->getEmitter("emitter");
+    sendResult = send(socket, sendBuffer, sendBufferLen, 0);
 
-    /*************************************/
-    unsigned int timeStep = robot->getBasicTimeStep();
+    if (sendResult == -1) {
 
-
-    /*
-    *   how to:
-    *   communication between one supvervisor entity and multiple robots.
-    *   communication medium is wifi. Supervisor opens up a server on a specific port.
-    *   Robots try to connect to the server.
-    *   When setting up a socket server, the result is a SFD value. 
-    *   The clients need this SFD value in order to connect to the correct port.
-    *   -> how to communicate this SFD value from supervisor entity to all clients ?
-    *   -> using emitter/receiver mechanism by webots as seen in webots' soccer example?
-    */
-    constexpr auto port = 1000;
-    SOCKET m_socket;
-
-    /* open a server on port 1000 */
-    m_socket = create_socket_server(port);
-
-    /* try to set socket non blocking */
-    if (!socket_set_non_blocking(m_socket)) {
-        /* failed to set server non-blocking */
+        fprintf(stderr, "Failed to send data to client .\n");
+        socket_close((int)socket);
         return -1;
     }
 
-    printf("Waiting for a connection on port %d...\n", port);
-    printf("SFD is %d...\n", (int) m_socket);
+    return sendResult;
+}
 
-    while (robot->step(timeStep) != -1) {
-        emitter->send(&m_socket, sizeof(m_socket));
+void robotActiveWait(int numOfSteps)
+{
+    for (int i = 0; i < numOfSteps; i++) {
+        if (robot->step(mTimeStep) == -1)
+            break;
     }
-
-    /*  optional cleanup  */
-    delete robot;
-
-    return 0;
 }
