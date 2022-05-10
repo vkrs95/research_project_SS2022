@@ -71,7 +71,7 @@ int main(int argc, char **argv) {
         /********** CONNECT TO SUPERVISOR BLOCK **********/
         if (!supervisorConnected)
         {            
-            if (commWifi->tryToConnectToSupervisor()) {
+            if (commWifi->tryToConnectToSupervisor(robotroutine->robotName)) {
 
                 supervisorConnected = true;
             }            

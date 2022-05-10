@@ -3,8 +3,8 @@ WorldInfo {
   coordinateSystem "NUE"
 }
 Viewpoint {
-  orientation 0.9087749081379054 -0.39403517911242736 -0.1373478939073294 5.550681102045253
-  position 0.5379190949746945 1.3543151538289433 1.597514096317758
+  orientation 0.9532919391048005 -0.2793234589481897 -0.11494731018613795 5.46814928419626
+  position 0.3990096990598654 1.5434614652864516 1.4819460597285454
 }
 TexturedBackground {
 }
@@ -34,6 +34,20 @@ E-puck {
   translation -0.201855 -2.22045e-15 -0.196927
   rotation 0 1 0 1.5708
   name "EPuck 1"
+  controller "epuck_autonomous_collision_avoidance"
+  version "2"
+  camera_width 640
+  camera_height 480
+  receiver_channel 0
+  groundSensorsSlot [
+    E-puckGroundSensors {
+    }
+  ]
+}
+E-puck {
+  translation -0.201161 -1.11023e-15 0.193625
+  rotation 0 1 0 1.5708
+  name "EPuck 2"
   controller "epuck_autonomous_collision_avoidance"
   version "2"
   camera_width 640

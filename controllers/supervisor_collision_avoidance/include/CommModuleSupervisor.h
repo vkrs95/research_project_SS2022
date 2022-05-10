@@ -47,7 +47,6 @@ private:
 	{
 	public:
 		ClientCommHandlerThread(int clientSocket);
-		void runRoutine(void);
 		bool addMsgToOutbox(char* message);
 		char* getInboxMessage(void);
 		std::string getClientName(void);
@@ -63,6 +62,7 @@ private:
 		std::list<char*> mMsgInbox;
 		std::list<char*> mMsgOutbox;
 		std::mutex msgMutex;
+		std::thread* commHandlingThread;
 	};
 
 

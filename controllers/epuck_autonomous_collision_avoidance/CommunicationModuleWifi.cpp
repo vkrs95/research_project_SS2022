@@ -4,6 +4,7 @@ CommunicationModuleWifi::CommunicationModuleWifi(int port)
 {
     wifiPort = port;
     connectSocket = INVALID_SOCKET;
+    mClientName = "undefined";
 }
 
 
@@ -34,7 +35,7 @@ bool CommunicationModuleWifi::socketCleanup() {
 #endif
 }
 
-bool CommunicationModuleWifi::tryToConnectToSupervisor()
+bool CommunicationModuleWifi::tryToConnectToSupervisor(std::string robotName)
 {
     if (socketInit()) {
 
@@ -65,8 +66,68 @@ bool CommunicationModuleWifi::tryToConnectToSupervisor()
             return false;
         }
 
-        return true;
+        // Try to send register message 
+        int maxRegisterAttempts = 3;
+
+        for (int i = 0; i < maxRegisterAttempts; i++) {
+            if (registerToSupervisor(robotName))
+                return true;
+        }        
     }
 
     return false;
+}
+
+bool CommunicationModuleWifi::sendMessage(const char* message, int msgLen)
+{
+    int sendResult;
+
+    /* send message to client via tcp socket */
+    sendResult = send(connectSocket, message, maxMsgLen, 0);
+
+    if (sendResult == SOCKET_ERROR) {
+        std::cerr << "CommunicationModuleWifi (" << mClientName << "): Failed to send message to server" << std::endl;
+        return false;
+    }
+
+    return true;
+}
+
+bool CommunicationModuleWifi::registerToSupervisor(std::string robotName)
+{
+    /* prepare register message */
+    std::ostringstream stringStream;
+    stringStream << MessageType::REGISTER << ";" << robotName;
+    std::string msgString = stringStream.str();
+
+    return sendMessage(msgString.c_str(), msgString.size());
+}
+
+void CommunicationModuleWifi::unregisterFromSupervisor(std::string reason)
+{
+    /* prepare unregister message */
+    std::ostringstream stringStream;
+    stringStream << MessageType::UNREGISTER << ";" << reason;
+    std::string msgString = stringStream.str();
+
+    sendMessage(msgString.c_str(), msgString.size());
+}
+
+bool CommunicationModuleWifi::reportCollision(
+    std::tuple<int, int> startXY,
+    std::tuple<int, int> goalXY,
+    std::tuple<int, int> collisionXY)
+{
+    /* prepare collision message */
+    /* e.g. 2;1,2;6,0;3,2 */
+    std::ostringstream stringStream;
+
+    stringStream << MessageType::COLLISION << ";" 
+        << std::get<0>(startXY)     << "," << std::get<1>(startXY)  << ";"
+        << std::get<0>(goalXY)      << "," << std::get<1>(goalXY)   << ";"
+        << std::get<0>(collisionXY) << "," << std::get<1>(collisionXY);
+
+    std::string msgString = stringStream.str();
+
+    return sendMessage(msgString.c_str(), msgString.size());
 }

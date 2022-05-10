@@ -163,8 +163,6 @@ void CommModuleTCPSocketServer::socketListenerRoutine(void)
             /* create new client thread, add it to thread pool and let it run */
             ClientCommHandlerThread* clientThread = new ClientCommHandlerThread(mClientSocket);
             mCommHandlerThreadPool.push_back(clientThread);
-            clientThread->detach();
-            clientThread->runRoutine();
             
             std::cout << "Connection ID " << int(mCommHandlerThreadPool.size() - 1) << " established on socket " << mClientSocket << std::endl;
         }
@@ -175,7 +173,8 @@ void CommModuleTCPSocketServer::socketListenerRoutine(void)
 
 void CommModuleTCPSocketServer::ClientCommHandlerThread::socketCommunicationHandlerRoutine(void)
 {
-
+    /* start endless thread routine */
+ 
     while (true) {
         /* periodically check for message from client */
         receiveMessage();
@@ -192,12 +191,9 @@ CommModuleTCPSocketServer::ClientCommHandlerThread::ClientCommHandlerThread(int 
 {
     mClientSocket = clientSocket;
     mClientName = "undefined";
-}
 
-void CommModuleTCPSocketServer::ClientCommHandlerThread::runRoutine(void)
-{
-    /* start endless thread routine */
-    socketCommunicationHandlerRoutine();
+    commHandlingThread = new std::thread(&ClientCommHandlerThread::socketCommunicationHandlerRoutine, this);
+    commHandlingThread->detach();
 }
 
 void CommModuleTCPSocketServer::ClientCommHandlerThread::receiveMessage(void)
@@ -210,8 +206,11 @@ void CommModuleTCPSocketServer::ClientCommHandlerThread::receiveMessage(void)
         /* might be first message sent by client containing client's name */
         if (mClientName.compare("undefined") == 0) {
 
+            /* to get e.g. '1' -> 1 etc. */
+            int msgIdentifier = recvBuffer[0] - '0';    
+
             /* check if message is of type REGISTER */
-            if (recvBuffer[0] == MessageType::REGISTER) {
+            if (msgIdentifier == MessageType::REGISTER) {
                 mClientName = extractNameFromMsg(recvBuffer, recvSize);
                 std::cout << "ClientCommHandlerThread: client '" << mClientName << "' registered!" << std::endl;
                 return;
