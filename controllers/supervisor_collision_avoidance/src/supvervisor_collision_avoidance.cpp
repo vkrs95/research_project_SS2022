@@ -17,25 +17,19 @@ int main(int argc, char **argv) {
     //sendbuf[0] = '4';
     //sendbuf[1] = '2';
     //sendbuf[2] = '\0';
-
-    /*
-    *   how to:
-    *   communication between one supvervisor entity and multiple robots.
-    *   communication medium is wifi. Supervisor opens up a server on a specific port.
-    *   Robots try to connect to the server.
-    *   When setting up a socket server, the result is a SFD value. 
-    *   The clients need this SFD value in order to connect to the correct port.
-    *   -> how to communicate this SFD value from supervisor entity to all clients ?
-    *   -> using emitter/receiver mechanism by webots as seen in webots' soccer example?
-    */
-    
+        
 
     while (robot->step(mTimeStep) != -1) {
-        //socket_send(clientSocket, sendbuf, sendbuflen);
-        //printf("Sent data %d...\n", socket_send(clientSocket, sendbuf, sendbuflen));
 
-        //emitter->send(&mSocket, sizeof(mSocket));
+        /* get received data from tcp server via polling */
+        /*
+        *   data 
+        * 
+        *   socketServer->getData()
+        *   --> interpret data in supervisor? 
+        */
 
+    
         //robotActiveWait(1000);
     }
 

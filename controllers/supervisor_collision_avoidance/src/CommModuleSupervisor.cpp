@@ -134,20 +134,19 @@ int CommModuleTCPSocketServer::createSocketServer(int port) {
     return sfd;
 }
 
-int CommModuleTCPSocketServer::socketSend(SOCKET socket, char* sendBuffer, int sendBufferLen)
+void CommModuleTCPSocketServer::sendMessageToClient(std::string clientName, char* message)
 {
-    int sendResult;
+    std::string currentClient;
 
-    sendResult = send(socket, sendBuffer, sendBufferLen, 0);
+    for (ClientCommHandlerThread* clientThread : mCommHandlerThreadPool) {
+        currentClient = clientThread->getClientName();
 
-    if (sendResult == -1) {
-
-        std::cerr << "Communication Module Supervisor: Failed to send data to client." << std::endl;
-        socketClose((int)socket);
-        return -1;
+        if (currentClient == clientName) {
+            /* we found the correct client thread, forward message to its outbox */
+            clientThread->addMsgToOutbox(message);
+            break;
+        }
     }
-
-    return sendResult;
 }
 
 void CommModuleTCPSocketServer::socketListenerRoutine(void)
@@ -160,10 +159,140 @@ void CommModuleTCPSocketServer::socketListenerRoutine(void)
         mClientSocket = socketAccept(mListenSocket);
 
         if (mClientSocket > 0) {
-            clientList.push_back(mClientSocket);
-            printf("connection ID %d established on socket %d !\n", int(clientList.size() - 1), mClientSocket);
+
+            /* create new client thread, add it to thread pool and let it run */
+            ClientCommHandlerThread* clientThread = new ClientCommHandlerThread(mClientSocket);
+            mCommHandlerThreadPool.push_back(clientThread);
+            clientThread->detach();
+            clientThread->runRoutine();
+            
+            std::cout << "Connection ID " << int(mCommHandlerThreadPool.size() - 1) << " established on socket " << mClientSocket << std::endl;
         }
 
         std::this_thread::sleep_for(std::chrono::milliseconds(1000));	// TODO: how long should the thread wait until next check?
     }
+}
+
+void CommModuleTCPSocketServer::ClientCommHandlerThread::socketCommunicationHandlerRoutine(void)
+{
+
+    while (true) {
+        /* periodically check for message from client */
+        receiveMessage();
+
+        /* periodically check for ordered message to send to client */
+        sendMessage();
+
+        /* TODO: how long should the thread wait until next check ? */
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));	
+    }
+}
+
+CommModuleTCPSocketServer::ClientCommHandlerThread::ClientCommHandlerThread(int clientSocket)
+{
+    mClientSocket = clientSocket;
+    mClientName = "undefined";
+}
+
+void CommModuleTCPSocketServer::ClientCommHandlerThread::runRoutine(void)
+{
+    /* start endless thread routine */
+    socketCommunicationHandlerRoutine();
+}
+
+void CommModuleTCPSocketServer::ClientCommHandlerThread::receiveMessage(void)
+{
+    char recvBuffer[maxMsgLen];
+    int recvSize = recv(mClientSocket, recvBuffer, maxMsgLen, 0);
+
+    if (recvSize > 0) {
+
+        /* might be first message sent by client containing client's name */
+        if (mClientName.compare("undefined") == 0) {
+
+            /* check if message is of type REGISTER */
+            if (recvBuffer[0] == MessageType::REGISTER) {
+                mClientName = extractNameFromMsg(recvBuffer, recvSize);
+                std::cout << "ClientCommHandlerThread: client '" << mClientName << "' registered!" << std::endl;
+                return;
+            }
+
+            /* if MessageType != REGISTER just continue adding message to inbox */
+        }
+
+        /* add received message to internal inbox */
+        std::unique_lock<std::mutex> msgInboxLock(msgMutex);
+        mMsgInbox.push_back(recvBuffer);
+        msgInboxLock.unlock();
+    }
+}
+
+void CommModuleTCPSocketServer::ClientCommHandlerThread::sendMessage(void)
+{
+    char* lastMessage;
+    int sendResult;
+
+    while (!mMsgOutbox.empty()) {
+
+        /* set local mutex and get oldest message from outbox */
+        std::unique_lock<std::mutex> msgOutboxLock(msgMutex);
+        lastMessage = mMsgOutbox.front();
+        mMsgOutbox.pop_front();              // remove the message from list
+        msgOutboxLock.unlock();
+
+        /* send message to client via tcp socket */
+        sendResult = send(mClientSocket, lastMessage, maxMsgLen, 0);
+
+        if (sendResult == SOCKET_ERROR) {
+            std::cerr << "ClientCommHandlerThread: Failed to send message to " << mClientName << std::endl;
+        }
+    }
+}
+
+std::string CommModuleTCPSocketServer::ClientCommHandlerThread::extractNameFromMsg(char* message, int msgSize)
+{
+    char* extractNamePointer = message;
+
+    extractNamePointer += sizeof(char) * 2; // move 2 character since first one is message type, second is separator
+
+    std::string clientName(extractNamePointer);
+
+    return clientName;
+}
+
+bool CommModuleTCPSocketServer::ClientCommHandlerThread::addMsgToOutbox(char* message)
+{
+    char* newMessage = message;
+
+    /* set local mutex and add passed message to outbox */
+    std::unique_lock<std::mutex> msgOutboxLock(msgMutex);
+    mMsgOutbox.push_back(message);
+    msgOutboxLock.unlock();
+
+    return true;
+}
+
+char* CommModuleTCPSocketServer::ClientCommHandlerThread::getInboxMessage(void)
+{
+    char* lastMessage;
+
+    if (mMsgInbox.empty()) {
+        lastMessage = nullptr;
+    }
+    else {
+        /* at least one message in inbox, set local mutex and pop next message from inbox */
+        std::unique_lock<std::mutex> msgInboxLock(msgMutex);
+        
+        lastMessage = mMsgInbox.front();    // get oldest message from FIFO
+        mMsgInbox.pop_front();              // remove the message from list
+
+        msgInboxLock.unlock();
+
+    }
+    return nullptr;
+}
+
+std::string CommModuleTCPSocketServer::ClientCommHandlerThread::getClientName(void)
+{
+    return mClientName;
 }
