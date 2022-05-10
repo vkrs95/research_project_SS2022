@@ -4,6 +4,7 @@
 #include <iostream>
 #include <thread>
 #include <mutex>
+#include <string>
 
 /* wifi imports */
 #ifdef _WIN32
@@ -26,7 +27,7 @@ class CommModuleTCPSocketServer{
 public:
 	CommModuleTCPSocketServer(int port = 1000);
 	~CommModuleTCPSocketServer();
-	void sendMessageToClient(std::string clientName, char* message);
+	void sendMessageToClient(std::string clientName, char* message, int msgSize);
 
 	enum MessageType
 	{
@@ -42,12 +43,12 @@ protected:
 private:
 
 	/* nested thread class */
-	class ClientCommHandlerThread :
+	class ClientCommHandler :
 		public std::thread
 	{
 	public:
-		ClientCommHandlerThread(int clientSocket);
-		bool addMsgToOutbox(char* message);
+		ClientCommHandler(int clientSocket);
+		bool addMsgToOutbox(char* message, int msgSize);
 		char* getInboxMessage(void);
 		std::string getClientName(void);
 
@@ -55,7 +56,7 @@ private:
 		void socketCommunicationHandlerRoutine(void);
 		void receiveMessage(void);
 		void sendMessage(void);
-		std::string extractNameFromMsg(char* message, int msgSize);
+		void registerNameAndSendACK(char* message, int msgSize);
 
 		std::string mClientName;
 		int mClientSocket;
@@ -81,7 +82,7 @@ private:
 	int mServerPort = 0;
 	unsigned int mClientCount = 0;
 	std::thread* listenerThread;
-	std::vector<ClientCommHandlerThread*> mCommHandlerThreadPool;
+	std::vector<ClientCommHandler*> mCommHandlerThreadPool;
 
 };
 

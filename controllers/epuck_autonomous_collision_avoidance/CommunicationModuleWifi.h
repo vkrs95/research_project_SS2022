@@ -7,6 +7,7 @@
 #include <time.h>
 #include <iostream>
 #include <sstream>
+#include <thread>
 #ifdef _WIN32
 #include <winsock.h>
 #else
@@ -28,7 +29,6 @@ public:
 
     CommunicationModuleWifi(int port = 1000);
     bool tryToConnectToSupervisor(std::string robotName);
-    bool registerToSupervisor(std::string robotName);
     void unregisterFromSupervisor(std::string reason = std::string("none"));
     bool reportCollision(std::tuple<int, int> startXY, 
                             std::tuple<int, int> goalXY, 
@@ -47,9 +47,12 @@ private:
     bool socketClose(int fd);
     bool socketCleanup();
     bool sendMessage(const char* message, int msgLen);
+    bool sendRegistrationToSupervisor(std::string robotName);
+    bool receiveRegistrationAck(void);
+    char* receiveMessage(void);
 
     SOCKET connectSocket;
     int wifiPort;
-    int maxMsgLen = 512;
+    static const int maxMsgLen = 512;
     std::string mClientName;
 };

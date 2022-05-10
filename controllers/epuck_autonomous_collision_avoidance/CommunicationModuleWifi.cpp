@@ -66,13 +66,32 @@ bool CommunicationModuleWifi::tryToConnectToSupervisor(std::string robotName)
             return false;
         }
 
-        // Try to send register message 
-        int maxRegisterAttempts = 3;
+        /*
+        *   Try to send register message and receive ACK. 
+        *   When sendRegistrationToSupervisor was successful, try to receive the acknowledge. 
+        *   After maxRegisterAttempts of sending or receiving data the connection is set as failed
+        */
+        int maxRegisterAttempts = 5;
 
         for (int i = 0; i < maxRegisterAttempts; i++) {
-            if (registerToSupervisor(robotName))
-                return true;
-        }        
+
+            /* Try to send register message */
+            if (sendRegistrationToSupervisor(robotName)) {
+
+                /* Try to receive ACK */
+                for (int i = 0; i < maxRegisterAttempts; i++) {
+
+                    //std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
+                    /* Check for registration acknowledge */
+                    if (receiveRegistrationAck())
+                        return true;
+                }
+
+                return false;
+            }
+        }
+                
     }
 
     return false;
@@ -93,14 +112,50 @@ bool CommunicationModuleWifi::sendMessage(const char* message, int msgLen)
     return true;
 }
 
-bool CommunicationModuleWifi::registerToSupervisor(std::string robotName)
+char* CommunicationModuleWifi::receiveMessage(void)
+{
+    char recvBuffer[maxMsgLen];
+    int recvSize = recv(connectSocket, recvBuffer, maxMsgLen, 0);
+
+    if (recvSize == 0) {
+        // std::cerr << "CommunicationModuleWifi (" << mClientName << "): No data received from server" << std::endl;
+        return nullptr;
+    }
+
+    return recvBuffer;
+
+}
+
+bool CommunicationModuleWifi::sendRegistrationToSupervisor(std::string robotName)
 {
     /* prepare register message */
     std::ostringstream stringStream;
     stringStream << MessageType::REGISTER << ";" << robotName;
     std::string msgString = stringStream.str();
 
-    return sendMessage(msgString.c_str(), msgString.size());
+    if (!sendMessage(msgString.c_str(), msgString.size())) {
+        std::cout << "FAILED TO SEND REGISTRATION" << std::endl;
+        return false;
+    }
+
+    return true;
+}
+
+bool CommunicationModuleWifi::receiveRegistrationAck(void)
+{
+    char* msg = receiveMessage();
+
+    if (msg != nullptr) {
+
+        int msgIdentifier = msg[0] - '0';
+
+        if (msgIdentifier == 0) {
+            std::cout << "RECEIVED ACK" << std::endl;
+            return true;
+        }   
+    }
+
+    return false;
 }
 
 void CommunicationModuleWifi::unregisterFromSupervisor(std::string reason)

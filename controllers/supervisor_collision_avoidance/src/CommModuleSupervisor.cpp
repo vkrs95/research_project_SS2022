@@ -134,16 +134,16 @@ int CommModuleTCPSocketServer::createSocketServer(int port) {
     return sfd;
 }
 
-void CommModuleTCPSocketServer::sendMessageToClient(std::string clientName, char* message)
+void CommModuleTCPSocketServer::sendMessageToClient(std::string clientName, char* message, int msgSize)
 {
     std::string currentClient;
 
-    for (ClientCommHandlerThread* clientThread : mCommHandlerThreadPool) {
+    for (ClientCommHandler* clientThread : mCommHandlerThreadPool) {
         currentClient = clientThread->getClientName();
 
         if (currentClient == clientName) {
             /* we found the correct client thread, forward message to its outbox */
-            clientThread->addMsgToOutbox(message);
+            clientThread->addMsgToOutbox(message, msgSize);
             break;
         }
     }
@@ -161,7 +161,7 @@ void CommModuleTCPSocketServer::socketListenerRoutine(void)
         if (mClientSocket > 0) {
 
             /* create new client thread, add it to thread pool and let it run */
-            ClientCommHandlerThread* clientThread = new ClientCommHandlerThread(mClientSocket);
+            ClientCommHandler* clientThread = new ClientCommHandler(mClientSocket);
             mCommHandlerThreadPool.push_back(clientThread);
             
             std::cout << "Connection ID " << int(mCommHandlerThreadPool.size() - 1) << " established on socket " << mClientSocket << std::endl;
@@ -171,7 +171,7 @@ void CommModuleTCPSocketServer::socketListenerRoutine(void)
     }
 }
 
-void CommModuleTCPSocketServer::ClientCommHandlerThread::socketCommunicationHandlerRoutine(void)
+void CommModuleTCPSocketServer::ClientCommHandler::socketCommunicationHandlerRoutine(void)
 {
     /* start endless thread routine */
  
@@ -187,16 +187,16 @@ void CommModuleTCPSocketServer::ClientCommHandlerThread::socketCommunicationHand
     }
 }
 
-CommModuleTCPSocketServer::ClientCommHandlerThread::ClientCommHandlerThread(int clientSocket)
+CommModuleTCPSocketServer::ClientCommHandler::ClientCommHandler(int clientSocket)
 {
     mClientSocket = clientSocket;
     mClientName = "undefined";
 
-    commHandlingThread = new std::thread(&ClientCommHandlerThread::socketCommunicationHandlerRoutine, this);
+    commHandlingThread = new std::thread(&ClientCommHandler::socketCommunicationHandlerRoutine, this);
     commHandlingThread->detach();
 }
 
-void CommModuleTCPSocketServer::ClientCommHandlerThread::receiveMessage(void)
+void CommModuleTCPSocketServer::ClientCommHandler::receiveMessage(void)
 {
     char recvBuffer[maxMsgLen];
     int recvSize = recv(mClientSocket, recvBuffer, maxMsgLen, 0);
@@ -211,8 +211,9 @@ void CommModuleTCPSocketServer::ClientCommHandlerThread::receiveMessage(void)
 
             /* check if message is of type REGISTER */
             if (msgIdentifier == MessageType::REGISTER) {
-                mClientName = extractNameFromMsg(recvBuffer, recvSize);
-                std::cout << "ClientCommHandlerThread: client '" << mClientName << "' registered!" << std::endl;
+
+                /* send registration ACK */
+                registerNameAndSendACK(recvBuffer, recvSize);
                 return;
             }
 
@@ -226,7 +227,7 @@ void CommModuleTCPSocketServer::ClientCommHandlerThread::receiveMessage(void)
     }
 }
 
-void CommModuleTCPSocketServer::ClientCommHandlerThread::sendMessage(void)
+void CommModuleTCPSocketServer::ClientCommHandler::sendMessage(void)
 {
     char* lastMessage;
     int sendResult;
@@ -243,35 +244,40 @@ void CommModuleTCPSocketServer::ClientCommHandlerThread::sendMessage(void)
         sendResult = send(mClientSocket, lastMessage, maxMsgLen, 0);
 
         if (sendResult == SOCKET_ERROR) {
-            std::cerr << "ClientCommHandlerThread: Failed to send message to " << mClientName << std::endl;
+            std::cerr << "ClientCommHandler: Failed to send message to " << mClientName << std::endl;
         }
     }
 }
 
-std::string CommModuleTCPSocketServer::ClientCommHandlerThread::extractNameFromMsg(char* message, int msgSize)
+void CommModuleTCPSocketServer::ClientCommHandler::registerNameAndSendACK(char* message, int msgSize)
 {
     char* extractNamePointer = message;
 
     extractNamePointer += sizeof(char) * 2; // move 2 character since first one is message type, second is separator
 
     std::string clientName(extractNamePointer);
-
-    return clientName;
+    mClientName = clientName;
+    std::cout << "ClientCommHandler: client '" << mClientName << "' registered!" << std::endl;
+    
+    /* send ACK to client */
+    std::string ackMsg = std::to_string(MessageType::REGISTER) +";ACK";
+    addMsgToOutbox((char*) ackMsg.c_str(), ackMsg.size());
 }
 
-bool CommModuleTCPSocketServer::ClientCommHandlerThread::addMsgToOutbox(char* message)
+bool CommModuleTCPSocketServer::ClientCommHandler::addMsgToOutbox(char* message, int msgSize)
 {
-    char* newMessage = message;
+    char* newMessage = (char*) malloc(sizeof(char) * msgSize);
+    strcpy_s(newMessage, msgSize, message);
 
     /* set local mutex and add passed message to outbox */
     std::unique_lock<std::mutex> msgOutboxLock(msgMutex);
-    mMsgOutbox.push_back(message);
+    mMsgOutbox.push_back(newMessage);
     msgOutboxLock.unlock();
 
     return true;
 }
 
-char* CommModuleTCPSocketServer::ClientCommHandlerThread::getInboxMessage(void)
+char* CommModuleTCPSocketServer::ClientCommHandler::getInboxMessage(void)
 {
     char* lastMessage;
 
@@ -291,7 +297,7 @@ char* CommModuleTCPSocketServer::ClientCommHandlerThread::getInboxMessage(void)
     return nullptr;
 }
 
-std::string CommModuleTCPSocketServer::ClientCommHandlerThread::getClientName(void)
+std::string CommModuleTCPSocketServer::ClientCommHandler::getClientName(void)
 {
     return mClientName;
 }
