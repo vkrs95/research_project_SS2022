@@ -134,7 +134,6 @@ bool CommunicationModuleWifi::sendRegistrationToSupervisor(std::string robotName
     std::string msgString = stringStream.str();
 
     if (!sendMessage(msgString.c_str(), msgString.size())) {
-        std::cout << "FAILED TO SEND REGISTRATION" << std::endl;
         return false;
     }
 
@@ -150,7 +149,6 @@ bool CommunicationModuleWifi::receiveRegistrationAck(void)
         int msgIdentifier = msg[0] - '0';
 
         if (msgIdentifier == 0) {
-            std::cout << "RECEIVED ACK" << std::endl;
             return true;
         }   
     }

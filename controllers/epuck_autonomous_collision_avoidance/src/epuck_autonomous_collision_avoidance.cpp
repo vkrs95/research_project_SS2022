@@ -74,7 +74,10 @@ int main(int argc, char **argv) {
             if (commWifi->tryToConnectToSupervisor(robotroutine->robotName)) {
 
                 supervisorConnected = true;
-            }            
+            }
+            else {
+                std::cerr << robotroutine->robotName << ": failed to connect to supervisor." << std::endl;
+            }
         }
         /*************************************/
         /*************************************/

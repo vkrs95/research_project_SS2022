@@ -27,7 +27,7 @@ class CommModuleTCPSocketServer{
 public:
 	CommModuleTCPSocketServer(int port = 1000);
 	~CommModuleTCPSocketServer();
-	void sendMessageToClient(std::string clientName, char* message, int msgSize);
+	void sendMessageToClient(std::string clientName, std::string message);
 
 	enum MessageType
 	{
@@ -48,20 +48,20 @@ private:
 	{
 	public:
 		ClientCommHandler(int clientSocket);
-		bool addMsgToOutbox(char* message, int msgSize);
-		char* getInboxMessage(void);
+		bool addMsgToOutbox(std::string message);
+		std::string getInboxMessage(void);
 		std::string getClientName(void);
 
 	private:
 		void socketCommunicationHandlerRoutine(void);
 		void receiveMessage(void);
 		void sendMessage(void);
-		void registerNameAndSendACK(char* message, int msgSize);
+		void registerNameAndSendACK(std::string message);
 
 		std::string mClientName;
 		int mClientSocket;
-		std::list<char*> mMsgInbox;
-		std::list<char*> mMsgOutbox;
+		std::list<std::string> mMsgInbox;
+		std::list<std::string> mMsgOutbox;
 		std::mutex msgMutex;
 		std::thread* commHandlingThread;
 	};
