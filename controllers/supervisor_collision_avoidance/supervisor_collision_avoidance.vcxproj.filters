@@ -115,6 +115,12 @@
     <ClCompile Include="src\CommModuleSupervisor.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\ClientCommHandler.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Message.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\supvervisor_collision_avoidance.h">
@@ -130,6 +136,12 @@
       <Filter>lib\path_planning\include</Filter>
     </ClInclude>
     <ClInclude Include="include\CommModuleSupervisor.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ClientCommHandler.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Message.h">
       <Filter>include</Filter>
     </ClInclude>
   </ItemGroup>

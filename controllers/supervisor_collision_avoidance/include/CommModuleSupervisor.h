@@ -6,7 +6,10 @@
 #include <mutex>
 #include <string>
 
-/* wifi imports */
+/* member imports */
+#include "ClientCommHandler.h"
+
+/* tcp socket imports */
 #ifdef _WIN32
 #include <winsock.h>
 #else
@@ -27,45 +30,13 @@ class CommModuleTCPSocketServer{
 public:
 	CommModuleTCPSocketServer(int port = 1000);
 	~CommModuleTCPSocketServer();
-	void sendMessageToClient(std::string clientName, std::string message);
-
-	enum MessageType
-	{
-		REGISTER = 0, 
-		UNREGISTER, 
-		COLLISION
-	};
+	void sendMessageToClient(std::string clientName, Message* message);
 
 protected:
 	int socketAccept(int server_fd);
 	const static int maxMsgLen = 512;
 
 private:
-
-	/* nested thread class */
-	class ClientCommHandler :
-		public std::thread
-	{
-	public:
-		ClientCommHandler(int clientSocket);
-		bool addMsgToOutbox(std::string message);
-		std::string getInboxMessage(void);
-		std::string getClientName(void);
-
-	private:
-		void socketCommunicationHandlerRoutine(void);
-		void receiveMessage(void);
-		void sendMessage(void);
-		void registerNameAndSendACK(std::string message);
-
-		std::string mClientName;
-		int mClientSocket;
-		std::list<std::string> mMsgInbox;
-		std::list<std::string> mMsgOutbox;
-		std::mutex msgMutex;
-		std::thread* commHandlingThread;
-	};
-
 
 	/* internal functions */
 	bool	socketInit(void);

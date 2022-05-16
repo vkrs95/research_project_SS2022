@@ -164,11 +164,15 @@
     <ClCompile Include="lib\path_planning\lib\utils\src\utils.cpp" />
     <ClCompile Include="lib\path_planning\src\a_star.cpp" />
     <ClCompile Include="lib\path_planning\src\dijkstra.cpp" />
+    <ClCompile Include="src\ClientCommHandler.cpp" />
     <ClCompile Include="src\CommModuleSupervisor.cpp" />
+    <ClCompile Include="src\Message.cpp" />
     <ClCompile Include="src\supvervisor_collision_avoidance.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\ClientCommHandler.h" />
     <ClInclude Include="include\CommModuleSupervisor.h" />
+    <ClInclude Include="include\Message.h" />
     <ClInclude Include="include\supvervisor_collision_avoidance.h" />
     <ClInclude Include="lib\path_planning\include\path_planning\a_star.hpp" />
     <ClInclude Include="lib\path_planning\include\path_planning\dijkstra.hpp" />

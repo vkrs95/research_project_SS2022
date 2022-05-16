@@ -88,6 +88,7 @@ bool CommunicationModuleWifi::tryToConnectToSupervisor(std::string robotName)
                         return true;
                 }
 
+                printf("Error (%s): maximum attempts of sending/receiving ACK exceeded.", robotName.c_str());
                 return false;
             }
         }
@@ -151,6 +152,8 @@ bool CommunicationModuleWifi::receiveRegistrationAck(void)
         if (msgIdentifier == 0) {
             return true;
         }   
+
+        std::cout << "CommunicationModuleWifi: error when trying to receive ACK msg. Received: " << msgIdentifier << std::endl;
     }
 
     return false;
