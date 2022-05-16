@@ -266,20 +266,26 @@ int main(int argc, char **argv) {
             else if (!pathplanner->pathCompleted() && /* border wall of goal position is no obstacle */
                 (obstacleDetected || robotroutine->detectObstacle()) )
             {
-                obstacleDetected = true;
+                /* notify supervisor of collision */
+                // TODO: commWifi->reportCollision()
+                 
+                // TODO: receive and process supervisor response 
 
-                robotroutine->setWheelSpeedTurnAround();
 
-                turnCounter += timeStep;
+                // obstacleDetected = true
 
-                if (turnCounter >= TURNAROUNDTHRESHOLD)
-                {
-                    /* find an alternative path to circumnavigate detected obstacle */
-                    pathplanner->findAlternativePath();
+                //robotroutine->setWheelSpeedTurnAround();
 
-                    turnCounter = 0;
-                    obstacleDetected = false;
-                }
+                //turnCounter += timeStep;
+
+                //if (turnCounter >= TURNAROUNDTHRESHOLD)
+                //{
+                //    /* find an alternative path to circumnavigate detected obstacle */
+                //    pathplanner->findAlternativePath();
+
+                //    turnCounter = 0;
+                //    obstacleDetected = false;
+                //}
             }
             /*************************************/
             /*************************************/

@@ -26,11 +26,19 @@
 
 #pragma once
 
+struct CollisionNotification {
+	std::string clientName;
+	std::tuple<int, int> startNode;
+	std::tuple<int, int> goalNode;
+	std::tuple<int, int> collisionNode;
+};
+
 class CommModuleTCPSocketServer{
 public:
 	CommModuleTCPSocketServer(int port = 1000);
 	~CommModuleTCPSocketServer();
 	void sendMessageToClient(std::string clientName, Message* message);
+	bool checkCollisionNotifications(std::list<CollisionNotification>* collisionNotifications);
 
 protected:
 	int socketAccept(int server_fd);
@@ -45,6 +53,7 @@ private:
 	bool	socketClose(int fd);
 	bool	socketCleanup(void);
 	void	socketListenerRoutine(void);
+	std::tuple<int, int> getCoordinatesTuple(std::string tupleString);
 
 
 	/* member variables */

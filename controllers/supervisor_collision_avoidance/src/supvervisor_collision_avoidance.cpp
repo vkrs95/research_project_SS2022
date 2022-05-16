@@ -10,27 +10,33 @@ int main(int argc, char **argv) {
     /*************************************/
     mTimeStep =(unsigned int)robot->getBasicTimeStep();
 
-    //const int DEFAULT_BUFLEN = 512;
-    //char sendbuf[DEFAULT_BUFLEN];
-    //int sendbuflen = DEFAULT_BUFLEN;
-
-    //sendbuf[0] = '4';
-    //sendbuf[1] = '2';
-    //sendbuf[2] = '\0';
-        
+    std::list<CollisionNotification> collisionNotList;
 
     while (robot->step(mTimeStep) != -1) {
 
-        /* get received data from tcp server via polling */
-        /*
-        *   data 
-        * 
-        *   socketServer->getData()
-        *   --> interpret data in supervisor? 
-        */
+        /* check for collisions */
+        if (socketServer->checkCollisionNotifications(&collisionNotList)) {
+            /* 
+            *   some clients have send collision messages; reigster them
+            *   at collision handler
+            */
+            for (CollisionNotification collisionMsg : collisionNotList) {
 
+                //  TODO: implement registration
+                //  CollisionHandler.register(name, start, goal, collision)
+                std::cout << "Supervisor: received collision at (" 
+                    << std::get<0>(collisionMsg.collisionNode) 
+                    << ", "
+                    << std::get<1>(collisionMsg.collisionNode)
+                    << ") by "
+                    << collisionMsg.clientName
+                    << std::endl;
+            }
+
+            collisionNotList.clear();
+        }
     
-        //robotActiveWait(1000);
+        robotActiveWait(1000);
     }
 
     /*  optional cleanup  */

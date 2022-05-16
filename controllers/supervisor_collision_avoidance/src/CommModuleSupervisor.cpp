@@ -149,6 +149,76 @@ void CommModuleTCPSocketServer::sendMessageToClient(std::string clientName, Mess
     }
 }
 
+bool CommModuleTCPSocketServer::checkCollisionNotifications(std::list<CollisionNotification>* collisionNotifications)
+{
+    Message* currentMsg;
+    std::vector<ClientCommHandler*>::iterator it;
+
+    it = mCommHandlerThreadPool.begin();
+
+    while (it != mCommHandlerThreadPool.end()) {
+        
+        ClientCommHandler* clientThread = *it;
+
+        currentMsg = clientThread->getInboxMessage();
+
+        if (currentMsg != nullptr &&
+                currentMsg->getType() == MessageType::COLLISION ) {
+
+            /* client got a message in its inbox */
+            CollisionNotification colNot;
+            std::string subStr;
+            std::vector<std::string> subStrings;
+
+            /* load message content into string stream */
+            std::istringstream iss(currentMsg->getPayload());
+            
+            /* go through stream and extract substring between delimiter */
+            while (std::getline(iss, subStr, ';')) {
+                subStrings.push_back(subStr);
+            }
+
+            /* we need three substrings for start, goal and collision node */
+            if (subStrings.size() != 3) {
+                std::cerr << "CommModuleTCPSocketServer: handler message contains invalid number of nodes. (" << subStrings.size() << ")." << std::endl;
+                // go on with next message
+            }
+            else {
+                /* assign values to struct */
+                colNot.clientName = clientThread->getClientName();
+                colNot.startNode = getCoordinatesTuple(subStrings.at(0));
+                colNot.goalNode = getCoordinatesTuple(subStrings.at(1));
+                colNot.collisionNode = getCoordinatesTuple(subStrings.at(2));
+
+                collisionNotifications->push_back(colNot);
+            }
+        } 
+        else {
+            it++;   // move to next client handler
+        }
+    }
+
+    return collisionNotifications->size() > 0 ? true : false;
+
+}
+
+std::tuple<int, int> CommModuleTCPSocketServer::getCoordinatesTuple(std::string tupleString)
+{
+    /* passed tuple string is expected to be build up: xCoord,yCoord */
+    int xCoord = 0, yCoord = 0;
+    size_t pos = tupleString.find(',');
+
+    if (pos == std::string::npos) {
+        // string does not contain comma delimiter
+        return { 0,0 };
+    }
+
+    xCoord = std::stoi(tupleString.substr(0, pos ));
+    yCoord = std::stoi(tupleString.substr(pos + 1, tupleString.size() - pos + 1));
+
+    return { xCoord, yCoord };
+}
+
 void CommModuleTCPSocketServer::socketListenerRoutine(void)
 {
     std::cout << "Communication Module Supervisor: Waiting for connections on port " << mServerPort << "..." << std::endl;
