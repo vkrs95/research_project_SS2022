@@ -36,7 +36,7 @@ int main(int argc, char **argv) {
             collisionNotList.clear();
         }
     
-        robotActiveWait(1000);
+        robotActiveWait(50);
     }
 
     /*  optional cleanup  */

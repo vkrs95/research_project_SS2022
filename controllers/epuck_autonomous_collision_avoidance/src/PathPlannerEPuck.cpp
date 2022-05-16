@@ -54,6 +54,16 @@ void PathPlannerEPuck::findPath(Node startPosition, Node goalPosition)
     /* first time path planning, initiate list of obstacles */
     obstacleList.clear();
 }
+void PathPlannerEPuck::getObstacleParameters(std::tuple<int, int> *startCoords, std::tuple<int, int> *goalCoords, std::tuple<int, int> *collisionCoords)
+{
+    *startCoords = std::make_tuple(startPosition.x_, startPosition.y_);
+
+    *goalCoords = std::make_tuple(goalPosition.x_, goalPosition.y_);
+    
+    // add position of current successor as new detected obstacle
+    *collisionCoords = std::make_tuple((pathCoordinatesList[pathIterator - 1]).x_,
+                        (pathCoordinatesList[pathIterator - 1]).y_ );    
+}
 
 void PathPlannerEPuck::findAlternativePath(void)
 {

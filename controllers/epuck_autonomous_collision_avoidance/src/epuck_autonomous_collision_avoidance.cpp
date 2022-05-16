@@ -264,9 +264,27 @@ int main(int argc, char **argv) {
             *   procedure is already activated
             */
             else if (!pathplanner->pathCompleted() && /* border wall of goal position is no obstacle */
-                (obstacleDetected || robotroutine->detectObstacle()) )
+                (!obstacleDetected && robotroutine->detectObstacle()))
             {
+                /* get node parameters from pathplanner module */
+                std::tuple<int, int> startNode, goalNode, collisionNode;
+                pathplanner->getObstacleParameters(&startNode, &goalNode, &collisionNode);
+
                 /* notify supervisor of collision */
+                commWifi->reportCollision(startNode, goalNode, collisionNode);
+
+                obstacleDetected = true;
+                robotroutine->PerformHalt();
+                robotroutine->SetSpeedAndVelocity();
+                robotActiveWait(200);
+                break;
+                
+                /*
+                    { startNode->x_, startNode->y_ }, 
+                    { goalNode->x_, goalNode->y_ }, 
+                    { collisionNode->x_, collisionNode->y_ });
+                */
+
                 // TODO: commWifi->reportCollision()
                  
                 // TODO: receive and process supervisor response 

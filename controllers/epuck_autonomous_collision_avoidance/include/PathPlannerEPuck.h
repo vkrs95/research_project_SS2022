@@ -3,6 +3,7 @@
 #include "path_planning/dijkstra.hpp"
 
 #include <iostream>
+#include <tuple>
 #pragma once
 
 enum MovingDirection {
@@ -31,6 +32,8 @@ public:
     bool pathCompleted(void);
     void setMatrixDimension(unsigned int dimension);
     void setStartGoalPositionByIndex(unsigned int startIndex, unsigned int goalIndex);
+    void getObstacleParameters(std::tuple<int,int> *startCoords, std::tuple<int, int> *goalCoords, std::tuple<int, int> *collisionCoords);
+
 
     MovingDirection getNextMovingDirection(void);
 
