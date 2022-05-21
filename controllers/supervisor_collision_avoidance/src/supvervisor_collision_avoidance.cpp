@@ -6,6 +6,7 @@ int main(int argc, char **argv) {
     robot = new Robot();
     emitter = robot->getEmitter("emitter");
     socketServer = new CommModuleTCPSocketServer(1000); // initialise socket server on port 1000
+    collisionHandler = new CollisionHandler();
 
     /*************************************/
     mTimeStep =(unsigned int)robot->getBasicTimeStep();
@@ -14,27 +15,33 @@ int main(int argc, char **argv) {
 
     while (robot->step(mTimeStep) != -1) {
 
-        /* check for collisions */
+        /* check for collisions periodically */
         if (socketServer->checkCollisionNotifications(&collisionNotList)) {
             /* 
             *   some clients have send collision messages; reigster them
             *   at collision handler
             */
-            for (CollisionNotification collisionMsg : collisionNotList) {
+            for (CollisionNotification cmsg : collisionNotList) {
 
-                //  TODO: implement registration
-                //  CollisionHandler.register(name, start, goal, collision)
                 std::cout << "Supervisor: received collision at (" 
-                    << std::get<0>(collisionMsg.collisionNode) 
+                    << std::get<0>(cmsg.collisionNode)
                     << ", "
-                    << std::get<1>(collisionMsg.collisionNode)
+                    << std::get<1>(cmsg.collisionNode)
                     << ") by "
-                    << collisionMsg.clientName
+                    << cmsg.clientName
                     << std::endl;
+
+                collisionHandler->registerCollision(cmsg.clientName, cmsg.startNode, cmsg.goalNode, cmsg.collisionNode);
             }
 
             collisionNotList.clear();
         }
+
+        /*
+        *   PSEUDO: 
+        *   if (collisionHandler.collisionResolved(&collisionAvoidList)
+        *       socketServer.sendAvoidBehaviour(collisionAvoidList)
+        */
     
         robotActiveWait(50);
     }

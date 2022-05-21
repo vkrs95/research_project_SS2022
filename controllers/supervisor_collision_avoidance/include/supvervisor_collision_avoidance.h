@@ -4,6 +4,7 @@
 
 /* module imports */
 #include "CommModuleSupervisor.h"
+#include "CollisionHandler.h"
 
 #pragma once
 
@@ -14,6 +15,7 @@ using namespace webots;
 Robot* robot;
 Emitter* emitter;
 CommModuleTCPSocketServer* socketServer;
+CollisionHandler* collisionHandler;
 
 
 /*** define member variables ***/
