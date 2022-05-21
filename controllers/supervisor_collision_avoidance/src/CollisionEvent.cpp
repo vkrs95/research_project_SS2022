@@ -2,7 +2,7 @@
 
 /**********************************************************************
 * 
-*   CollisionHandler class functions 
+*   CollisionEvent class functions 
 * 
 ***********************************************************************/
 
@@ -16,6 +16,61 @@ CollisionEvent::CollisionEvent(coordinate collisionPoint)
 {
     mCollisionPoint = collisionPoint;
     mParticipants.clear();
+
+    /* create and run event thread */
+    resolveEventThread = new std::thread(&CollisionEvent::resolveEventThreadRoutine, this);
+    resolveEventThread->detach();
+}
+
+
+void CollisionEvent::resolveEventThreadRoutine(void)
+{
+    /*
+    *   SIMPLE COLLISION DISSOLUTION:
+    *   calculate distance to goal (dtg) for each robot. 
+    *   Robot A with shortest distance to goal has right of way, robot B
+    *   calculates alternative path
+    */
+
+    /* for now we expect two participants registered in a collision event */
+    while (mParticipants.size() < 2) {
+        /* sleep for 100ms and check number of participants again */
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    }
+
+    /*** go through all participants and try to resolve collision properly ***/
+    
+    /* find smallest distance to goal out of all robot paths */
+    int curDTG = INT16_MAX;
+    int minDTG = INT16_MAX;
+    int minDTGIndex = -1;
+    
+    for(int i = 0; i < mParticipants.size(); i++) {
+
+        // curDTG = determineDTG(mParticipants[i]);
+        if (curDTG < minDTG) {
+            minDTG = curDTG;
+            minDTGIndex = i;
+        }
+        
+    }
+
+    /* calculate best path for each robot to dissolve collision event */
+    for (int i = 0; i < mParticipants.size(); i++) {
+
+        if (i == minDTGIndex) {
+            /* right of way: continue shortest path */
+            // TODO: calculate shortest path to goal and set mParticipants[i].setPath(path)
+        }
+        else {
+            /* calculate alternative path to circumnavigate collision */
+            // TODO: set obstacle at collison coordinate, calculate shortest path to goal 
+            // and set mParticipants[i].setPath(path)
+        }
+    }
+
+    mResolved = true;
+
 }
 
 void CollisionEvent::addParticipant(CollisionParticipant newParticipant)
@@ -33,6 +88,7 @@ bool CollisionEvent::eventResolved(void)
 {
     return mResolved;
 }
+
 
 /*
 *   Returns a map of all participants with their calculated collision avoidance paths

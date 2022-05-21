@@ -3,6 +3,8 @@
 #include <vector>
 #include <list>
 #include <map>
+#include <thread>
+#include <algorithm>
 
 #pragma once
 
@@ -42,9 +44,12 @@ public:
 	std::map<std::string, std::vector<coordinate>> getParticipants(void);
 
 private:
+	void resolveEventThreadRoutine(void);
+
 	std::list<CollisionParticipant> mParticipants;	// internal list to manage participants
 	coordinate mCollisionPoint;
 	bool mResolved = false;
+	std::thread* resolveEventThread;
 };
 
 
