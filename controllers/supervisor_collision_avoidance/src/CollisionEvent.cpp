@@ -17,6 +17,8 @@ CollisionEvent::CollisionEvent(coordinate collisionPoint)
     mCollisionPoint = collisionPoint;
     mParticipants.clear();
 
+    planner = new PathPlanner(MATRIX_DIM);
+
     /* create and run event thread */
     resolveEventThread = new std::thread(&CollisionEvent::resolveEventThreadRoutine, this);
     resolveEventThread->detach();
@@ -28,8 +30,8 @@ void CollisionEvent::resolveEventThreadRoutine(void)
     /*
     *   SIMPLE COLLISION DISSOLUTION:
     *   calculate distance to goal (dtg) for each robot. 
-    *   Robot A with shortest distance to goal has right of way, robot B
-    *   calculates alternative path
+    *   Robot A with shortest distance to goal has right of way, 
+    *   robot B calculates alternative path
     */
 
     /* for now we expect two participants registered in a collision event */
@@ -51,21 +53,21 @@ void CollisionEvent::resolveEventThreadRoutine(void)
         if (curDTG < minDTG) {
             minDTG = curDTG;
             minDTGIndex = i;
-        }
-        
+        }        
     }
 
     /* calculate best path for each robot to dissolve collision event */
     for (int i = 0; i < mParticipants.size(); i++) {
-
+        CollisionParticipant prtcpnt = mParticipants.at(i);
         if (i == minDTGIndex) {
             /* right of way: continue shortest path */
-            // TODO: calculate shortest path to goal and set mParticipants[i].setPath(path)
+            mParticipants[i].setPath(
+                planner->getShortestPath(prtcpnt.mStart, prtcpnt.mGoal));
         }
         else {
             /* calculate alternative path to circumnavigate collision */
-            // TODO: set obstacle at collison coordinate, calculate shortest path to goal 
-            // and set mParticipants[i].setPath(path)
+            mParticipants[i].setPath(
+                planner->getAlternativePath(prtcpnt.mStart, prtcpnt.mGoal, mCollisionPoint));
         }
     }
 
@@ -97,9 +99,9 @@ bool CollisionEvent::eventResolved(void)
 *   class CollisionParticipants is a protected nested class and for internal 
 *   use only. 
 */
-std::map<std::string, std::vector<coordinate>> CollisionEvent::getParticipants(void)
+std::map<std::string, std::vector<Node>> CollisionEvent::getParticipants(void)
 {
-    std::map<std::string, std::vector<coordinate>> participantNamePathMap;
+    std::map<std::string, std::vector<Node>> participantNamePathMap;
 
     /*  
     *   go through all participants and add their paths to the map 
@@ -126,12 +128,12 @@ CollisionEvent::CollisionParticipant::CollisionParticipant(std::string name, coo
     mGoal = goal;
 }
 
-std::vector<coordinate> CollisionEvent::CollisionParticipant::getPath(void)
+std::vector<Node> CollisionEvent::CollisionParticipant::getPath(void)
 {
     return path;
 }
 
-void CollisionEvent::CollisionParticipant::setPath(std::vector<coordinate> path)
+void CollisionEvent::CollisionParticipant::setPath(std::vector<Node> path)
 {
     this->path = path;
 }

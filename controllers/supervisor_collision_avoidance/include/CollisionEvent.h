@@ -6,6 +6,8 @@
 #include <thread>
 #include <algorithm>
 
+#include "PathPlanner.h"
+
 #pragma once
 
 using coordinate = std::tuple<int, int>;
@@ -26,13 +28,11 @@ protected:
 		coordinate mGoal;
 
 		CollisionParticipant(std::string name, coordinate start, coordinate goal);
-		std::vector<coordinate> getPath(void);
-
-	protected:
-		void setPath(std::vector<coordinate> path);
+		std::vector<Node> getPath(void);
+		void setPath(std::vector<Node> path);
 
 	private:
-		std::vector<coordinate> path;
+		std::vector<Node> path;
 	};
 
 public:
@@ -41,15 +41,18 @@ public:
 	void addParticipant(CollisionParticipant newParticipant);
 	void addParticipant(std::string name, coordinate start, coordinate goal);
 	bool eventResolved(void);
-	std::map<std::string, std::vector<coordinate>> getParticipants(void);
+	std::map<std::string, std::vector<Node>> getParticipants(void);
 
 private:
 	void resolveEventThreadRoutine(void);
 
-	std::list<CollisionParticipant> mParticipants;	// internal list to manage participants
+	PathPlanner* planner;
+
+	std::vector<CollisionParticipant> mParticipants;	// internal list to manage participants
 	coordinate mCollisionPoint;
 	bool mResolved = false;
 	std::thread* resolveEventThread;
+	static const int MATRIX_DIM = 3;
 };
 
 

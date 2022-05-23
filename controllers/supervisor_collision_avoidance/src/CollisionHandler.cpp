@@ -29,20 +29,20 @@ void CollisionHandler::processCollisionEvents(void)
 {
 }
 
-bool CollisionHandler::collisionResolved(std::map<std::string, std::vector<coordinate>> clientPathList)
+bool CollisionHandler::collisionResolved(std::map<std::string, std::vector<Node>>* clientPathList)
 {
     /* go through all collision events and check their event resolved state */
     for (const auto collEvent : mCollisionList) {
 
         if (collEvent.second->eventResolved()) {
-            std::map<std::string, std::vector<coordinate>> resolvedParticipants = collEvent.second->getParticipants();
+            std::map<std::string, std::vector<Node>> resolvedParticipants = collEvent.second->getParticipants();
 
             /* go through all participants of an event and add them to passed clientPathList */
             for (const auto participant : resolvedParticipants) {
-                clientPathList[participant.first] = participant.second;
+                clientPathList->insert_or_assign(participant.first, participant.second);
             }
         }
     }
 
-    return clientPathList.empty();
+    return clientPathList->empty();
 }

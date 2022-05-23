@@ -127,6 +127,9 @@
     <ClCompile Include="src\CollisionEvent.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\PathPlanner.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\supvervisor_collision_avoidance.h">
@@ -154,6 +157,9 @@
       <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="include\CollisionEvent.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\PathPlanner.h">
       <Filter>include</Filter>
     </ClInclude>
   </ItemGroup>

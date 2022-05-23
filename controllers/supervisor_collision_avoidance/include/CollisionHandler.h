@@ -14,7 +14,7 @@ class CollisionHandler
 public:
 	CollisionHandler(void);
 	void registerCollision(std::string name, coordinate start, coordinate goal, coordinate collision);
-	bool collisionResolved(std::map<std::string, std::vector<coordinate>> clientPathList);
+	bool collisionResolved(std::map<std::string, std::vector<Node>>* clientPathList);
 
 private:
 	void processCollisionEvents(void);
