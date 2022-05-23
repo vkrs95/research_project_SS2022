@@ -34,6 +34,8 @@ void CollisionEvent::resolveEventThreadRoutine(void)
     *   robot B calculates alternative path
     */
 
+    std::cout << "Starting thread!" << std::endl;
+
     /* for now we expect two participants registered in a collision event */
     while (mParticipants.size() < 2) {
         /* sleep for 100ms and check number of participants again */
@@ -41,6 +43,7 @@ void CollisionEvent::resolveEventThreadRoutine(void)
     }
 
     /*** go through all participants and try to resolve collision properly ***/
+    std::cout << "Start resolving collision at " << std::get<0>(mCollisionPoint) << "," << std::get<1>(mCollisionPoint) << std::endl;
     
     /* find smallest distance to goal out of all robot paths */
     int curDTG = INT16_MAX;
@@ -49,7 +52,8 @@ void CollisionEvent::resolveEventThreadRoutine(void)
     
     for(int i = 0; i < mParticipants.size(); i++) {
 
-        // curDTG = determineDTG(mParticipants[i]);
+        curDTG = determineDTG(&mParticipants[i]);
+
         if (curDTG < minDTG) {
             minDTG = curDTG;
             minDTGIndex = i;
@@ -73,6 +77,11 @@ void CollisionEvent::resolveEventThreadRoutine(void)
 
     mResolved = true;
 
+}
+
+int CollisionEvent::determineDTG(CollisionParticipant* participant)
+{
+    return planner->getShortestPath(participant->mStart, participant->mGoal).size();
 }
 
 void CollisionEvent::addParticipant(CollisionParticipant newParticipant)

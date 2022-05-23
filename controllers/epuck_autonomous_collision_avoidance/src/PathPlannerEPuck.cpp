@@ -56,6 +56,13 @@ void PathPlannerEPuck::findPath(Node startPosition, Node goalPosition)
 }
 void PathPlannerEPuck::getObstacleParameters(std::tuple<int, int> *startCoords, std::tuple<int, int> *goalCoords, std::tuple<int, int> *collisionCoords)
 {
+    /*
+    *   To circumnavigate the obstacle the robot turns around and
+    *   sets the position of the predecessor as its new start position. After this
+    *   a new path is planned with the updated nodes and obstacles.
+    */
+    startPosition = pathCoordinatesList[pathIterator - 2];
+
     *startCoords = std::make_tuple(startPosition.x_, startPosition.y_);
 
     *goalCoords = std::make_tuple(goalPosition.x_, goalPosition.y_);

@@ -1,6 +1,7 @@
 /* general imports */
 #include <vector>
 #include <list>
+#include <map>
 #include <iostream>
 #include <thread>
 #include <mutex>
@@ -26,6 +27,8 @@
 
 #pragma once
 
+using coordinate = std::tuple<int, int>;
+
 struct CollisionNotification {
 	std::string clientName;
 	std::tuple<int, int> startNode;
@@ -39,6 +42,7 @@ public:
 	~CommModuleTCPSocketServer();
 	void sendMessageToClient(std::string clientName, Message* message);
 	bool checkCollisionNotifications(std::list<CollisionNotification>* collisionNotifications);
+	void sendCollisionMessageReply(std::map<std::string, std::vector<coordinate>> clientPaths);
 
 protected:
 	int socketAccept(int server_fd);
@@ -53,7 +57,8 @@ private:
 	bool	socketClose(int fd);
 	bool	socketCleanup(void);
 	void	socketListenerRoutine(void);
-	std::tuple<int, int> getCoordinatesTuple(std::string tupleString);
+	coordinate getCoordinatesTuple(std::string tupleString);
+	std::string buildPathMsgString(std::vector<coordinate> path);
 
 
 	/* member variables */

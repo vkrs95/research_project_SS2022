@@ -12,7 +12,7 @@ int main(int argc, char **argv) {
     mTimeStep =(unsigned int)robot->getBasicTimeStep();
 
     std::list<CollisionNotification> collisionNotList;
-    std::map<std::string, std::vector<Node>> clientPaths;
+    std::map<std::string, std::vector<coordinate>> clientPaths;
 
     while (robot->step(mTimeStep) != -1) {
 
@@ -39,15 +39,10 @@ int main(int argc, char **argv) {
         }
 
         if (collisionHandler->collisionResolved(&clientPaths)) {
-
+            socketServer->sendCollisionMessageReply(clientPaths);
+            clientPaths.clear();
         }
-
-        /*
-        *   PSEUDO: 
-        *   if (collisionHandler.collisionResolved(&collisionAvoidList)
-        *       socketServer.sendAvoidBehaviour(collisionAvoidList)
-        */
-    
+            
         robotActiveWait(50);
     }
 

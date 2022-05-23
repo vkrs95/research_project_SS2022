@@ -45,6 +45,7 @@ public:
 
 private:
 	void resolveEventThreadRoutine(void);
+	int determineDTG(CollisionParticipant* participant);
 
 	PathPlanner* planner;
 
@@ -52,7 +53,7 @@ private:
 	coordinate mCollisionPoint;
 	bool mResolved = false;
 	std::thread* resolveEventThread;
-	static const int MATRIX_DIM = 3;
+	static const int MATRIX_DIM = 6;	// arena lines per side * 2
 };
 
 

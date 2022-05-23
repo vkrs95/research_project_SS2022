@@ -202,6 +202,19 @@ bool CommModuleTCPSocketServer::checkCollisionNotifications(std::list<CollisionN
 
 }
 
+void CommModuleTCPSocketServer::sendCollisionMessageReply(std::map<std::string, std::vector<coordinate>> clientPaths)
+{
+    Message* msg;
+
+    /* prepare message for each client */
+    for (auto clientPath : clientPaths) {
+        std::string pathMsgString = buildPathMsgString(clientPath.second);
+        msg = new Message(pathMsgString);
+
+        sendMessageToClient(clientPath.first, msg);
+    }
+}
+
 std::tuple<int, int> CommModuleTCPSocketServer::getCoordinatesTuple(std::string tupleString)
 {
     /* passed tuple string is expected to be build up: xCoord,yCoord */
@@ -239,4 +252,19 @@ void CommModuleTCPSocketServer::socketListenerRoutine(void)
 
         std::this_thread::sleep_for(std::chrono::milliseconds(1000));	// TODO: how long should the thread wait until next check?
     }
+}
+
+std::string CommModuleTCPSocketServer::buildPathMsgString(std::vector<coordinate> path)
+{
+    std::stringstream sStrm;
+
+    /* build string containing type and path, separated with semicolon */
+    sStrm << (int)MessageType::COLLISION << ";";
+
+    /* each coordinate is parsed in pattern: 'x,y;x,y;x,y'*/
+    for (coordinate c : path) {
+        sStrm << std::get<0>(c) << "," << std::get<1>(c) << ";";
+    }
+    
+    return sStrm.str();
 }

@@ -45,8 +45,8 @@ E-puck {
   ]
 }
 E-puck {
-  translation -0.201161 -1.11023e-15 0.193625
-  rotation 0 1 0 1.5708
+  translation 0.000545608 -1.77636e-15 -0.200478
+  rotation 0 -1 0 -5.307179586466759e-06
   name "EPuck 2"
   controller "epuck_autonomous_collision_avoidance"
   version "2"
