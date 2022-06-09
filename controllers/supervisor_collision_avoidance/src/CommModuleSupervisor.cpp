@@ -15,6 +15,7 @@ CommModuleTCPSocketServer::CommModuleTCPSocketServer(int port)
 
     /* create listener thread to accept incoming connection requests */
     listenerThread = new std::thread(&CommModuleTCPSocketServer::socketListenerRoutine, this);
+    listenerThread->detach();
 }
 
 CommModuleTCPSocketServer::~CommModuleTCPSocketServer()
@@ -235,6 +236,9 @@ std::tuple<int, int> CommModuleTCPSocketServer::getCoordinatesTuple(std::string 
 void CommModuleTCPSocketServer::socketListenerRoutine(void)
 {
     std::cout << "Communication Module Supervisor: Waiting for connections on port " << mServerPort << "..." << std::endl;
+    unsigned int lifetime = 0;
+    unsigned int sleeptime = 100; // ms
+    unsigned int timeout = sleeptime * 50; // timeout after 5s runtime
 
     while (true) {
 
@@ -250,8 +254,13 @@ void CommModuleTCPSocketServer::socketListenerRoutine(void)
             //std::cout << "Connection ID " << int(mCommHandlerThreadPool.size() - 1) << " established on socket " << mClientSocket << std::endl;
         }
 
-        std::this_thread::sleep_for(std::chrono::milliseconds(1000));	// TODO: how long should the thread wait until next check?
+        std::this_thread::sleep_for(std::chrono::milliseconds(sleeptime));	// TODO: how long should the thread wait until next check?
+
+        if ((lifetime += sleeptime) >= timeout)
+            break;
     }
+
+    std::cout << "Communication Module Supervisor: Socket listener thread shutting down. No more connections accepted on port " << mServerPort << "." << std::endl;
 }
 
 std::string CommModuleTCPSocketServer::buildPathMsgString(std::vector<coordinate> path)

@@ -47,29 +47,47 @@ void ClientCommHandler::socketCommunicationHandlerRoutine(void)
 void ClientCommHandler::receiveMessage(void)
 {
     char recvBuffer[Message::MAX_MSG_LEN];
-    int recvSize = recv(mClientSocket, recvBuffer, Message::MAX_MSG_LEN, 0);
 
-    if (recvSize > 0) {
+    /* check socket if there is something to read */
+    fd_set rfds;
+    struct timeval tv = { 0, 100 };   // timeval of 100 ms
 
-        Message* msg = new Message(recvBuffer, recvSize);
+    FD_ZERO(&rfds);
+    FD_SET(mClientSocket, &rfds);
 
-        /* might be first message sent by client containing client's name */
-        if (mClientName.compare("undefined") == 0) {
+    /*
+    *   Check the readability status of the communication socket. Readability means that queued
+    *   data is available for reading such that a call to recv is guaranteed not to block.
+    */
+    int number = select(mClientSocket, &rfds, NULL, NULL, &tv);
 
-            /* check if message is of type REGISTER */
-            if (msg->getType() == MessageType::REGISTER) {
+    if (number != 0) {
+        int recvSize = recv(mClientSocket, recvBuffer, Message::MAX_MSG_LEN, 0);
 
-                /* send registration ACK */
-                registerNameAndSendACK(msg);
-                return;
+        if (recvSize > 0) {
+
+            Message* msg = new Message(recvBuffer, recvSize);
+
+            /* might be first message sent by client containing client's name */
+            if (mClientName.compare("undefined") == 0) {
+
+                /* check if message is of type REGISTER */
+                if (msg->getType() == MessageType::REGISTER) {
+
+                    /* send registration ACK */
+                    registerNameAndSendACK(msg);
+                    return;
+                }
+                /* if MessageType != REGISTER just continue adding message to inbox */
             }
-            /* if MessageType != REGISTER just continue adding message to inbox */
-        }
 
-        /* add received message to internal inbox */
-        std::unique_lock<std::mutex> msgInboxLock(msgMutex);
-        mMsgInbox.push_back(*msg);
-        msgInboxLock.unlock();
+            /* add received message to internal inbox */
+            std::unique_lock<std::mutex> msgInboxLock(msgMutex);
+            mMsgInbox.push_back(*msg);
+            msgInboxLock.unlock();
+
+            // std::cout << "ClientCommHandler: received message '" << msg->getMessageAsChar() << "' and pushed in inbox." << std::endl;
+        }
     }
 }
 
@@ -93,6 +111,9 @@ void ClientCommHandler::sendMessage(void)
 
         if (sendResult == SOCKET_ERROR) {
             std::cerr << "ClientCommHandler: Failed to send message to " << mClientName << std::endl;
+        }
+        else {
+            std::cout << "ClientCommHandler: Sent message content '" << lastMessage->getMessageAsChar() << "' to " << mClientName << " with length: " << sendResult << std::endl;
         }
     }
 }
@@ -137,6 +158,7 @@ Message* ClientCommHandler::getInboxMessage(void)
 
         msgInboxLock.unlock();
 
+        std::cout << "New message in inbox with content: " << lastMessage->getMessageAsChar() << std::endl;
     }
     return lastMessage;
 }

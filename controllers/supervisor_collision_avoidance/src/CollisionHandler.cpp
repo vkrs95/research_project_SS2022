@@ -42,6 +42,8 @@ bool CollisionHandler::collisionResolved(std::map<std::string, std::vector<coord
     for (const auto collEvent : mCollisionList) {
 
         if (collEvent.second->eventResolved()) {
+
+            std::cout << "CollisionHandler: Collision resolved at " << std::get<0>(collEvent.first) << "," << std::get<1>(collEvent.first) << std::endl;
             std::map<std::string, std::vector<Node>> resolvedParticipants = collEvent.second->getParticipants();
             
             /* go through all participants of an event */

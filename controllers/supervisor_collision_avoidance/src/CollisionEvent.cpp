@@ -33,9 +33,7 @@ void CollisionEvent::resolveEventThreadRoutine(void)
     *   Robot A with shortest distance to goal has right of way, 
     *   robot B calculates alternative path
     */
-
-    std::cout << "Starting thread!" << std::endl;
-
+        
     /* for now we expect two participants registered in a collision event */
     while (mParticipants.size() < 2) {
         /* sleep for 100ms and check number of participants again */
@@ -43,7 +41,7 @@ void CollisionEvent::resolveEventThreadRoutine(void)
     }
 
     /*** go through all participants and try to resolve collision properly ***/
-    std::cout << "Start resolving collision at " << std::get<0>(mCollisionPoint) << "," << std::get<1>(mCollisionPoint) << std::endl;
+    //std::cout << "Start resolving collision at " << std::get<0>(mCollisionPoint) << "," << std::get<1>(mCollisionPoint) << std::endl;
     
     /* find smallest distance to goal out of all robot paths */
     int curDTG = INT16_MAX;
