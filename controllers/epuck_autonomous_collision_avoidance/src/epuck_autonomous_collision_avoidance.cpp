@@ -258,7 +258,7 @@ int main(int argc, char **argv) {
 
 
             /**************************************/
-            /* OBSTACLE AVOIDANCE PROCEDURE BLOCK */
+            /* OBSTACLE BEHAVIOUR BLOCK */
             /*
             *   check if an obstacle has been detected or if obstacle avoidance
             *   procedure is already activated
@@ -274,23 +274,7 @@ int main(int argc, char **argv) {
                 commWifi->reportCollision(startNode, goalNode, collisionNode);
 
                 obstacleDetected = true;
-                robotroutine->PerformHalt();
-                robotroutine->SetSpeedAndVelocity();
-                robotActiveWait(200);
-                break;
-                
-                /*
-                    { startNode->x_, startNode->y_ }, 
-                    { goalNode->x_, goalNode->y_ }, 
-                    { collisionNode->x_, collisionNode->y_ });
-                */
-
-                // TODO: commWifi->reportCollision()
-                 
-                // TODO: receive and process supervisor response 
-
-
-                // obstacleDetected = true
+                robotroutine->PerformHalt();                
 
                 //robotroutine->setWheelSpeedTurnAround();
 
@@ -304,6 +288,21 @@ int main(int argc, char **argv) {
                 //    turnCounter = 0;
                 //    obstacleDetected = false;
                 //}
+            }
+            else if (obstacleDetected) {
+                /* 
+                *   obstacle has been detected and collision is reported.
+                *   Wait for supervisor's reply with alternative path.
+                */
+                std::vector<std::tuple<int, int>> path;
+                                
+                ///* check routine step, check for supervisor response */
+                if (commWifi->receiveCollisionReply(&path)) {
+                    std::cout << "<<<<<<<<<<<<<< PATH RECEIVED with length " << path.size() << std::endl;
+                }
+                else {
+                    /* wait some time ... */
+                }
             }
             /*************************************/
             /*************************************/

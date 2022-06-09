@@ -8,6 +8,8 @@
 #include <iostream>
 #include <sstream>
 #include <thread>
+#include <vector>
+
 #ifdef _WIN32
 #include <winsock.h>
 #else
@@ -22,10 +24,21 @@
 #include <unistd.h> /* definition of close */
 #endif
 
+using coordinate = std::tuple<int, int>;
+
 class CommunicationModuleWifi
 {
 
 public:
+
+    /*
+    *   AbstractCommunicationModule
+    *   registerAtSupervisor
+    *   unregisterFromSupervisor
+    *   reportCollision
+    *   receiveCollisionReply
+    */
+
 
     CommunicationModuleWifi(int port = 1000);
     bool tryToConnectToSupervisor(std::string robotName);
@@ -33,6 +46,7 @@ public:
     bool reportCollision(std::tuple<int, int> startXY, 
                             std::tuple<int, int> goalXY, 
                             std::tuple<int, int> collisionXY);
+    bool receiveCollisionReply(std::vector<std::tuple<int, int>>* path);
 
 private:
 
@@ -46,13 +60,17 @@ private:
     bool socketInit();
     bool socketClose(int fd);
     bool socketCleanup();
+    bool socketSetNonBlocking(int fd);
     bool sendMessage(const char* message, int msgLen);
     bool sendRegistrationToSupervisor(std::string robotName);
     bool receiveRegistrationAck(void);
     char* receiveMessage(void);
+    std::vector<coordinate> parsePath(std::string msg);
+    coordinate getCoordinateTuple(std::string tupleString);
 
     SOCKET connectSocket;
     int wifiPort;
     static const int maxMsgLen = 512;
     std::string mClientName;
+    bool socketApiInitialized = false;
 };

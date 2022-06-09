@@ -16,6 +16,7 @@ bool CommunicationModuleWifi::socketInit() {
         return false;
     }
 #endif
+    socketApiInitialized = true;
     return true;
 }
 
@@ -35,67 +36,115 @@ bool CommunicationModuleWifi::socketCleanup() {
 #endif
 }
 
+bool CommunicationModuleWifi::socketSetNonBlocking(int fd) {
+    if (fd < 0)
+        return false;
+#ifdef _WIN32
+    unsigned long mode = 1; //  if iMode != 0, non-blocking mode is enabled
+    return (ioctlsocket(fd, FIONBIO, &mode) == 0) ? true : false;
+#else
+    int flags = fcntl(fd, F_GETFL, 0) | O_NONBLOCK;
+    return (fcntl(fd, F_SETFL, flags) == 0) ? true : false;
+#endif
+}
+
 bool CommunicationModuleWifi::tryToConnectToSupervisor(std::string robotName)
 {
-    if (socketInit()) {
-
-        struct sockaddr_in address;
-
-        memset(&address, 0, sizeof(struct sockaddr_in));
-        address.sin_family = AF_INET;
-        address.sin_port = htons((unsigned short) wifiPort);
-        address.sin_addr.s_addr = inet_addr("127.0.0.1"); // INADDR_ANY;
-
-        // Create a SOCKET for connecting to server
-        connectSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-
-        if (connectSocket == INVALID_SOCKET) {
-            printf("socket failed with error: %ld\n", WSAGetLastError());
-            WSACleanup();
+    if (!socketApiInitialized) {
+        if (!socketInit()) {
+            std::cerr << "Failed to init socket API." << std::endl;
             return false;
         }
-        
-        // Connect to server.
-        int iResult = connect(connectSocket, (struct sockaddr*)&address, sizeof(struct sockaddr));
-
-        if (iResult == SOCKET_ERROR)
-        {
-            closesocket(connectSocket);
-            connectSocket = INVALID_SOCKET;
-            printf("The server is down... did not connect");
-            return false;
-        }
-
-        /*
-        *   Try to send register message and receive ACK. 
-        *   When sendRegistrationToSupervisor was successful, try to receive the acknowledge. 
-        *   After maxRegisterAttempts of sending or receiving data the connection is set as failed
-        */
-        int maxRegisterAttempts = 5;
-
-        for (int i = 0; i < maxRegisterAttempts; i++) {
-
-            /* Try to send register message */
-            if (sendRegistrationToSupervisor(robotName)) {
-
-                /* Try to receive ACK */
-                for (int i = 0; i < maxRegisterAttempts; i++) {
-
-                    //std::this_thread::sleep_for(std::chrono::milliseconds(100));
-
-                    /* Check for registration acknowledge */
-                    if (receiveRegistrationAck())
-                        return true;
-                }
-
-                printf("Error (%s): maximum attempts of sending/receiving ACK exceeded.", robotName.c_str());
-                return false;
-            }
-        }
-                
     }
 
-    return false;
+    // set client name 
+    mClientName = robotName;
+
+    struct sockaddr_in address;
+
+    memset(&address, 0, sizeof(struct sockaddr_in));
+    address.sin_family = AF_INET;
+    address.sin_port = htons((unsigned short) wifiPort);
+    address.sin_addr.s_addr = inet_addr("127.0.0.1"); // INADDR_ANY;
+
+    // Create a SOCKET for connecting to server
+    connectSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+
+    if (connectSocket == INVALID_SOCKET) {
+        std::cerr << "socket failed with error: " << WSAGetLastError() << std::endl;
+        WSACleanup();
+        return false;
+    }
+
+    if (!socketSetNonBlocking((int) connectSocket)) {
+        std::cerr << "Failed to set connect socket non-blocking." << std::endl;
+        return false;
+    }
+
+    // Connect to server.
+    int iResult = connect(connectSocket, (struct sockaddr*)&address, sizeof(struct sockaddr));
+
+
+    /*
+    *   Socket is non-blocking so connection is not completed immediately thus we
+    *   expect a SOCKET_ERROR result in the first place and WSAEWOULDBLOCK as errno.
+    * 
+    *   See: https://docs.microsoft.com/de-de/windows/win32/api/winsock2/nf-winsock2-wsaconnect?redirectedfrom=MSDN
+    */
+    if (iResult != SOCKET_ERROR && WSAGetLastError() != WSAEWOULDBLOCK)
+    {
+        closesocket(connectSocket);
+        connectSocket = INVALID_SOCKET;
+        std::cerr << "The server is down... did not connect" << std::endl;
+        return false;   
+    }
+
+    /*
+    *   Continue with checking if socket is writable...
+    *   When a socket is processing a connect call (nonblocking), a socket is writable if 
+    *   the connection establishment successfully completes.
+    */
+    fd_set wfds;
+    struct timeval tv = { 1, 0 };   // timeval of 1 sec
+
+    FD_ZERO(&wfds);
+    FD_SET(connectSocket, &wfds);
+
+    int number = select(connectSocket, NULL, &wfds, NULL, &tv);
+
+    if (number == 0) {
+        closesocket(connectSocket);
+        connectSocket = INVALID_SOCKET;
+        std::cerr << "Failed to get socket writable." << std::endl;
+        return false;
+    }
+
+    /*
+    *   Try to send register message and receive ACK. 
+    *   When sendRegistrationToSupervisor was successful, try to receive the acknowledge. 
+    *   After maxRegisterAttempts of sending or receiving data the connection is set as failed
+    */
+    int maxRegisterAttempts = 10;
+
+    for (int i = 0; i < maxRegisterAttempts; i++) {
+
+        /* Try to send register message */
+        if (sendRegistrationToSupervisor(robotName)) {
+
+            /* Try to receive ACK */
+            for (int i = 0; i < maxRegisterAttempts; i++) {
+
+                //std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
+                /* Check for registration acknowledge */
+                if (receiveRegistrationAck())
+                    return true;
+            }
+
+            std::cerr << "Error " << robotName.c_str() << ": maximum attempts of sending / receiving ACK exceeded." << std::endl;
+            return false;
+        }
+    }
 }
 
 bool CommunicationModuleWifi::sendMessage(const char* message, int msgLen)
@@ -116,15 +165,30 @@ bool CommunicationModuleWifi::sendMessage(const char* message, int msgLen)
 char* CommunicationModuleWifi::receiveMessage(void)
 {
     char recvBuffer[maxMsgLen];
-    int recvSize = recv(connectSocket, recvBuffer, maxMsgLen, 0);
 
-    if (recvSize == 0) {
-        // std::cerr << "CommunicationModuleWifi (" << mClientName << "): No data received from server" << std::endl;
-        return nullptr;
+    /* check socket if there is something to read */
+    fd_set rfds;
+    struct timeval tv = { 0, 100 };   // timeval of 100 ms
+
+    FD_ZERO(&rfds);
+    FD_SET(connectSocket, &rfds);
+
+    /*
+    *   Check the readability status of the communication socket. Readability means that queued 
+    *   data is available for reading such that a call to recv is guaranteed not to block.
+    */
+    int number = select(connectSocket, &rfds, NULL, NULL, &tv);
+
+    if (number != 0) {
+        int recvSize = recv(connectSocket, recvBuffer, maxMsgLen, 0);
+
+        if (recvSize > 0) {
+            return recvBuffer;
+        }
     }
 
-    return recvBuffer;
-
+    // std::cerr << "CommunicationModuleWifi (" << mClientName << "): No data received from server" << std::endl;
+    return nullptr;
 }
 
 bool CommunicationModuleWifi::sendRegistrationToSupervisor(std::string robotName)
@@ -149,7 +213,7 @@ bool CommunicationModuleWifi::receiveRegistrationAck(void)
 
         int msgIdentifier = msg[0] - '0';
 
-        if (msgIdentifier == 0) {
+        if (msgIdentifier == MessageType::REGISTER) {
             return true;
         }   
 
@@ -186,4 +250,63 @@ bool CommunicationModuleWifi::reportCollision(
     std::string msgString = stringStream.str();
 
     return sendMessage(msgString.c_str(), msgString.size());
+}
+
+bool CommunicationModuleWifi::receiveCollisionReply(std::vector<std::tuple<int, int>>* path)
+{
+    char* msg = receiveMessage();
+
+    if (msg != nullptr) {
+
+        int msgIdentifier = msg[0] - '0';
+
+        if (msgIdentifier == MessageType::COLLISION) {
+            /* received supervisor response with collision avoidance path */
+
+            *path = parsePath(std::string(msg));
+
+            return true;
+        }
+    }
+
+    return false;
+}
+
+std::vector<coordinate> CommunicationModuleWifi::parsePath(std::string msg)
+{
+    std::string subStr;
+    std::vector<coordinate> path;
+    std::vector<std::string> subStrings;
+
+    /* load message content into string stream */
+    std::istringstream iss(msg);
+
+    /* go through stream and extract substring between delimiter ';' */
+    while (std::getline(iss, subStr, ';')) {
+        subStrings.push_back(subStr);
+    }
+
+    for (int i = 1; i < subStrings.size(); i++) {
+        /* convert coordinates from string and add them to path list */
+        path.push_back(getCoordinateTuple(subStrings[i]));
+    }
+
+    return path;
+}
+
+coordinate CommunicationModuleWifi::getCoordinateTuple(std::string tupleString)
+{
+    /* passed tuple string is expected to be build up: xCoord,yCoord */
+    int xCoord = 0, yCoord = 0;
+    size_t pos = tupleString.find(',');
+
+    if (pos == std::string::npos) {
+        // string does not contain comma delimiter
+        return { 0,0 };
+    }
+
+    xCoord = std::stoi(tupleString.substr(0, pos));
+    yCoord = std::stoi(tupleString.substr(pos + 1, tupleString.size() - pos + 1));
+
+    return { xCoord, yCoord };
 }
