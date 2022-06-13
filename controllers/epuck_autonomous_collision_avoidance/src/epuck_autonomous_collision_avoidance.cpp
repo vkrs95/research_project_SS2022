@@ -298,10 +298,10 @@ int main(int argc, char **argv) {
                                 
                 ///* check routine step, check for supervisor response */
                 if (commWifi->receiveCollisionReply(&path)) {
-                    std::cout << "<<<<<<<<<<<<<< PATH RECEIVED with length " << path.size() << std::endl;
+                    std::cout << "PATH RECEIVED with length " << path.size() << std::endl;
                 }
                 else {
-                    /* wait some time ... */
+                    /* wait some time ? ... */
                 }
             }
             /*************************************/

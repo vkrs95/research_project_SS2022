@@ -162,9 +162,9 @@ bool CommunicationModuleWifi::sendMessage(const char* message, int msgLen)
     return true;
 }
 
-char* CommunicationModuleWifi::receiveMessage(void)
+std::string CommunicationModuleWifi::receiveMessage(void)
 {
-    char recvBuffer[maxMsgLen];
+    char recvBuffer[maxMsgLen] = {};
 
     /* check socket if there is something to read */
     fd_set rfds;
@@ -183,12 +183,14 @@ char* CommunicationModuleWifi::receiveMessage(void)
         int recvSize = recv(connectSocket, recvBuffer, maxMsgLen, 0);
 
         if (recvSize > 0) {
-            return recvBuffer;
+            std::string recvStr(recvBuffer);
+            //std::cout << "CommunicationModuleWifi(" << mClientName << ") : received message string'" << recvStr << "'" << std::endl;
+            return recvStr;
         }
     }
 
     // std::cerr << "CommunicationModuleWifi (" << mClientName << "): No data received from server" << std::endl;
-    return nullptr;
+    return "";
 }
 
 bool CommunicationModuleWifi::sendRegistrationToSupervisor(std::string robotName)
@@ -207,11 +209,11 @@ bool CommunicationModuleWifi::sendRegistrationToSupervisor(std::string robotName
 
 bool CommunicationModuleWifi::receiveRegistrationAck(void)
 {
-    char* msg = receiveMessage();
+    std::string msg = receiveMessage();
 
-    if (msg != nullptr) {
+    if (!msg.empty()) {
 
-        int msgIdentifier = msg[0] - '0';
+        int msgIdentifier = msg.at(0) - '0';
 
         if (msgIdentifier == MessageType::REGISTER) {
             return true;
@@ -254,16 +256,16 @@ bool CommunicationModuleWifi::reportCollision(
 
 bool CommunicationModuleWifi::receiveCollisionReply(std::vector<std::tuple<int, int>>* path)
 {
-    char* msg = receiveMessage();
+    std::string msg = receiveMessage();
 
-    if (msg != nullptr) {
+    if (!msg.empty()) {
 
-        int msgIdentifier = msg[0] - '0';
+        /* get msg type as integer from msg */
+        int msgIdentifier = msg.at(0) - '0';
 
         if (msgIdentifier == MessageType::COLLISION) {
             /* received supervisor response with collision avoidance path */
-
-            *path = parsePath(std::string(msg));
+            *path = parsePath(msg);
 
             return true;
         }

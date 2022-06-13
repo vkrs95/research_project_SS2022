@@ -274,6 +274,6 @@ std::string CommModuleTCPSocketServer::buildPathMsgString(std::vector<coordinate
     for (coordinate c : path) {
         sStrm << std::get<0>(c) << "," << std::get<1>(c) << ";";
     }
-    
+    sStrm << "\0";
     return sStrm.str();
 }

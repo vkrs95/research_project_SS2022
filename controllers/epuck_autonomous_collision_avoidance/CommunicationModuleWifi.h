@@ -64,7 +64,7 @@ private:
     bool sendMessage(const char* message, int msgLen);
     bool sendRegistrationToSupervisor(std::string robotName);
     bool receiveRegistrationAck(void);
-    char* receiveMessage(void);
+    std::string receiveMessage(void);
     std::vector<coordinate> parsePath(std::string msg);
     coordinate getCoordinateTuple(std::string tupleString);
 

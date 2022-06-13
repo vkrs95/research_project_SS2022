@@ -112,9 +112,9 @@ void ClientCommHandler::sendMessage(void)
         if (sendResult == SOCKET_ERROR) {
             std::cerr << "ClientCommHandler: Failed to send message to " << mClientName << std::endl;
         }
-        else {
+        /*else {
             std::cout << "ClientCommHandler: Sent message content '" << lastMessage->getMessageAsChar() << "' to " << mClientName << " with length: " << sendResult << std::endl;
-        }
+        }*/
     }
 }
 
@@ -158,7 +158,7 @@ Message* ClientCommHandler::getInboxMessage(void)
 
         msgInboxLock.unlock();
 
-        std::cout << "New message in inbox with content: " << lastMessage->getMessageAsChar() << std::endl;
+        //std::cout << "New message in inbox with content: " << lastMessage->getMessageAsChar() << std::endl;
     }
     return lastMessage;
 }
