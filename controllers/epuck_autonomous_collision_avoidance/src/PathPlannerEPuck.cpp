@@ -1,4 +1,5 @@
 #include "PathPlannerEPuck.h"
+#include "..\include\PathPlannerEPuck.h"
 
 PathPlannerEPuck::PathPlannerEPuck(std::string robotsName)
 {
@@ -54,6 +55,7 @@ void PathPlannerEPuck::findPath(Node startPosition, Node goalPosition)
     /* first time path planning, initiate list of obstacles */
     obstacleList.clear();
 }
+
 void PathPlannerEPuck::getObstacleParameters(std::tuple<int, int> *startCoords, std::tuple<int, int> *goalCoords, std::tuple<int, int> *collisionCoords)
 {
     /*
@@ -72,41 +74,15 @@ void PathPlannerEPuck::getObstacleParameters(std::tuple<int, int> *startCoords, 
                         (pathCoordinatesList[pathIterator - 1]).y_ );    
 }
 
-void PathPlannerEPuck::findAlternativePath(void)
+void PathPlannerEPuck::runAlternativePath(std::vector<std::tuple<int, int>> altPath)
 {
-    // TODO: change ?
-    // a robot can only avoid one obstacle at a time thus remove all known ones 
-    // before a new obstacle
-    obstacleList.clear();
+    /* reset parameters */
+    pathCoordinatesList.clear();
+    pathIterator = 1;               // initiate internal iterator, must be 1 to have predecessor at index 0 
 
-    /* add position of current successor as new detected obstacle */
-    obstacleList.push_back(pathCoordinatesList[pathIterator - 1]);
-        
-    /*
-    *   To circumnavigate the obstacle the robot turns around and 
-    *   sets the position of the predecessor as its new start position. After this
-    *   a new path is planned with the updated nodes and obstacles.
-    */
-    startPosition = pathCoordinatesList[pathIterator - 2];
-
-    /* 
-    *   initate world grid with additional obstacles and 
-    *   calculate path between start and goal 
-    */
-    prepareGridAndRunPlanner(true);
-
-
-    /* debug output of start / goal information */
-    unsigned int obstaclePosX = obstacleList.at(obstacleList.size() - 1).x_;
-    unsigned int obstaclePosY = obstacleList.at(obstacleList.size() - 1).y_;
-
-    std::cout << "------------------------" << "\n";
-    std::cout << "E-Puck '" << robotName << "' in " << ARENA_NUMBER_OF_LINES_PER_SIDE << "x" << ARENA_NUMBER_OF_LINES_PER_SIDE << " map\n";
-    std::cout << "Collision detected at (" << obstaclePosX << ", " << obstaclePosY << ")! Alternative path planning:" << "\n";
-    std::cout << "New Start Position: (" << startPosition.x_ << ", " << startPosition.y_ <<
-        ")\nGoal Position: (" << goalPosition.x_ << ", " << goalPosition.y_ << ")" << "\n";
+    lastPathPlanningSuccessful = true;
+    pathCoordinatesList = translateToNodeList(altPath);
 }
-
 
 bool PathPlannerEPuck::pathCompleted(void)
 {
@@ -116,7 +92,6 @@ bool PathPlannerEPuck::pathCompleted(void)
     */
     return pathCoordinatesList.size() > 0 && pathIterator >= pathCoordinatesList.size();
 }
-
 
 void PathPlannerEPuck::generateEdgeNodeList()
 {
@@ -180,6 +155,18 @@ void PathPlannerEPuck::prepareWorldGrid(bool addObstaclesFromList)
     startPosition.h_cost_ = abs(static_cast<double>(startPosition.x_) - goalPosition.x_) + abs(static_cast<double>(startPosition.y_) - goalPosition.y_);
 }
 
+std::vector<Node> PathPlannerEPuck::translateToNodeList(std::vector<std::tuple<int, int>> tupleList)
+{
+    std::vector<Node> nodeList;
+
+    for (auto entry : tupleList) {
+        Node n(std::get<0>(entry), std::get<1>(entry));
+        nodeList.push_back(n);
+    }
+
+    return nodeList;
+}
+
 void PathPlannerEPuck::setMatrixDimension(unsigned int dimension)
 {
     ARENA_NUMBER_OF_LINES_PER_SIDE = dimension;
@@ -201,7 +188,6 @@ void PathPlannerEPuck::setStartGoalPositionByIndex(unsigned int startIndex, unsi
         ")\nGoal Position: P" << goalIndex + 1 << "(" << goalPosition.x_ << ", " << goalPosition.y_ << ")" << "\n";
 }
 
-
 MovingDirection PathPlannerEPuck::getNextMovingDirection(void)
 {
     MovingDirection nextDirection;
@@ -219,7 +205,11 @@ MovingDirection PathPlannerEPuck::getNextMovingDirection(void)
     int sumX = predecessor.x_ + successor.x_;
     int sumY = predecessor.y_ + successor.y_;
 
-    if (sumX == 0 && sumY == 0)
+    if (predecessor == successor)
+    {
+        nextDirection = MovingDirection(turnAround);
+    }
+    else if (sumX == 0 && sumY == 0)
     {
         nextDirection = MovingDirection(straightOn);
     }

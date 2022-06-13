@@ -239,6 +239,10 @@ int main(int argc, char **argv) {
                             robotroutine->setWheelSpeedTurnRight();
                             crossroadManeuverThreshold = TURNLEFTRIGHTTHRESHOLD;
                         }
+                        else if (nextMovingDirection == turnAround) {
+                            robotroutine->setWheelSpeedTurnAround();
+                            crossroadManeuverThreshold = TURNAROUNDTHRESHOLD;
+                        }
                         else {
                             /*
                             *   nextMovingDirection == straightOn, configure wheel speed and maneuver threshold.
@@ -273,35 +277,43 @@ int main(int argc, char **argv) {
                 /* notify supervisor of collision */
                 commWifi->reportCollision(startNode, goalNode, collisionNode);
 
+                /* set robot states for further event handling */
                 obstacleDetected = true;
-                robotroutine->PerformHalt();                
+                alternativePathReceived = false; 
 
-                //robotroutine->setWheelSpeedTurnAround();
+                robotroutine->PerformHalt();         
 
-                //turnCounter += timeStep;
-
-                //if (turnCounter >= TURNAROUNDTHRESHOLD)
-                //{
-                //    /* find an alternative path to circumnavigate detected obstacle */
-                //    pathplanner->findAlternativePath();
-
-                //    turnCounter = 0;
-                //    obstacleDetected = false;
-                //}
             }
             else if (obstacleDetected) {
-                /* 
-                *   obstacle has been detected and collision is reported.
-                *   Wait for supervisor's reply with alternative path.
-                */
-                std::vector<std::tuple<int, int>> path;
-                                
-                ///* check routine step, check for supervisor response */
-                if (commWifi->receiveCollisionReply(&path)) {
-                    std::cout << "PATH RECEIVED with length " << path.size() << std::endl;
+
+                if (!alternativePathReceived) {
+                    /*
+                    *   obstacle has been detected and collision is reported.
+                    *   Wait for supervisor's reply with alternative path.
+                    */
+                    std::vector<std::tuple<int, int>> path;
+
+                    /* check routine step, check for supervisor response */
+                    if (commWifi->receiveCollisionReply(&path)) {
+                        pathplanner->runAlternativePath(path);
+                        alternativePathReceived = true;
+                    }
+                    else { /* wait some time ? ... */ }
                 }
                 else {
-                    /* wait some time ? ... */
+                    /*
+                    *   Supervisor replied with alternative path. Turn around, move to predecessor node and 
+                    *   continue following alternative path
+                    */
+                    robotroutine->setWheelSpeedTurnAround();
+
+                    turnCounter += timeStep;
+
+                    if (turnCounter >= TURNAROUNDTHRESHOLD)
+                    {
+                        turnCounter = 0;
+                        obstacleDetected = false;
+                    }
                 }
             }
             /*************************************/

@@ -64,7 +64,7 @@ void CollisionEvent::resolveEventThreadRoutine(void)
         if (i == minDTGIndex) {
             /* right of way: continue shortest path */
             mParticipants[i].setPath(
-                planner->getShortestPath(prtcpnt.mStart, prtcpnt.mGoal));
+                planner->getShortestPath(prtcpnt.mStart, prtcpnt.mGoal, mCollisionPoint));
         }
         else {
             /* calculate alternative path to circumnavigate collision */
@@ -79,7 +79,7 @@ void CollisionEvent::resolveEventThreadRoutine(void)
 
 int CollisionEvent::determineDTG(CollisionParticipant* participant)
 {
-    return planner->getShortestPath(participant->mStart, participant->mGoal).size();
+    return planner->getShortestPath(participant->mStart, participant->mGoal, mCollisionPoint).size();
 }
 
 void CollisionEvent::addParticipant(CollisionParticipant newParticipant)

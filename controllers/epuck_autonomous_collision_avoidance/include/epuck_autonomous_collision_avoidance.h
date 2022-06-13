@@ -40,5 +40,6 @@ bool endOfLineGoalReached = false;
 bool initProcedureDone = false;
 bool pathPlanningCompleted = false;
 bool supervisorConnected = false;
+bool alternativePathReceived = false;
 unsigned int readQrCodeAttemptCounter = 0;
 unsigned int readQrCodeAttemptLimit = 3;

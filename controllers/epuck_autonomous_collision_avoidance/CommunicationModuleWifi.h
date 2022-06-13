@@ -61,7 +61,7 @@ private:
     bool socketClose(int fd);
     bool socketCleanup();
     bool socketSetNonBlocking(int fd);
-    bool sendMessage(const char* message, int msgLen);
+    bool sendMessage(const char* message, size_t msgLen);
     bool sendRegistrationToSupervisor(std::string robotName);
     bool receiveRegistrationAck(void);
     std::string receiveMessage(void);
@@ -70,7 +70,7 @@ private:
 
     SOCKET connectSocket;
     int wifiPort;
-    static const int maxMsgLen = 512;
+    static const size_t maxMsgLen = 512;
     std::string mClientName;
     bool socketApiInitialized = false;
 };

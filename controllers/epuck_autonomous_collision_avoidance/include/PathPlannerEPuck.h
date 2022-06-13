@@ -28,7 +28,7 @@ public:
     void findPath(Node startPosition = {}, Node goalPosition = {}) override;
 
     /* provide additional public functions to use this planner */
-    void findAlternativePath(void);
+    void runAlternativePath(std::vector<std::tuple<int, int>> altPath);
     bool pathCompleted(void);
     void setMatrixDimension(unsigned int dimension);
     void setStartGoalPositionByIndex(unsigned int startIndex, unsigned int goalIndex);
@@ -38,9 +38,14 @@ public:
     MovingDirection getNextMovingDirection(void);
 
 private:
+    /**** private member functions ****/
+
     void generateEdgeNodeList();
     void prepareGridAndRunPlanner(bool addObstaclesFromList = false);
     void prepareWorldGrid(bool addObstaclesFromList);
+    std::vector<Node> translateToNodeList(std::vector<std::tuple<int, int>> tupleList);
+
+    /**** private member variables ****/
 
     /*
     *   List of all edge nodes as 2D coordinates.

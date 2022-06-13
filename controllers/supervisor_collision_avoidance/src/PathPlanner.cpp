@@ -5,17 +5,22 @@ PathPlanner::PathPlanner(int dimension)
     worldDimension = dimension;
 }
 
-std::vector<Node> PathPlanner::getShortestPath(std::tuple<int, int> start, std::tuple<int, int> goal)
+std::vector<Node> PathPlanner::getShortestPath(std::tuple<int, int> start, std::tuple<int, int> goal, std::tuple<int, int> collision)
 {
     startPosition.x_ = std::get<0>(start); startPosition.y_ = std::get<1>(start);
     goalPosition.x_ = std::get<0>(goal); goalPosition.y_ = std::get<1>(goal);
 
     prepareWorldGrid();
-    
+        
     Dijkstra dijkstraPlanning(worldGrid);
 
     /* calculate path between start and goal */
     auto [planningSuccessful, pathVector] = dijkstraPlanning.Plan(startPosition, goalPosition);
+
+    
+    /* client path planning needs obstacle as entry to determine first movement direction */
+    Node obstacle(std::get<0>(collision), std::get<1>(collision));
+    pathVector.push_back(obstacle);
 
     ///* */
     //auto itCollision = std::find(pathVector.begin(), pathVector.end(), obstacle);
@@ -54,6 +59,9 @@ std::vector<Node> PathPlanner::getAlternativePath(std::tuple<int, int> start, st
 
     /* calculate path between start and goal */
     auto [planningSuccessful, pathVector] = dijkstraPlanning.Plan(startPosition, goalPosition);
+
+    /* client path planning needs obstacle as entry to determine first movement direction */
+    pathVector.push_back(obstacle);
 
     /*
     *   pathCoordinatesList is ordered goal to start,

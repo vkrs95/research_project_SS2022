@@ -110,7 +110,7 @@ bool CommunicationModuleWifi::tryToConnectToSupervisor(std::string robotName)
     FD_ZERO(&wfds);
     FD_SET(connectSocket, &wfds);
 
-    int number = select(connectSocket, NULL, &wfds, NULL, &tv);
+    int number = select((int)connectSocket, NULL, &wfds, NULL, &tv);
 
     if (number == 0) {
         closesocket(connectSocket);
@@ -140,14 +140,16 @@ bool CommunicationModuleWifi::tryToConnectToSupervisor(std::string robotName)
                 if (receiveRegistrationAck())
                     return true;
             }
-
-            std::cerr << "Error " << robotName.c_str() << ": maximum attempts of sending / receiving ACK exceeded." << std::endl;
-            return false;
+            /* error case: failed to receive ACK after maxRegisterAttempts attempts */
+            break;  
         }
     }
+
+    std::cerr << "Error " << robotName.c_str() << ": maximum attempts of sending / receiving ACK exceeded." << std::endl;
+    return false;
 }
 
-bool CommunicationModuleWifi::sendMessage(const char* message, int msgLen)
+bool CommunicationModuleWifi::sendMessage(const char* message, size_t msgLen)
 {
     int sendResult;
 
@@ -177,7 +179,7 @@ std::string CommunicationModuleWifi::receiveMessage(void)
     *   Check the readability status of the communication socket. Readability means that queued 
     *   data is available for reading such that a call to recv is guaranteed not to block.
     */
-    int number = select(connectSocket, &rfds, NULL, NULL, &tv);
+    int number = select((int)connectSocket, &rfds, NULL, NULL, &tv);
 
     if (number != 0) {
         int recvSize = recv(connectSocket, recvBuffer, maxMsgLen, 0);
