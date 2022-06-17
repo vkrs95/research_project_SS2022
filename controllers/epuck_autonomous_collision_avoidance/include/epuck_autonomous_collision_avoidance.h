@@ -1,6 +1,7 @@
 #include "RobotRoutine.h"
 #include "PathPlannerEPuck.h"
 #include "QRModuleEPuckSGD.h"
+#include "CommunicationModuleWifi.h"
 
 #pragma once
 
@@ -9,12 +10,14 @@ Robot* robot;
 RobotRoutine* robotroutine;
 PathPlannerEPuck* pathplanner;
 QRModule<SGDQRParams>* qrmodule;
+CommunicationModuleWifi* commWifi;
 
-void robotActiveWait(unsigned int numOfSteps);
+void robotActiveWait(int numOfSteps);
 
 /*** define member variables ***/
 int timeStep;
 unsigned int turnCounter = 0;
+int connectionFD = 0;
 unsigned int crossroadManeuverThreshold;    // is set when next direction is read  
 const unsigned int TURNLEFTRIGHTTHRESHOLD = 3200;
 const unsigned int TURNAROUNDTHRESHOLD = 3500; // TURNLEFTRIGHTTHRESHOLD;
@@ -36,5 +39,7 @@ bool performingTurn = false;
 bool endOfLineGoalReached = false;
 bool initProcedureDone = false;
 bool pathPlanningCompleted = false;
+bool supervisorConnected = false;
+bool alternativePathReceived = false;
 unsigned int readQrCodeAttemptCounter = 0;
 unsigned int readQrCodeAttemptLimit = 3;

@@ -100,16 +100,7 @@
     <ClCompile Include="$(WEBOTS_HOME)\resources\languages\cpp\TouchSensor.cpp">
       <Filter>Webots</Filter>
     </ClCompile>
-    <ClCompile Include="src\epuck_autonomous_collision_avoidance.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="src\PathPlannerEPuck.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="src\QRModuleEPuckSGD.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="src\RobotRoutine.cpp">
+    <ClCompile Include="src\supvervisor_collision_avoidance.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="lib\path_planning\lib\utils\src\utils.cpp">
@@ -121,27 +112,27 @@
     <ClCompile Include="lib\path_planning\src\dijkstra.cpp">
       <Filter>lib\path_planning\src</Filter>
     </ClCompile>
-    <ClCompile Include="CommunicationModuleWifi.cpp">
+    <ClCompile Include="src\CommModuleSupervisor.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ClientCommHandler.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Message.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\CollisionHandler.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\CollisionEvent.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\PathPlanner.cpp">
       <Filter>src</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\RobotRoutine.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="include\QRModuleEPuckSGD.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="include\QRModule.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="include\PathPlanningModule.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="include\PathPlannerEPuck.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="include\epuck_autonomous_collision_avoidance.h">
+    <ClInclude Include="include\supvervisor_collision_avoidance.h">
       <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="lib\path_planning\lib\utils\include\utils\utils.hpp">
@@ -153,10 +144,22 @@
     <ClInclude Include="lib\path_planning\include\path_planning\dijkstra.hpp">
       <Filter>lib\path_planning\include</Filter>
     </ClInclude>
-    <ClInclude Include="CollisionSupervisorModule.h">
+    <ClInclude Include="include\CommModuleSupervisor.h">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="CommunicationModuleWifi.h">
+    <ClInclude Include="include\ClientCommHandler.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Message.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\CollisionHandler.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\CollisionEvent.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\PathPlanner.h">
       <Filter>include</Filter>
     </ClInclude>
   </ItemGroup>

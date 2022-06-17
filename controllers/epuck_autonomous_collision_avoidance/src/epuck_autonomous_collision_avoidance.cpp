@@ -1,6 +1,6 @@
 #include "epuck_autonomous_collision_avoidance.h"
 
-void robotActiveWait(unsigned int numOfSteps)
+void robotActiveWait(int numOfSteps)
 {
     for (int i = 0; i < numOfSteps; i++) {
         if (robot->step(timeStep) == -1)
@@ -15,13 +15,13 @@ int main(int argc, char **argv) {
     robotroutine = new RobotRoutine(robot);
     pathplanner = new PathPlannerEPuck(robotroutine->robotName);
     qrmodule = new QRModuleEPuckSGD();
+    commWifi = new CommunicationModuleWifi();
         
     /*** get time step from robot routine ***/
     timeStep = robotroutine->basicTimeStep;
 
     /* before entering main loop init camera by enabling it */
     robotroutine->EnableEpuckCam();
-
 
     /*************************************/
     /************* MAIN LOOP *************/
@@ -39,6 +39,14 @@ int main(int argc, char **argv) {
     */
     while (robot->step(timeStep) != -1) {
 
+        /*   if (fd == 0) {
+            fd = commWifi->socket_accept(sfd);
+            if (fd > 0)
+                commWifi->socket_set_non_blocking(fd);
+            else if (fd < 0)
+                ;
+        }
+        */
         robotroutine->ReadSensors();
 
         /*************************************/
@@ -53,6 +61,22 @@ int main(int argc, char **argv) {
             {
                 robotroutine->CyclicBlinkingLED();
                 ledCounter = 1;
+            }
+        }
+        /*************************************/
+        /*************************************/
+        
+
+        /*************************************************/
+        /********** CONNECT TO SUPERVISOR BLOCK **********/
+        if (!supervisorConnected)
+        {            
+            if (commWifi->tryToConnectToSupervisor(robotroutine->robotName)) {
+
+                supervisorConnected = true;
+            }
+            else {
+                std::cerr << robotroutine->robotName << ": failed to connect to supervisor." << std::endl;
             }
         }
         /*************************************/
@@ -215,6 +239,10 @@ int main(int argc, char **argv) {
                             robotroutine->setWheelSpeedTurnRight();
                             crossroadManeuverThreshold = TURNLEFTRIGHTTHRESHOLD;
                         }
+                        else if (nextMovingDirection == turnAround) {
+                            robotroutine->setWheelSpeedTurnAround();
+                            crossroadManeuverThreshold = TURNAROUNDTHRESHOLD;
+                        }
                         else {
                             /*
                             *   nextMovingDirection == straightOn, configure wheel speed and maneuver threshold.
@@ -234,27 +262,58 @@ int main(int argc, char **argv) {
 
 
             /**************************************/
-            /* OBSTACLE AVOIDANCE PROCEDURE BLOCK */
+            /* OBSTACLE BEHAVIOUR BLOCK */
             /*
             *   check if an obstacle has been detected or if obstacle avoidance
             *   procedure is already activated
             */
             else if (!pathplanner->pathCompleted() && /* border wall of goal position is no obstacle */
-                (obstacleDetected || robotroutine->detectObstacle()) )
+                (!obstacleDetected && robotroutine->detectObstacle()))
             {
+                /* get node parameters from pathplanner module */
+                std::tuple<int, int> startNode, goalNode, collisionNode;
+                pathplanner->getObstacleParameters(&startNode, &goalNode, &collisionNode);
+
+                /* notify supervisor of collision */
+                commWifi->reportCollision(startNode, goalNode, collisionNode);
+
+                /* set robot states for further event handling */
                 obstacleDetected = true;
+                alternativePathReceived = false; 
 
-                robotroutine->setWheelSpeedTurnAround();
+                robotroutine->PerformHalt();         
 
-                turnCounter += timeStep;
+            }
+            else if (obstacleDetected) {
 
-                if (turnCounter >= TURNAROUNDTHRESHOLD)
-                {
-                    /* find an alternative path to circumnavigate detected obstacle */
-                    pathplanner->findAlternativePath();
+                if (!alternativePathReceived) {
+                    /*
+                    *   obstacle has been detected and collision is reported.
+                    *   Wait for supervisor's reply with alternative path.
+                    */
+                    std::vector<std::tuple<int, int>> path;
 
-                    turnCounter = 0;
-                    obstacleDetected = false;
+                    /* check routine step, check for supervisor response */
+                    if (commWifi->receiveCollisionReply(&path)) {
+                        pathplanner->runAlternativePath(path);
+                        alternativePathReceived = true;
+                    }
+                    else { /* wait some time ? ... */ }
+                }
+                else {
+                    /*
+                    *   Supervisor replied with alternative path. Turn around, move to predecessor node and 
+                    *   continue following alternative path
+                    */
+                    robotroutine->setWheelSpeedTurnAround();
+
+                    turnCounter += timeStep;
+
+                    if (turnCounter >= TURNAROUNDTHRESHOLD)
+                    {
+                        turnCounter = 0;
+                        obstacleDetected = false;
+                    }
                 }
             }
             /*************************************/

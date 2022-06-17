@@ -21,7 +21,7 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
     <ProjectGuid>{B2AA53B0-6416-4406-8FF5-6D43BBA8B305}</ProjectGuid>
-    <RootNamespace>epuck_autonomous_collision_avoidance</RootNamespace>
+    <RootNamespace>supervisor_collision_avoidance</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -161,24 +161,25 @@
     <ClCompile Include="$(WEBOTS_HOME)\resources\languages\cpp\Speaker.cpp" />
     <ClCompile Include="$(WEBOTS_HOME)\resources\languages\cpp\Supervisor.cpp" />
     <ClCompile Include="$(WEBOTS_HOME)\resources\languages\cpp\TouchSensor.cpp" />
-    <ClCompile Include="CommunicationModuleWifi.cpp" />
     <ClCompile Include="lib\path_planning\lib\utils\src\utils.cpp" />
     <ClCompile Include="lib\path_planning\src\a_star.cpp" />
     <ClCompile Include="lib\path_planning\src\dijkstra.cpp" />
-    <ClCompile Include="src\epuck_autonomous_collision_avoidance.cpp" />
-    <ClCompile Include="src\PathPlannerEPuck.cpp" />
-    <ClCompile Include="src\QRModuleEPuckSGD.cpp" />
-    <ClCompile Include="src\RobotRoutine.cpp" />
+    <ClCompile Include="src\ClientCommHandler.cpp" />
+    <ClCompile Include="src\CollisionEvent.cpp" />
+    <ClCompile Include="src\CollisionHandler.cpp" />
+    <ClCompile Include="src\CommModuleSupervisor.cpp" />
+    <ClCompile Include="src\Message.cpp" />
+    <ClCompile Include="src\PathPlanner.cpp" />
+    <ClCompile Include="src\supvervisor_collision_avoidance.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="CollisionSupervisorModule.h" />
-    <ClInclude Include="CommunicationModuleWifi.h" />
-    <ClInclude Include="include\epuck_autonomous_collision_avoidance.h" />
-    <ClInclude Include="include\PathPlannerEPuck.h" />
-    <ClInclude Include="include\PathPlanningModule.h" />
-    <ClInclude Include="include\QRModule.h" />
-    <ClInclude Include="include\QRModuleEPuckSGD.h" />
-    <ClInclude Include="include\RobotRoutine.h" />
+    <ClInclude Include="include\ClientCommHandler.h" />
+    <ClInclude Include="include\CollisionEvent.h" />
+    <ClInclude Include="include\CollisionHandler.h" />
+    <ClInclude Include="include\CommModuleSupervisor.h" />
+    <ClInclude Include="include\Message.h" />
+    <ClInclude Include="include\PathPlanner.h" />
+    <ClInclude Include="include\supvervisor_collision_avoidance.h" />
     <ClInclude Include="lib\path_planning\include\path_planning\a_star.hpp" />
     <ClInclude Include="lib\path_planning\include\path_planning\dijkstra.hpp" />
     <ClInclude Include="lib\path_planning\lib\utils\include\utils\utils.hpp" />

@@ -1,245 +1,269 @@
-# VRML_SIM R2020b utf8
-WorldInfo{
-coordinateSystem "NUE"
+#VRML_SIM R2020b utf8
+WorldInfo {
+  coordinateSystem "NUE"
 }
-Viewpoint{
-orientation 0.5049159889850088 0.8390541734683749 0.20260290731525285 5.391024937958733
-position -1.4152238355868552 1.123989562538208 1.3915096455193883
+Viewpoint {
+  orientation 0.9119447456102837 -0.3836810985751203 -0.14541525212295844 5.4954288654462715
+  position 0.6515356749854542 1.3246644992087595 1.4032251097409492
 }
-TexturedBackground {}
-TexturedBackgroundLight {}
-RectangleArena
-{
-name "rectangle matrix arena"
-floorSize 0.8 0.8
-floorTileSize 0.2 0.2
-floorAppearance PBRAppearance {
-baseColorMap ImageTexture {
-url["textures/grid_element_512px.png"]
-filtering 0
+TexturedBackground {
 }
-roughness 0.5
-metalness 0.7
+TexturedBackgroundLight {
 }
-wallHeight 0.06
-wallAppearance OsbWood {
-colorOverride 0 0 0
-IBLStrength 3
-}
-}
-E-puck {
-translation 0.2 0 0.0
-rotation 0 1 0 -1.5708
-name "EPuck 0"
-controller "epuck_autonomous_collision_avoidance"
-camera_width 640
-camera_height 480
-groundSensorsSlot[
-E-puckGroundSensors{
-}
-]
+RectangleArena {
+  name "rectangle matrix arena"
+  floorSize 0.8 0.8
+  floorTileSize 0.2 0.2
+  floorAppearance PBRAppearance {
+    baseColorMap ImageTexture {
+      url [
+        "textures/grid_element_512px.png"
+      ]
+      filtering 0
+    }
+    roughness 0.5
+    metalness 0.7
+  }
+  wallHeight 0.06
+  wallAppearance OsbWood {
+    colorOverride 0 0 0
+    IBLStrength 3
+  }
 }
 E-puck {
-translation -0.2 0 0.0
-rotation 0 1 0 1.5708
-name "EPuck 1"
-controller "epuck_autonomous_collision_avoidance"
-camera_width 640
-camera_height 480
-groundSensorsSlot[
-E-puckGroundSensors{
-}
-]
+  translation -0.201855 -2.22045e-15 -0.196927
+  rotation 0 1 0 1.5708
+  name "EPuck 1"
+  controller "epuck_autonomous_collision_avoidance"
+  version "2"
+  camera_width 640
+  camera_height 480
+  receiver_channel 0
+  groundSensorsSlot [
+    E-puckGroundSensors {
+    }
+  ]
 }
 E-puck {
-translation -0.2 0 0.2
-rotation 0 1 0 3.14159
-name "EPuck 2"
-controller "epuck_autonomous_collision_avoidance"
-camera_width 640
-camera_height 480
-groundSensorsSlot[
-E-puckGroundSensors{
+  translation -0.00041955 -2.22045e-15 -0.200437
+  rotation 0 -1 0 -5.307179586466759e-06
+  name "EPuck 2"
+  controller "epuck_autonomous_collision_avoidance"
+  version "2"
+  camera_width 640
+  camera_height 480
+  receiver_channel 0
+  groundSensorsSlot [
+    E-puckGroundSensors {
+    }
+  ]
 }
-]
+Robot {
+  children [
+    Emitter {
+      range 10
+      baudRate 115200
+    }
+  ]
+  name "supervisor"
+  controller "supervisor_collision_avoidance"
+  supervisor TRUE
 }
-Wall{
-translation -0.2 0 -0.4
-rotation 0 1 0 0
-name "P1"
-size 0.05 0.05 0.01
-appearance Appearance {
-material Material {
-ambientIntensity 1
-diffuseColor 1 1 1
+Wall {
+  translation -0.2 0 -0.4
+  name "P1"
+  size 0.05 0.05 0.01
+  appearance Appearance {
+    material Material {
+      ambientIntensity 1
+      diffuseColor 1 1 1
+    }
+    texture ImageTexture {
+      url [
+        "textures/4X4/P1.jpg"
+      ]
+    }
+  }
 }
-texture ImageTexture {
-url["textures/4X4/P1.jpg"]
+Wall {
+  translation -0.2 0 0.4
+  name "P4"
+  size 0.05 0.05 0.01
+  appearance Appearance {
+    material Material {
+      ambientIntensity 1
+      diffuseColor 1 1 1
+    }
+    texture ImageTexture {
+      url [
+        "textures/4X4/P4.jpg"
+      ]
+    }
+  }
 }
+Wall {
+  translation -0.4 0 -0.2
+  rotation 0 1 0 1.578
+  name "P7"
+  size 0.05 0.05 0.01
+  appearance Appearance {
+    material Material {
+      ambientIntensity 1
+      diffuseColor 1 1 1
+    }
+    texture ImageTexture {
+      url [
+        "textures/4X4/P7.jpg"
+      ]
+    }
+  }
 }
+Wall {
+  translation 0.4 0 -0.2
+  rotation 0 1 0 1.578
+  name "P10"
+  size 0.05 0.05 0.01
+  appearance Appearance {
+    material Material {
+      ambientIntensity 1
+      diffuseColor 1 1 1
+    }
+    texture ImageTexture {
+      url [
+        "textures/4X4/P10.jpg"
+      ]
+    }
+  }
 }
-Wall{
-translation -0.2 0 0.4
-rotation 0 1 0 0
-name "P4"
-size 0.05 0.05 0.01
-appearance Appearance {
-material Material {
-ambientIntensity 1
-diffuseColor 1 1 1
+Wall {
+  translation 0 0 -0.4
+  name "P2"
+  size 0.05 0.05 0.01
+  appearance Appearance {
+    material Material {
+      ambientIntensity 1
+      diffuseColor 1 1 1
+    }
+    texture ImageTexture {
+      url [
+        "textures/4X4/P2.jpg"
+      ]
+    }
+  }
 }
-texture ImageTexture {
-url["textures/4X4/P4.jpg"]
+Wall {
+  translation 0 0 0.4
+  name "P5"
+  size 0.05 0.05 0.01
+  appearance Appearance {
+    material Material {
+      ambientIntensity 1
+      diffuseColor 1 1 1
+    }
+    texture ImageTexture {
+      url [
+        "textures/4X4/P5.jpg"
+      ]
+    }
+  }
 }
+Wall {
+  translation -0.4 0 0
+  rotation 0 1 0 1.578
+  name "P8"
+  size 0.05 0.05 0.01
+  appearance Appearance {
+    material Material {
+      ambientIntensity 1
+      diffuseColor 1 1 1
+    }
+    texture ImageTexture {
+      url [
+        "textures/4X4/P8.jpg"
+      ]
+    }
+  }
 }
+Wall {
+  translation 0.4 0 0
+  rotation 0 1 0 1.578
+  name "P11"
+  size 0.05 0.05 0.01
+  appearance Appearance {
+    material Material {
+      ambientIntensity 1
+      diffuseColor 1 1 1
+    }
+    texture ImageTexture {
+      url [
+        "textures/4X4/P11.jpg"
+      ]
+    }
+  }
 }
-Wall{
-translation -0.4 0 -0.2
-rotation 0 1 0 1.578
-name "P7"
-size 0.05 0.05 0.01
-appearance Appearance {
-material Material {
-ambientIntensity 1
-diffuseColor 1 1 1
+Wall {
+  translation 0.2 0 -0.4
+  name "P3"
+  size 0.05 0.05 0.01
+  appearance Appearance {
+    material Material {
+      ambientIntensity 1
+      diffuseColor 1 1 1
+    }
+    texture ImageTexture {
+      url [
+        "textures/4X4/P3.jpg"
+      ]
+    }
+  }
 }
-texture ImageTexture {
-url["textures/4X4/P7.jpg"]
+Wall {
+  translation 0.2 0 0.4
+  name "P6"
+  size 0.05 0.05 0.01
+  appearance Appearance {
+    material Material {
+      ambientIntensity 1
+      diffuseColor 1 1 1
+    }
+    texture ImageTexture {
+      url [
+        "textures/4X4/P6.jpg"
+      ]
+    }
+  }
 }
+Wall {
+  translation -0.4 0 0.2
+  rotation 0 1 0 1.578
+  name "P9"
+  size 0.05 0.05 0.01
+  appearance Appearance {
+    material Material {
+      ambientIntensity 1
+      diffuseColor 1 1 1
+    }
+    texture ImageTexture {
+      url [
+        "textures/4X4/P9.jpg"
+      ]
+    }
+  }
 }
-}
-Wall{
-translation 0.4 0 -0.2
-rotation 0 1 0 1.578
-name "P10"
-size 0.05 0.05 0.01
-appearance Appearance {
-material Material {
-ambientIntensity 1
-diffuseColor 1 1 1
-}
-texture ImageTexture {
-url["textures/4X4/P10.jpg"]
-}
-}
-}
-Wall{
-translation 0.0 0 -0.4
-rotation 0 1 0 0
-name "P2"
-size 0.05 0.05 0.01
-appearance Appearance {
-material Material {
-ambientIntensity 1
-diffuseColor 1 1 1
-}
-texture ImageTexture {
-url["textures/4X4/P2.jpg"]
-}
-}
-}
-Wall{
-translation 0.0 0 0.4
-rotation 0 1 0 0
-name "P5"
-size 0.05 0.05 0.01
-appearance Appearance {
-material Material {
-ambientIntensity 1
-diffuseColor 1 1 1
-}
-texture ImageTexture {
-url["textures/4X4/P5.jpg"]
-}
-}
-}
-Wall{
-translation -0.4 0 0.0
-rotation 0 1 0 1.578
-name "P8"
-size 0.05 0.05 0.01
-appearance Appearance {
-material Material {
-ambientIntensity 1
-diffuseColor 1 1 1
-}
-texture ImageTexture {
-url["textures/4X4/P8.jpg"]
-}
-}
-}
-Wall{
-translation 0.4 0 0.0
-rotation 0 1 0 1.578
-name "P11"
-size 0.05 0.05 0.01
-appearance Appearance {
-material Material {
-ambientIntensity 1
-diffuseColor 1 1 1
-}
-texture ImageTexture {
-url["textures/4X4/P11.jpg"]
-}
-}
-}
-Wall{
-translation 0.2 0 -0.4
-rotation 0 1 0 0
-name "P3"
-size 0.05 0.05 0.01
-appearance Appearance {
-material Material {
-ambientIntensity 1
-diffuseColor 1 1 1
-}
-texture ImageTexture {
-url["textures/4X4/P3.jpg"]
-}
-}
-}
-Wall{
-translation 0.2 0 0.4
-rotation 0 1 0 0
-name "P6"
-size 0.05 0.05 0.01
-appearance Appearance {
-material Material {
-ambientIntensity 1
-diffuseColor 1 1 1
-}
-texture ImageTexture {
-url["textures/4X4/P6.jpg"]
-}
-}
-}
-Wall{
-translation -0.4 0 0.2
-rotation 0 1 0 1.578
-name "P9"
-size 0.05 0.05 0.01
-appearance Appearance {
-material Material {
-ambientIntensity 1
-diffuseColor 1 1 1
-}
-texture ImageTexture {
-url["textures/4X4/P9.jpg"]
-}
-}
-}
-Wall{
-translation 0.4 0 0.2
-rotation 0 1 0 1.578
-name "P12"
-size 0.05 0.05 0.01
-appearance Appearance {
-material Material {
-ambientIntensity 1
-diffuseColor 1 1 1
-}
-texture ImageTexture {
-url["textures/4X4/P12.jpg"]
-}
-}
+Wall {
+  translation 0.4 0 0.2
+  rotation 0 1 0 1.578
+  name "P12"
+  size 0.05 0.05 0.01
+  appearance Appearance {
+    material Material {
+      ambientIntensity 1
+      diffuseColor 1 1 1
+    }
+    texture ImageTexture {
+      url [
+        "textures/4X4/P12.jpg"
+      ]
+    }
+  }
 }
