@@ -24,7 +24,6 @@ const unsigned int TURNAROUNDTHRESHOLD = 3500; // TURNLEFTRIGHTTHRESHOLD;
 
 
 /* robot parameters */
-unsigned int ledCounter = 1;
 unsigned int groundSensorJitter = 0;
 unsigned int groundSensorJitterThreshold = 4;
 bool epuckEndlessMode = true;

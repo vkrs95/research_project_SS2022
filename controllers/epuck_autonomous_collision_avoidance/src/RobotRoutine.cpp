@@ -5,17 +5,17 @@ RobotRoutine::RobotRoutine(Robot* robot)
     basicTimeStep = (int)robot->getBasicTimeStep();
 
     /* Motor initialization */
-    motorLeft = robot->getMotor("left wheel motor");
-    motorRight = robot->getMotor("right wheel motor");
+    motors[LEFT] = robot->getMotor("left wheel motor");
+    motors[RIGHT] = robot->getMotor("right wheel motor");
 
-    motorLeft->setVelocity(0.0);
-    motorRight->setVelocity(0.0);
+    motors[LEFT]->setVelocity(0.0);
+    motors[RIGHT]->setVelocity(0.0);
 
-    motorLeft->setPosition(INFINITY);
-    motorRight->setPosition(INFINITY);
+    motors[LEFT]->setPosition(INFINITY);
+    motors[RIGHT]->setPosition(INFINITY);
 
-    lfm_speed[LEFT] = 0;
-    lfm_speed[RIGHT] = 0;
+    wheelSetValue[LEFT] = 0;
+    wheelSetValue[RIGHT] = 0;
 
     /* receiver initialization */
     receiver = robot->getReceiver("receiver");
@@ -36,7 +36,7 @@ RobotRoutine::RobotRoutine(Robot* robot)
     }
 
     /* proximitys sensor initialization */
-    for (int i = 0; i < NB_DIST_SENS; i++) 
+    for (int i = 0; i < NUM_DIST_SENS; i++) 
     {
         sprintf_s(name, "ps%d", i);
         proximSensors[i] = robot->getDistanceSensor(name); /* proximity sensors */
@@ -44,50 +44,55 @@ RobotRoutine::RobotRoutine(Robot* robot)
     }
 
     /* ground sensor initialization */
-    for (int i = 0; i < NB_GROUND_SENS; i++) 
+    for (int i = 0; i < NUM_GROUND_SENS; i++) 
     {
         sprintf_s(name, "gs%d", i);
         groundSensors[i] = robot->getDistanceSensor(name); /* ground sensors */
         groundSensors[i]->enable(basicTimeStep);
     }
 
-    // epuck camera initialisation
+    /* robot camera initialisation */
     robotCamera = robot->getCamera("camera");
 }
 
-void RobotRoutine::ReadSensors()
+std::string RobotRoutine::getRobotName(void)
 {
-    for (int i = 0; i < NB_DIST_SENS; i++)
-        ps_value[i] = (int)proximSensors[i]->getValue();
-    for (int i = 0; i < NB_GROUND_SENS; i++)
-        gs_value[i] = (int)groundSensors[i]->getValue();
+    return robotName;
+}
+
+void RobotRoutine::readSensors()
+{
+    for (int i = 0; i < NUM_DIST_SENS; i++)
+        psValues[i] = (int)proximSensors[i]->getValue();
+    for (int i = 0; i < NUM_GROUND_SENS; i++)
+        gsValues[i] = (int)groundSensors[i]->getValue();
 }
 
 
-void RobotRoutine::LineFollowingModule(void) 
+void RobotRoutine::setWheelSpeedFollowLine(void) 
 {
-    int DeltaS = gs_value[GS_RIGHT] - gs_value[GS_LEFT];
+    int DeltaS = gsValues[GS_RIGHT] - gsValues[GS_LEFT];
 
-    lfm_speed[LEFT] = LFM_FORWARD_SPEED - LFM_K_GS_SPEED * DeltaS;
-    lfm_speed[RIGHT] = LFM_FORWARD_SPEED + LFM_K_GS_SPEED * DeltaS;
+    wheelSetValue[LEFT] = FORWARD_SPEED - K_GS_SPEED * DeltaS;
+    wheelSetValue[RIGHT] = FORWARD_SPEED + K_GS_SPEED * DeltaS;
 }
 
 
-bool RobotRoutine::DetectLineCrossroad(void) 
+bool RobotRoutine::detectLineCrossroad(void) 
 {
-    if (gs_value[GS_LEFT] <= GS_BLACK &&
-        gs_value[GS_CENTER] <= GS_BLACK &&
-        gs_value[GS_RIGHT] <= GS_BLACK)
+    if (gsValues[GS_LEFT] <= GS_BLACK &&
+        gsValues[GS_CENTER] <= GS_BLACK &&
+        gsValues[GS_RIGHT] <= GS_BLACK)
         return true;
 
     return false;
 }
 
-bool RobotRoutine::DetectEndOfLine(void) {
+bool RobotRoutine::detectEndOfLine(void) {
 
-    if (gs_value[GS_LEFT] >= GS_GROUND &&
-        gs_value[GS_CENTER] >= GS_GROUND &&
-        gs_value[GS_RIGHT] >= GS_GROUND)
+    if (gsValues[GS_LEFT] >= GS_GROUND &&
+        gsValues[GS_CENTER] >= GS_GROUND &&
+        gsValues[GS_RIGHT] >= GS_GROUND)
         return true;
 
     return false;
@@ -95,81 +100,81 @@ bool RobotRoutine::DetectEndOfLine(void) {
 
 void RobotRoutine::setWheelSpeedMoveStraightAhead(void)
 {
-    lfm_speed[LEFT] = LFM_FORWARD_SPEED;
-    lfm_speed[RIGHT] = LFM_FORWARD_SPEED;
+    wheelSetValue[LEFT] = FORWARD_SPEED;
+    wheelSetValue[RIGHT] = FORWARD_SPEED;
 }
 
 void RobotRoutine::setWheelSpeedTurnLeft(void)
 {
-    lfm_speed[LEFT] = 0;
-    lfm_speed[RIGHT] = LFM_FORWARD_SPEED;
+    wheelSetValue[LEFT] = 0;
+    wheelSetValue[RIGHT] = FORWARD_SPEED;
 }
 
 void RobotRoutine::setWheelSpeedTurnRight(void)
 {
-    lfm_speed[LEFT] = LFM_FORWARD_SPEED;
-    lfm_speed[RIGHT] = 0;
+    wheelSetValue[LEFT] = FORWARD_SPEED;
+    wheelSetValue[RIGHT] = 0;
 }
 
 void RobotRoutine::setWheelSpeedTurnAround(void)
 {
-    lfm_speed[LEFT] = LFM_FORWARD_SPEED;
-    lfm_speed[RIGHT] = -LFM_FORWARD_SPEED;
+    wheelSetValue[LEFT] = FORWARD_SPEED;
+    wheelSetValue[RIGHT] = -FORWARD_SPEED;
 }
 
-void RobotRoutine::CyclicBlinkingLED(void) 
+void RobotRoutine::cyclicBlinkingLED(void) 
 {
-    robotLEDs[activeLED]->set(0);
-    activeLED = (activeLED + 1) % NB_LEDS;
-    robotLEDs[activeLED]->set(1);
+    if ((basicTimeStep * ledTimeCounter++) >= LED_TIME_STEP)
+    {
+        /* disable current LED and enable next one */
+        robotLEDs[activeLED]->set(0);
+        activeLED = (activeLED + 2) % NB_LEDS;  // increment by 2 to skip RGB LEDs of Epuck V2
+        robotLEDs[activeLED]->set(1);
+            
+        /* reset LED time counter */
+        ledTimeCounter = 1;
+    }
+
 }
 
-void RobotRoutine::AllLightsOnLED(void) 
+void RobotRoutine::allLightsOnLED(void) 
 {
     for (int i = 0; i < NB_LEDS; i++) {
         robotLEDs[i]->set(1);
     }
 }
 
-void RobotRoutine::SetSpeedAndVelocity(void)
+void RobotRoutine::applyRobotWheelSpeed(void)
 {
-
-    int speed[2] = { 0,0 };
-
-    speed[LEFT] = lfm_speed[LEFT];
-    speed[RIGHT] = lfm_speed[RIGHT];
-
-    motorLeft->setVelocity(MOTOR_RATIO * speed[LEFT]);
-    motorRight->setVelocity(MOTOR_RATIO * speed[RIGHT]);
+    motors[LEFT]->setVelocity(MOTOR_RATIO * wheelSetValue[LEFT]);
+    motors[RIGHT]->setVelocity(MOTOR_RATIO * wheelSetValue[RIGHT]);
 }
 
-void RobotRoutine::PerformHalt(void)
+void RobotRoutine::performHalt(void)
 {
     // HALT 
-    lfm_speed[LEFT] = 0;
-    lfm_speed[RIGHT] = 0;
+    wheelSetValue[LEFT] = 0;
+    wheelSetValue[RIGHT] = 0;
 
-    SetSpeedAndVelocity();
+    applyRobotWheelSpeed();
 }
 
-void RobotRoutine::EnableEpuckCam(void)
+void RobotRoutine::enableCamera(void)
 {
     robotCamera->enable(50);
 }
 
-void RobotRoutine::DisableEpuckCam(void)
+void RobotRoutine::disableCamera(void)
 {
     robotCamera->disable();
 }
 
-void RobotRoutine::TakeCameraSnapshot(void)
+void RobotRoutine::takeCameraSnapshot(void)
 {
-    //EnableEpuckCam();
     robotCamera->saveImage(qrImgFileName, 100);
-    //DisableEpuckCam();
 }
 
-bool RobotRoutine::IsEpuckCamEnabled(void)
+bool RobotRoutine::isCameraEnabled(void)
 {
     // if sampling period is 0, camera is currently disabled
     return robotCamera->getSamplingPeriod() == 0 ? false : true;
@@ -184,14 +189,14 @@ bool RobotRoutine::detectObstacle(void)
 
     for (i = RobotRoutine::PS_RIGHT_00; i <= RobotRoutine::PS_RIGHT_45; i++)
     {
-        if (max_ds_value < ps_value[i]) max_ds_value = ps_value[i];
-        Activation[RobotRoutine::RIGHT] += ps_value[i];
+        if (max_ds_value < psValues[i]) max_ds_value = psValues[i];
+        Activation[RobotRoutine::RIGHT] += psValues[i];
     }
 
     for (i = RobotRoutine::PS_LEFT_45; i <= RobotRoutine::PS_LEFT_00; i++)
     {
-        if (max_ds_value < ps_value[i]) max_ds_value = ps_value[i];
-        Activation[RobotRoutine::LEFT] += ps_value[i];
+        if (max_ds_value < psValues[i]) max_ds_value = psValues[i];
+        Activation[RobotRoutine::LEFT] += psValues[i];
     }
 
     if (max_ds_value > OAM_OBST_THRESHOLD)
@@ -202,7 +207,7 @@ bool RobotRoutine::detectObstacle(void)
     return false;
 }
 
-bool RobotRoutine::getNextPacket(int* dataPacket)
+bool RobotRoutine::getNextReceiverPacket(int* dataPacket)
 {
     int* localCopy;
 

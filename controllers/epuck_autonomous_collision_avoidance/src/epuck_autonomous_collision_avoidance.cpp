@@ -13,7 +13,7 @@ int main(int argc, char **argv) {
     /*** create all Object instances ***/
     robot = new Robot();
     robotroutine = new RobotRoutine(robot);
-    pathplanner = new PathPlannerEPuck(robotroutine->robotName);
+    pathplanner = new PathPlannerEPuck(robotroutine->getRobotName());
     qrmodule = new QRModuleEPuckSGD();
     commWifi = new CommunicationModuleWifi();
         
@@ -21,7 +21,7 @@ int main(int argc, char **argv) {
     timeStep = robotroutine->basicTimeStep;
 
     /* before entering main loop init camera by enabling it */
-    robotroutine->EnableEpuckCam();
+    robotroutine->enableCamera();
 
     /*************************************/
     /************* MAIN LOOP *************/
@@ -33,35 +33,25 @@ int main(int argc, char **argv) {
     *   
     *   Moving through environment: 
     *   depending on the current state(s) a speed for each wheel is configured in parameter
-    *   lfm_speed of the robotroutine object. 
+    *   wheelSetValue of the robotroutine object. 
     *   At the end of each main loop pass the preconfigured speed is then applied to the robot
     * 
     */
     while (robot->step(timeStep) != -1) {
 
-        /*   if (fd == 0) {
-            fd = commWifi->socket_accept(sfd);
-            if (fd > 0)
-                commWifi->socket_set_non_blocking(fd);
-            else if (fd < 0)
-                ;
-        }
-        */
-        robotroutine->ReadSensors();
+        /* read current state of sensors */
+        robotroutine->readSensors();
+
 
         /*************************************/
         /********** LED CYCLE BLOCK **********/
         if (endOfLineGoalReached || obstacleDetected /* || crossroadManeuverActive */ )
         {
-            robotroutine->AllLightsOnLED();
+            robotroutine->allLightsOnLED();
         }
         else 
         {
-            if ((timeStep * ledCounter++) >= RobotRoutine::LED_TIME_STEP)
-            {
-                robotroutine->CyclicBlinkingLED();
-                ledCounter = 1;
-            }
+            robotroutine->cyclicBlinkingLED();
         }
         /*************************************/
         /*************************************/
@@ -71,12 +61,12 @@ int main(int argc, char **argv) {
         /********** CONNECT TO SUPERVISOR BLOCK **********/
         if (!supervisorConnected)
         {            
-            if (commWifi->tryToConnectToSupervisor(robotroutine->robotName)) {
+            if (commWifi->tryToConnectToSupervisor(robotroutine->getRobotName())) {
 
                 supervisorConnected = true;
             }
             else {
-                std::cerr << robotroutine->robotName << ": failed to connect to supervisor." << std::endl;
+                std::cerr << robotroutine->getRobotName() << ": failed to connect to supervisor." << std::endl;
             }
         }
         /*************************************/
@@ -110,9 +100,9 @@ int main(int argc, char **argv) {
                 if (initProcedureDistanceToScanCounter >= qrDistanceToScanPos) {
 
                     /* check if camera is enabled and take a snapshot via camera while robot is facing towards QR code*/
-                    if (robotroutine->IsEpuckCamEnabled()) {
+                    if (robotroutine->isCameraEnabled()) {
 
-                        robotroutine->TakeCameraSnapshot();
+                        robotroutine->takeCameraSnapshot();
                     }
                     else {
                         /*
@@ -120,8 +110,8 @@ int main(int argc, char **argv) {
                         *   ensure camera is fully enabled when taking a snapshot.
                         *   Finish this step of routine afterwards
                         */                          
-                        robotroutine->PerformHalt();
-                        robotroutine->EnableEpuckCam();
+                        robotroutine->performHalt();
+                        robotroutine->enableCamera();
                         robotActiveWait(20);
                         continue;
                     }
@@ -134,8 +124,8 @@ int main(int argc, char **argv) {
 
                     if (readSuccessful) {
 
-                        // deactivate epuck camera since reading was successful
-                        robotroutine->DisableEpuckCam();
+                        // deactivate camera since reading was successful
+                        robotroutine->disableCamera();
 
                         // save parameters read from QR code
                         pathplanner->setMatrixDimension(qrCodeParams.mapDimension);
@@ -164,7 +154,7 @@ int main(int argc, char **argv) {
                     }
                 }
                 else {
-                    robotroutine->LineFollowingModule();
+                    robotroutine->setWheelSpeedFollowLine();
                     initProcedureDistanceToScanCounter += timeStep;
                 }
             }
@@ -188,7 +178,7 @@ int main(int argc, char **argv) {
             *   check if the ground sensors of the robot have detected a crossroad or
             *   if the crossroad maneuver behaviour is already active
             */
-            if (crossroadManeuverActive || robotroutine->DetectLineCrossroad())
+            if (crossroadManeuverActive || robotroutine->detectLineCrossroad())
             {
                 if (crossroadManeuverActive) {
                     /*
@@ -281,7 +271,7 @@ int main(int argc, char **argv) {
                 obstacleDetected = true;
                 alternativePathReceived = false; 
 
-                robotroutine->PerformHalt();         
+                robotroutine->performHalt();         
 
             }
             else if (obstacleDetected) {
@@ -337,8 +327,6 @@ int main(int argc, char **argv) {
                         // reset variables -> reset_controller_state();
                         pathPlanningCompleted = false;
                         initProcedureDone = false;
-
-                        // robotroutine->EnableEpuckCam();
                     }
                     else 
                     {
@@ -346,11 +334,11 @@ int main(int argc, char **argv) {
                         *   if no endless mode active, move until end of line and stop
                         */
                         if (robotroutine->detectObstacle()) {
-                            robotroutine->PerformHalt();
+                            robotroutine->performHalt();
                             endOfLineGoalReached = true;
                         }
                         else {
-                            robotroutine->LineFollowingModule();
+                            robotroutine->setWheelSpeedFollowLine();
                         }
                     }
                 }
@@ -359,7 +347,7 @@ int main(int argc, char **argv) {
                     /*
                     *   following path not completed yet, continue following line
                     */
-                    robotroutine->LineFollowingModule();
+                    robotroutine->setWheelSpeedFollowLine();
                 }
             }
             /*************************************/
@@ -369,7 +357,7 @@ int main(int argc, char **argv) {
         /*
         *   apply configured speed for each wheel after all states were checked 
         */
-        robotroutine->SetSpeedAndVelocity();
+        robotroutine->applyRobotWheelSpeed();
 
     };  // END OF MAIN LOOP
     /*************************************/
