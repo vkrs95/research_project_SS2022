@@ -5,6 +5,7 @@ int main(int argc, char **argv) {
     /*** create all Object instances ***/
     robot = new Robot();
     emitter = robot->getEmitter("emitter");
+    //camera = robot->getCamera("camera");
     socketServer = new CommModuleTCPSocketServer(1000); // initialise socket server on port 1000
     collisionHandler = new CollisionHandler();
 
@@ -13,6 +14,8 @@ int main(int argc, char **argv) {
 
     std::list<CollisionNotification> collisionNotList;
     std::map<std::string, std::vector<coordinate>> clientPaths;
+
+    //camera->enable(50);
 
     while (robot->step(mTimeStep) != -1) {
 
@@ -44,6 +47,8 @@ int main(int argc, char **argv) {
         }
             
         robotActiveWait(50);
+
+        //camera->saveImage("supervisor_cam_test.jpg", 100);
     }
 
     /*  optional cleanup  */

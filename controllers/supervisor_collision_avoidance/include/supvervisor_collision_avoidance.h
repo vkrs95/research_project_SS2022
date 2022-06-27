@@ -1,6 +1,7 @@
 /* webots imports */
 #include <webots/Robot.hpp>
 #include <webots/Emitter.hpp>
+#include <webots/Camera.hpp>
 
 /* module imports */
 #include "CommModuleSupervisor.h"
@@ -14,6 +15,7 @@ using namespace webots;
 /*** object pointers ***/
 Robot* robot;
 Emitter* emitter;
+//Camera* camera;
 CommModuleTCPSocketServer* socketServer;
 CollisionHandler* collisionHandler;
 

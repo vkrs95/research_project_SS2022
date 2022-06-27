@@ -3,8 +3,8 @@ WorldInfo {
   coordinateSystem "NUE"
 }
 Viewpoint {
-  orientation 0.9119447456102837 -0.3836810985751203 -0.14541525212295844 5.4954288654462715
-  position 0.6515356749854542 1.3246644992087595 1.4032251097409492
+  orientation 0.8597423391751536 -0.479254403201621 -0.17651721514201743 5.473686109315012
+  position 0.6762759151478916 1.441351851000814 1.4854065170883297
 }
 TexturedBackground {
 }
@@ -31,7 +31,7 @@ RectangleArena {
   }
 }
 E-puck {
-  translation -0.201855 -2.22045e-15 -0.196927
+  translation -0.204735 -2.44249e-15 -0.194233
   rotation 0 1 0 1.5708
   name "EPuck 1"
   controller "epuck_autonomous_collision_avoidance"
@@ -45,7 +45,7 @@ E-puck {
   ]
 }
 E-puck {
-  translation -0.00041955 -2.22045e-15 -0.200437
+  translation 0.000902267 -2.22045e-15 -0.202254
   rotation 0 -1 0 -5.307179586466759e-06
   name "EPuck 2"
   controller "epuck_autonomous_collision_avoidance"
@@ -59,7 +59,22 @@ E-puck {
   ]
 }
 Robot {
+  translation 1.54719e-06 1.05 -5.83702e-06
+  rotation 1 -1.19015e-06 1.19015e-06 -1.5708053071795867
   children [
+    Shape {
+      appearance PBRAppearance {
+        baseColor 1 0.333333 0
+        metalness 0
+      }
+      geometry Box {
+        size 0.05 0.05 0.1
+      }
+    }
+    Camera {
+      width 800
+      height 800
+    }
     Emitter {
       range 10
       baudRate 115200
