@@ -3,7 +3,7 @@
 
 template<typename T>
 
-class QRModule
+class IQRModule
 {
 public:
 

@@ -9,7 +9,7 @@
 Robot* robot;
 IRobotControl* robotControl;
 PathPlannerEPuck* pathplanner;
-QRModule<SGDQRParams>* qrmodule;
+IQRModule<SGDQRParams>* qrmodule;
 CommunicationModuleWifi* commWifi;
 
 void robotActiveWait(int numOfSteps);

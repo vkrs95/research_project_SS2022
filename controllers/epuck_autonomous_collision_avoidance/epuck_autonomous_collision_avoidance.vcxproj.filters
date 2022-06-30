@@ -132,7 +132,7 @@
     <ClInclude Include="include\QRModuleEPuckSGD.h">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="include\QRModule.h">
+    <ClInclude Include="include\IQRModule.h">
       <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="include\PathPlanningModule.h">

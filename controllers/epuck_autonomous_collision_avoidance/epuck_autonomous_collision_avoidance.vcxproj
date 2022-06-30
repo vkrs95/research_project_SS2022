@@ -177,7 +177,7 @@
     <ClInclude Include="include\epuck_autonomous_collision_avoidance.h" />
     <ClInclude Include="include\PathPlannerEPuck.h" />
     <ClInclude Include="include\PathPlanningModule.h" />
-    <ClInclude Include="include\QRModule.h" />
+    <ClInclude Include="include\IQRModule.h" />
     <ClInclude Include="include\QRModuleEPuckSGD.h" />
     <ClInclude Include="include\RobotControlEPuck.h" />
     <ClInclude Include="lib\path_planning\include\path_planning\a_star.hpp" />
