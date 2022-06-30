@@ -15,7 +15,7 @@ int main(int argc, char **argv) {
     robotControl = new RobotControlEPuck(robot);
     pathplanner = new PathPlannerEPuck(robotControl->getRobotName());
     qrmodule = new QRModuleEPuckSGD();
-    commWifi = new CommunicationModuleWifi();
+    commModule = new CommModuleTCP();
         
     /*** get time step from robot routine ***/
     timeStep = robotControl->getTimeStep();
@@ -61,7 +61,7 @@ int main(int argc, char **argv) {
         /********** CONNECT TO SUPERVISOR BLOCK **********/
         if (!supervisorConnected)
         {            
-            if (commWifi->tryToConnectToSupervisor(robotControl->getRobotName())) {
+            if (commModule->registerAtSupervisor(robotControl->getRobotName())) {
 
                 supervisorConnected = true;
             }
@@ -266,7 +266,7 @@ int main(int argc, char **argv) {
                 pathplanner->getObstacleParameters(&startNode, &goalNode, &collisionNode);
 
                 /* notify supervisor of collision */
-                commWifi->reportCollision(startNode, goalNode, collisionNode);
+                commModule->reportCollision(startNode, goalNode, collisionNode);
 
                 /* set robot states for further event handling */
                 obstacleDetected = true;
@@ -285,7 +285,7 @@ int main(int argc, char **argv) {
                     std::vector<std::tuple<int, int>> path;
 
                     /* check routine step, check for supervisor response */
-                    if (commWifi->receiveCollisionReply(&path)) {
+                    if (commModule->receiveCollisionReply(&path)) {
                         pathplanner->runAlternativePath(path);
                         alternativePathReceived = true;
                     }

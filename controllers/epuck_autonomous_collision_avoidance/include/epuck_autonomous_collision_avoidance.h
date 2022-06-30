@@ -1,7 +1,7 @@
 #include "RobotControlEPuck.h"
 #include "PathPlannerEPuck.h"
 #include "QRModuleEPuckSGD.h"
-#include "CommunicationModuleWifi.h"
+#include "CommModuleTCP.h"
 
 #pragma once
 
@@ -10,14 +10,13 @@ Robot* robot;
 IRobotControl* robotControl;
 PathPlannerEPuck* pathplanner;
 IQRModule<SGDQRParams>* qrmodule;
-CommunicationModuleWifi* commWifi;
+ICommModule* commModule;
 
 void robotActiveWait(int numOfSteps);
 
 /*** define member variables ***/
 int timeStep;
 unsigned int turnCounter = 0;
-int connectionFD = 0;
 unsigned int crossroadManeuverThreshold;    // is set when next direction is read  
 const unsigned int TURNLEFTRIGHTTHRESHOLD = 3200;
 const unsigned int TURNAROUNDTHRESHOLD = 3500; // TURNLEFTRIGHTTHRESHOLD;

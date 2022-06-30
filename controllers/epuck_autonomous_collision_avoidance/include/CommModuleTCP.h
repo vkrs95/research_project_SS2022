@@ -8,7 +8,6 @@
 #include <iostream>
 #include <sstream>
 #include <thread>
-#include <vector>
 
 #ifdef _WIN32
 #include <winsock.h>
@@ -24,29 +23,22 @@
 #include <unistd.h> /* definition of close */
 #endif
 
-using coordinate = std::tuple<int, int>;
+/* include abstract module interface */
+#include "ICommModule.h"
 
-class CommunicationModuleWifi
+class CommModuleTCP : 
+    public ICommModule
 {
 
 public:
 
-    /*
-    *   AbstractCommunicationModule
-    *   registerAtSupervisor
-    *   unregisterFromSupervisor
-    *   reportCollision
-    *   receiveCollisionReply
-    */
-
-
-    CommunicationModuleWifi(int port = 1000);
-    bool tryToConnectToSupervisor(std::string robotName);
+    CommModuleTCP(int port = 1000);
+    bool registerAtSupervisor(std::string robotName);
     void unregisterFromSupervisor(std::string reason = std::string("none"));
-    bool reportCollision(std::tuple<int, int> startXY, 
-                            std::tuple<int, int> goalXY, 
-                            std::tuple<int, int> collisionXY);
-    bool receiveCollisionReply(std::vector<std::tuple<int, int>>* path);
+    bool reportCollision(coordinate startXY, 
+                            coordinate goalXY, 
+                            coordinate collisionXY);
+    bool receiveCollisionReply(std::vector<coordinate>* path);
 
 private:
 

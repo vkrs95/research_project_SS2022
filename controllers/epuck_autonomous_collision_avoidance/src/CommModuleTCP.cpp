@@ -1,6 +1,6 @@
-#include "CommunicationModuleWifi.h"
+#include "CommModuleTCP.h"
 
-CommunicationModuleWifi::CommunicationModuleWifi(int port)
+CommModuleTCP::CommModuleTCP(int port)
 {
     wifiPort = port;
     connectSocket = INVALID_SOCKET;
@@ -8,7 +8,7 @@ CommunicationModuleWifi::CommunicationModuleWifi(int port)
 }
 
 
-bool CommunicationModuleWifi::socketInit() {
+bool CommModuleTCP::socketInit() {
 #ifdef _WIN32 /* initialize the socket API */
     WSADATA info;
     if (WSAStartup(MAKEWORD(1, 1), &info) != 0) {
@@ -20,7 +20,7 @@ bool CommunicationModuleWifi::socketInit() {
     return true;
 }
 
-bool CommunicationModuleWifi::socketClose(int fd) {
+bool CommModuleTCP::socketClose(int fd) {
 #ifdef _WIN32
     return (closesocket(fd) == 0) ? true : false;
 #else
@@ -28,7 +28,7 @@ bool CommunicationModuleWifi::socketClose(int fd) {
 #endif
 }
 
-bool CommunicationModuleWifi::socketCleanup() {
+bool CommModuleTCP::socketCleanup() {
 #ifdef _WIN32
     return (WSACleanup() == 0) ? true : false;
 #else
@@ -36,7 +36,7 @@ bool CommunicationModuleWifi::socketCleanup() {
 #endif
 }
 
-bool CommunicationModuleWifi::socketSetNonBlocking(int fd) {
+bool CommModuleTCP::socketSetNonBlocking(int fd) {
     if (fd < 0)
         return false;
 #ifdef _WIN32
@@ -48,7 +48,7 @@ bool CommunicationModuleWifi::socketSetNonBlocking(int fd) {
 #endif
 }
 
-bool CommunicationModuleWifi::tryToConnectToSupervisor(std::string robotName)
+bool CommModuleTCP::registerAtSupervisor(std::string robotName)
 {
     if (!socketApiInitialized) {
         if (!socketInit()) {
@@ -149,7 +149,7 @@ bool CommunicationModuleWifi::tryToConnectToSupervisor(std::string robotName)
     return false;
 }
 
-bool CommunicationModuleWifi::sendMessage(const char* message, size_t msgLen)
+bool CommModuleTCP::sendMessage(const char* message, size_t msgLen)
 {
     int sendResult;
 
@@ -157,14 +157,14 @@ bool CommunicationModuleWifi::sendMessage(const char* message, size_t msgLen)
     sendResult = send(connectSocket, message, maxMsgLen, 0);
 
     if (sendResult == SOCKET_ERROR) {
-        std::cerr << "CommunicationModuleWifi (" << mClientName << "): Failed to send message to server" << std::endl;
+        std::cerr << "CommModuleTCP (" << mClientName << "): Failed to send message to server" << std::endl;
         return false;
     }
 
     return true;
 }
 
-std::string CommunicationModuleWifi::receiveMessage(void)
+std::string CommModuleTCP::receiveMessage(void)
 {
     char recvBuffer[maxMsgLen] = {};
 
@@ -186,16 +186,16 @@ std::string CommunicationModuleWifi::receiveMessage(void)
 
         if (recvSize > 0) {
             std::string recvStr(recvBuffer);
-            //std::cout << "CommunicationModuleWifi(" << mClientName << ") : received message string'" << recvStr << "'" << std::endl;
+            //std::cout << "CommModuleTCP(" << mClientName << ") : received message string'" << recvStr << "'" << std::endl;
             return recvStr;
         }
     }
 
-    // std::cerr << "CommunicationModuleWifi (" << mClientName << "): No data received from server" << std::endl;
+    // std::cerr << "CommModuleTCP (" << mClientName << "): No data received from server" << std::endl;
     return "";
 }
 
-bool CommunicationModuleWifi::sendRegistrationToSupervisor(std::string robotName)
+bool CommModuleTCP::sendRegistrationToSupervisor(std::string robotName)
 {
     /* prepare register message */
     std::ostringstream stringStream;
@@ -209,7 +209,7 @@ bool CommunicationModuleWifi::sendRegistrationToSupervisor(std::string robotName
     return true;
 }
 
-bool CommunicationModuleWifi::receiveRegistrationAck(void)
+bool CommModuleTCP::receiveRegistrationAck(void)
 {
     std::string msg = receiveMessage();
 
@@ -221,13 +221,13 @@ bool CommunicationModuleWifi::receiveRegistrationAck(void)
             return true;
         }   
 
-        std::cout << "CommunicationModuleWifi: error when trying to receive ACK msg. Received: " << msgIdentifier << std::endl;
+        std::cout << "CommModuleTCP: error when trying to receive ACK msg. Received: " << msgIdentifier << std::endl;
     }
 
     return false;
 }
 
-void CommunicationModuleWifi::unregisterFromSupervisor(std::string reason)
+void CommModuleTCP::unregisterFromSupervisor(std::string reason)
 {
     /* prepare unregister message */
     std::ostringstream stringStream;
@@ -237,10 +237,10 @@ void CommunicationModuleWifi::unregisterFromSupervisor(std::string reason)
     sendMessage(msgString.c_str(), msgString.size());
 }
 
-bool CommunicationModuleWifi::reportCollision(
-    std::tuple<int, int> startXY,
-    std::tuple<int, int> goalXY,
-    std::tuple<int, int> collisionXY)
+bool CommModuleTCP::reportCollision(
+    coordinate startXY,
+    coordinate goalXY,
+    coordinate collisionXY)
 {
     /* prepare collision message */
     /* e.g. 2;1,2;6,0;3,2 */
@@ -256,7 +256,7 @@ bool CommunicationModuleWifi::reportCollision(
     return sendMessage(msgString.c_str(), msgString.size());
 }
 
-bool CommunicationModuleWifi::receiveCollisionReply(std::vector<std::tuple<int, int>>* path)
+bool CommModuleTCP::receiveCollisionReply(std::vector<std::tuple<int, int>>* path)
 {
     std::string msg = receiveMessage();
 
@@ -276,7 +276,7 @@ bool CommunicationModuleWifi::receiveCollisionReply(std::vector<std::tuple<int, 
     return false;
 }
 
-std::vector<coordinate> CommunicationModuleWifi::parsePath(std::string msg)
+std::vector<coordinate> CommModuleTCP::parsePath(std::string msg)
 {
     std::string subStr;
     std::vector<coordinate> path;
@@ -298,7 +298,7 @@ std::vector<coordinate> CommunicationModuleWifi::parsePath(std::string msg)
     return path;
 }
 
-coordinate CommunicationModuleWifi::getCoordinateTuple(std::string tupleString)
+coordinate CommModuleTCP::getCoordinateTuple(std::string tupleString)
 {
     /* passed tuple string is expected to be build up: xCoord,yCoord */
     int xCoord = 0, yCoord = 0;

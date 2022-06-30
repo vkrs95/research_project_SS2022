@@ -161,18 +161,19 @@
     <ClCompile Include="$(WEBOTS_HOME)\resources\languages\cpp\Speaker.cpp" />
     <ClCompile Include="$(WEBOTS_HOME)\resources\languages\cpp\Supervisor.cpp" />
     <ClCompile Include="$(WEBOTS_HOME)\resources\languages\cpp\TouchSensor.cpp" />
-    <ClCompile Include="CommunicationModuleWifi.cpp" />
     <ClCompile Include="lib\path_planning\lib\utils\src\utils.cpp" />
     <ClCompile Include="lib\path_planning\src\a_star.cpp" />
     <ClCompile Include="lib\path_planning\src\dijkstra.cpp" />
+    <ClCompile Include="src\CommModuleTCP.cpp" />
     <ClCompile Include="src\epuck_autonomous_collision_avoidance.cpp" />
     <ClCompile Include="src\PathPlannerEPuck.cpp" />
     <ClCompile Include="src\QRModuleEPuckSGD.cpp" />
     <ClCompile Include="src\RobotControlEPuck.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="CollisionSupervisorModule.h" />
-    <ClInclude Include="CommunicationModuleWifi.h" />
+    <ClInclude Include="include\CollisionSupervisorModule.h" />
+    <ClInclude Include="include\CommModuleTCP.h" />
+    <ClInclude Include="include\ICommModule.h" />
     <ClInclude Include="include\IRobotControl.h" />
     <ClInclude Include="include\epuck_autonomous_collision_avoidance.h" />
     <ClInclude Include="include\PathPlannerEPuck.h" />
