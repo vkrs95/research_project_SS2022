@@ -111,6 +111,7 @@ int main(int argc, char **argv) {
                         *   Finish this step of routine afterwards
                         */                          
                         robotControl->setMotorSpeedHalt();
+                        robotControl->applyRobotMotorSpeed();
                         robotControl->enableCamera();
                         robotActiveWait(20);
                         continue;
@@ -319,7 +320,7 @@ int main(int argc, char **argv) {
                 */
                 if (pathplanner->pathCompleted()) // all direction commands have been executed
                 {                    
-                    if (epuckEndlessMode) 
+                    if (endlessMode) 
                     {
                         /*
                         *   endless mode behavior

@@ -26,7 +26,7 @@ const unsigned int TURNAROUNDTHRESHOLD = 3500; // TURNLEFTRIGHTTHRESHOLD;
 /* robot parameters */
 unsigned int groundSensorJitter = 0;
 unsigned int groundSensorJitterThreshold = 4;
-bool epuckEndlessMode = true;
+bool endlessMode = true;
 unsigned int qrDistanceToScanPos = 2200;
 unsigned int initProcedureDistanceToScanCounter = 0;
 
