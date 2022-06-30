@@ -124,6 +124,9 @@
     <ClCompile Include="src\CommModuleTCP.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\MainControllerEPuck.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\RobotControlEPuck.h">
@@ -139,9 +142,6 @@
       <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="include\PathPlannerEPuck.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="include\epuck_autonomous_collision_avoidance.h">
       <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="lib\path_planning\lib\utils\include\utils\utils.hpp">
@@ -163,6 +163,12 @@
       <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="include\ICommModule.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\IMainController.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\MainControllerEPuck.h">
       <Filter>include</Filter>
     </ClInclude>
   </ItemGroup>

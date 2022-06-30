@@ -18,7 +18,7 @@ public:
 
 	/*********************************************************
 	*
-	*	public functions provided by robot routine module
+	*	public functions
 	*
 	*********************************************************/
 	

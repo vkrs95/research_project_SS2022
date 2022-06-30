@@ -166,6 +166,7 @@
     <ClCompile Include="lib\path_planning\src\dijkstra.cpp" />
     <ClCompile Include="src\CommModuleTCP.cpp" />
     <ClCompile Include="src\epuck_autonomous_collision_avoidance.cpp" />
+    <ClCompile Include="src\MainControllerEPuck.cpp" />
     <ClCompile Include="src\PathPlannerEPuck.cpp" />
     <ClCompile Include="src\QRModuleEPuckSGD.cpp" />
     <ClCompile Include="src\RobotControlEPuck.cpp" />
@@ -174,8 +175,9 @@
     <ClInclude Include="include\CollisionSupervisorModule.h" />
     <ClInclude Include="include\CommModuleTCP.h" />
     <ClInclude Include="include\ICommModule.h" />
+    <ClInclude Include="include\IMainController.h" />
     <ClInclude Include="include\IRobotControl.h" />
-    <ClInclude Include="include\epuck_autonomous_collision_avoidance.h" />
+    <ClInclude Include="include\MainControllerEPuck.h" />
     <ClInclude Include="include\PathPlannerEPuck.h" />
     <ClInclude Include="include\PathPlanningModule.h" />
     <ClInclude Include="include\IQRModule.h" />
