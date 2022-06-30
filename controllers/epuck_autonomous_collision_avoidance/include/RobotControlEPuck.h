@@ -35,13 +35,13 @@ public:
 	bool detectEndOfLine(void);
 	
 	/* motor control functions */
-	void setWheelSpeedFollowLine(void);
-	void setWheelSpeedMoveStraightAhead(void);
-	void setWheelSpeedTurnLeft(void);
-	void setWheelSpeedTurnRight(void);
-	void setWheelSpeedTurnAround(void);
-	void setWheelSpeedHalt(void);
-	void applyRobotWheelSpeed(void);
+	void setMotorSpeedFollowLine(void);
+	void setMotorSpeedMoveStraightAhead(void);
+	void setMotorSpeedTurnLeft(void);
+	void setMotorSpeedTurnRight(void);
+	void setMotorSpeedTurnAround(void);
+	void setMotorSpeedHalt(void);
+	void applyRobotMotorSpeed(void);
 
 	/* LED functions */
 	void cyclicBlinkingLED(void);

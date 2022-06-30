@@ -35,13 +35,13 @@ public:
 	virtual bool detectEndOfLine(void) = 0;
 	
 	/* basic motor control functions */
-	virtual void setWheelSpeedFollowLine(void) = 0;
-	virtual void setWheelSpeedMoveStraightAhead(void) = 0;
-	virtual void setWheelSpeedTurnLeft(void) = 0;
-	virtual void setWheelSpeedTurnRight(void) = 0;
-	virtual void setWheelSpeedTurnAround(void) = 0;
-	virtual void setWheelSpeedHalt(void) = 0;
-	virtual void applyRobotWheelSpeed(void) = 0;
+	virtual void setMotorSpeedFollowLine(void) = 0;
+	virtual void setMotorSpeedMoveStraightAhead(void) = 0;
+	virtual void setMotorSpeedTurnLeft(void) = 0;
+	virtual void setMotorSpeedTurnRight(void) = 0;
+	virtual void setMotorSpeedTurnAround(void) = 0;
+	virtual void setMotorSpeedHalt(void) = 0;
+	virtual void applyRobotMotorSpeed(void) = 0;
 
 	/* LED functions */
 	virtual void cyclicBlinkingLED(void) = 0;

@@ -87,7 +87,7 @@ int main(int argc, char **argv) {
 
             if (pathPlanningCompleted) {
 
-                robotControl->setWheelSpeedTurnAround();
+                robotControl->setMotorSpeedTurnAround();
                 turnCounter += timeStep;
 
                 if (turnCounter >= TURNAROUNDTHRESHOLD) {
@@ -110,7 +110,7 @@ int main(int argc, char **argv) {
                         *   ensure camera is fully enabled when taking a snapshot.
                         *   Finish this step of routine afterwards
                         */                          
-                        robotControl->setWheelSpeedHalt();
+                        robotControl->setMotorSpeedHalt();
                         robotControl->enableCamera();
                         robotActiveWait(20);
                         continue;
@@ -154,7 +154,7 @@ int main(int argc, char **argv) {
                     }
                 }
                 else {
-                    robotControl->setWheelSpeedFollowLine();
+                    robotControl->setMotorSpeedFollowLine();
                     initProcedureDistanceToScanCounter += timeStep;
                 }
             }
@@ -222,15 +222,15 @@ int main(int argc, char **argv) {
                         *   configure wheel speed and maneuver threshold according to moving direction
                         */
                         if (nextMovingDirection == turnLeft) {
-                            robotControl->setWheelSpeedTurnLeft();
+                            robotControl->setMotorSpeedTurnLeft();
                             crossroadManeuverThreshold = TURNLEFTRIGHTTHRESHOLD;
                         }
                         else if (nextMovingDirection == turnRight) {
-                            robotControl->setWheelSpeedTurnRight();
+                            robotControl->setMotorSpeedTurnRight();
                             crossroadManeuverThreshold = TURNLEFTRIGHTTHRESHOLD;
                         }
                         else if (nextMovingDirection == turnAround) {
-                            robotControl->setWheelSpeedTurnAround();
+                            robotControl->setMotorSpeedTurnAround();
                             crossroadManeuverThreshold = TURNAROUNDTHRESHOLD;
                         }
                         else {
@@ -238,7 +238,7 @@ int main(int argc, char **argv) {
                             *   nextMovingDirection == straightOn, configure wheel speed and maneuver threshold.
                             *   when moving straight ahead on a crossroad, use reduced threshold until movement is done
                             */
-                            robotControl->setWheelSpeedMoveStraightAhead();
+                            robotControl->setMotorSpeedMoveStraightAhead();
                             crossroadManeuverThreshold = TURNLEFTRIGHTTHRESHOLD / 8;
                         }
 
@@ -271,7 +271,7 @@ int main(int argc, char **argv) {
                 obstacleDetected = true;
                 alternativePathReceived = false; 
 
-                robotControl->setWheelSpeedHalt();
+                robotControl->setMotorSpeedHalt();
 
             }
             else if (obstacleDetected) {
@@ -295,7 +295,7 @@ int main(int argc, char **argv) {
                     *   Supervisor replied with alternative path. Turn around, move to predecessor node and 
                     *   continue following alternative path
                     */
-                    robotControl->setWheelSpeedTurnAround();
+                    robotControl->setMotorSpeedTurnAround();
 
                     turnCounter += timeStep;
 
@@ -334,11 +334,11 @@ int main(int argc, char **argv) {
                         *   if no endless mode active, move until end of line and stop
                         */
                         if (robotControl->detectObstacle()) {
-                            robotControl->setWheelSpeedHalt();
+                            robotControl->setMotorSpeedHalt();
                             endOfLineGoalReached = true;
                         }
                         else {
-                            robotControl->setWheelSpeedFollowLine();
+                            robotControl->setMotorSpeedFollowLine();
                         }
                     }
                 }
@@ -347,7 +347,7 @@ int main(int argc, char **argv) {
                     /*
                     *   following path not completed yet, continue following line
                     */
-                    robotControl->setWheelSpeedFollowLine();
+                    robotControl->setMotorSpeedFollowLine();
                 }
             }
             /*************************************/
@@ -357,7 +357,7 @@ int main(int argc, char **argv) {
         /*
         *   apply configured speed for each wheel after all states were checked 
         */
-        robotControl->applyRobotWheelSpeed();
+        robotControl->applyRobotMotorSpeed();
 
     };  // END OF MAIN LOOP
     /*************************************/

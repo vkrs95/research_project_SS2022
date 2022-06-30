@@ -79,7 +79,7 @@ void RobotControlEPuck::readSensors()
 }
 
 
-void RobotControlEPuck::setWheelSpeedFollowLine(void) 
+void RobotControlEPuck::setMotorSpeedFollowLine(void) 
 {
     int DeltaS = gsValues[GS_RIGHT] - gsValues[GS_LEFT];
 
@@ -108,25 +108,25 @@ bool RobotControlEPuck::detectEndOfLine(void) {
     return false;
 }
 
-void RobotControlEPuck::setWheelSpeedMoveStraightAhead(void)
+void RobotControlEPuck::setMotorSpeedMoveStraightAhead(void)
 {
     wheelSetValue[LEFT] = FORWARD_SPEED;
     wheelSetValue[RIGHT] = FORWARD_SPEED;
 }
 
-void RobotControlEPuck::setWheelSpeedTurnLeft(void)
+void RobotControlEPuck::setMotorSpeedTurnLeft(void)
 {
     wheelSetValue[LEFT] = 0;
     wheelSetValue[RIGHT] = FORWARD_SPEED;
 }
 
-void RobotControlEPuck::setWheelSpeedTurnRight(void)
+void RobotControlEPuck::setMotorSpeedTurnRight(void)
 {
     wheelSetValue[LEFT] = FORWARD_SPEED;
     wheelSetValue[RIGHT] = 0;
 }
 
-void RobotControlEPuck::setWheelSpeedTurnAround(void)
+void RobotControlEPuck::setMotorSpeedTurnAround(void)
 {
     wheelSetValue[LEFT] = FORWARD_SPEED;
     wheelSetValue[RIGHT] = -FORWARD_SPEED;
@@ -154,7 +154,7 @@ void RobotControlEPuck::allLightsOnLED(void)
     }
 }
 
-void RobotControlEPuck::applyRobotWheelSpeed(void)
+void RobotControlEPuck::applyRobotMotorSpeed(void)
 {
     int speed[2];
 
@@ -165,7 +165,7 @@ void RobotControlEPuck::applyRobotWheelSpeed(void)
     motors[RIGHT]->setVelocity(MOTOR_RATIO * speed[RIGHT]);
 }
 
-void RobotControlEPuck::setWheelSpeedHalt(void)
+void RobotControlEPuck::setMotorSpeedHalt(void)
 {
     wheelSetValue[LEFT] = 0;
     wheelSetValue[RIGHT] = 0;
