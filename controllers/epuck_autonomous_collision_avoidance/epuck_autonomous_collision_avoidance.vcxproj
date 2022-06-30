@@ -168,17 +168,18 @@
     <ClCompile Include="src\epuck_autonomous_collision_avoidance.cpp" />
     <ClCompile Include="src\PathPlannerEPuck.cpp" />
     <ClCompile Include="src\QRModuleEPuckSGD.cpp" />
-    <ClCompile Include="src\RobotRoutine.cpp" />
+    <ClCompile Include="src\RobotControlEPuck.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CollisionSupervisorModule.h" />
     <ClInclude Include="CommunicationModuleWifi.h" />
+    <ClInclude Include="include\IRobotControl.h" />
     <ClInclude Include="include\epuck_autonomous_collision_avoidance.h" />
     <ClInclude Include="include\PathPlannerEPuck.h" />
     <ClInclude Include="include\PathPlanningModule.h" />
     <ClInclude Include="include\QRModule.h" />
     <ClInclude Include="include\QRModuleEPuckSGD.h" />
-    <ClInclude Include="include\RobotRoutine.h" />
+    <ClInclude Include="include\RobotControlEPuck.h" />
     <ClInclude Include="lib\path_planning\include\path_planning\a_star.hpp" />
     <ClInclude Include="lib\path_planning\include\path_planning\dijkstra.hpp" />
     <ClInclude Include="lib\path_planning\lib\utils\include\utils\utils.hpp" />

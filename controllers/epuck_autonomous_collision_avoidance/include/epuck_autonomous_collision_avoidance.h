@@ -1,4 +1,4 @@
-#include "RobotRoutine.h"
+#include "RobotControlEPuck.h"
 #include "PathPlannerEPuck.h"
 #include "QRModuleEPuckSGD.h"
 #include "CommunicationModuleWifi.h"
@@ -7,7 +7,7 @@
 
 /*** object pointers ***/
 Robot* robot;
-RobotRoutine* robotroutine;
+IRobotControl* robotControl;
 PathPlannerEPuck* pathplanner;
 QRModule<SGDQRParams>* qrmodule;
 CommunicationModuleWifi* commWifi;

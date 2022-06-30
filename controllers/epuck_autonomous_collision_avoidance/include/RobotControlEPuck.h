@@ -1,9 +1,4 @@
-#include <webots/Robot.hpp>
-#include <webots/Motor.hpp>
-#include <webots/DistanceSensor.hpp>
-#include <webots/LED.hpp>
-#include <webots/Camera.hpp>
-#include <webots/Receiver.hpp>
+#include <IRobotControl.h>
 
 #include <array>
 #include <vector>
@@ -15,7 +10,8 @@
 // All the webots classes are defined in the "webots" namespace
 using namespace webots;
 
-class RobotRoutine
+class RobotControlEPuck : 
+	public IRobotControl
 {
 
 public:
@@ -32,7 +28,7 @@ public:
 	*
 	*********************************************************/
 	
-	RobotRoutine(Robot* robot);
+	RobotControlEPuck(Robot* robot);
 	
 	/* general functions */
 	std::string getRobotName(void);
@@ -48,8 +44,8 @@ public:
 	void setWheelSpeedTurnLeft(void);
 	void setWheelSpeedTurnRight(void);
 	void setWheelSpeedTurnAround(void);
+	void setWheelSpeedHalt(void);
 	void applyRobotWheelSpeed(void);
-	void performHalt(void);
 
 	/* LED functions */
 	void cyclicBlinkingLED(void);
@@ -130,10 +126,12 @@ private:
 	/* robot sensor objects utilized by functions */
 	std::array<DistanceSensor*, NUM_DIST_SENS> proximSensors;
 	std::array<DistanceSensor*, NUM_GROUND_SENS> groundSensors;
-	std::array<Motor*, NUM_WHEELS> motors;
+	//std::array<Motor*, NUM_WHEELS> motors;
 	std::array<LED*, NB_LEDS> robotLEDs;
 	Camera* robotCamera;
 	Receiver* receiver;
+	Motor* motor_left;
+	Motor* motor_right;
 
 	/* robot's ground sensor values */
 	unsigned short gsValues[NUM_GROUND_SENS] = { 0, 0, 0 };

@@ -12,16 +12,16 @@ int main(int argc, char **argv) {
 
     /*** create all Object instances ***/
     robot = new Robot();
-    robotroutine = new RobotRoutine(robot);
-    pathplanner = new PathPlannerEPuck(robotroutine->getRobotName());
+    robotControl = new RobotControlEPuck(robot);
+    pathplanner = new PathPlannerEPuck(robotControl->getRobotName());
     qrmodule = new QRModuleEPuckSGD();
     commWifi = new CommunicationModuleWifi();
         
     /*** get time step from robot routine ***/
-    timeStep = robotroutine->basicTimeStep;
+    timeStep = robotControl->basicTimeStep;
 
     /* before entering main loop init camera by enabling it */
-    robotroutine->enableCamera();
+    robotControl->enableCamera();
 
     /*************************************/
     /************* MAIN LOOP *************/
@@ -33,25 +33,25 @@ int main(int argc, char **argv) {
     *   
     *   Moving through environment: 
     *   depending on the current state(s) a speed for each wheel is configured in parameter
-    *   wheelSetValue of the robotroutine object. 
+    *   wheelSetValue of the robotControl object. 
     *   At the end of each main loop pass the preconfigured speed is then applied to the robot
     * 
     */
     while (robot->step(timeStep) != -1) {
 
         /* read current state of sensors */
-        robotroutine->readSensors();
+        robotControl->readSensors();
 
 
         /*************************************/
         /********** LED CYCLE BLOCK **********/
         if (endOfLineGoalReached || obstacleDetected /* || crossroadManeuverActive */ )
         {
-            robotroutine->allLightsOnLED();
+            robotControl->allLightsOnLED();
         }
         else 
         {
-            robotroutine->cyclicBlinkingLED();
+            robotControl->cyclicBlinkingLED();
         }
         /*************************************/
         /*************************************/
@@ -61,12 +61,12 @@ int main(int argc, char **argv) {
         /********** CONNECT TO SUPERVISOR BLOCK **********/
         if (!supervisorConnected)
         {            
-            if (commWifi->tryToConnectToSupervisor(robotroutine->getRobotName())) {
+            if (commWifi->tryToConnectToSupervisor(robotControl->getRobotName())) {
 
                 supervisorConnected = true;
             }
             else {
-                std::cerr << robotroutine->getRobotName() << ": failed to connect to supervisor." << std::endl;
+                std::cerr << robotControl->getRobotName() << ": failed to connect to supervisor." << std::endl;
             }
         }
         /*************************************/
@@ -87,7 +87,7 @@ int main(int argc, char **argv) {
 
             if (pathPlanningCompleted) {
 
-                robotroutine->setWheelSpeedTurnAround();
+                robotControl->setWheelSpeedTurnAround();
                 turnCounter += timeStep;
 
                 if (turnCounter >= TURNAROUNDTHRESHOLD) {
@@ -100,9 +100,9 @@ int main(int argc, char **argv) {
                 if (initProcedureDistanceToScanCounter >= qrDistanceToScanPos) {
 
                     /* check if camera is enabled and take a snapshot via camera while robot is facing towards QR code*/
-                    if (robotroutine->isCameraEnabled()) {
+                    if (robotControl->isCameraEnabled()) {
 
-                        robotroutine->takeCameraSnapshot();
+                        robotControl->takeCameraSnapshot();
                     }
                     else {
                         /*
@@ -110,8 +110,8 @@ int main(int argc, char **argv) {
                         *   ensure camera is fully enabled when taking a snapshot.
                         *   Finish this step of routine afterwards
                         */                          
-                        robotroutine->performHalt();
-                        robotroutine->enableCamera();
+                        robotControl->setWheelSpeedHalt();
+                        robotControl->enableCamera();
                         robotActiveWait(20);
                         continue;
                     }
@@ -120,12 +120,12 @@ int main(int argc, char **argv) {
                     SGDQRParams qrCodeParams;
 
                     // get content from QR image
-                    bool readSuccessful = qrmodule->readQRCode(robotroutine->qrImgFileName, &qrCodeParams);
+                    bool readSuccessful = qrmodule->readQRCode(robotControl->qrImgFileName, &qrCodeParams);
 
                     if (readSuccessful) {
 
                         // deactivate camera since reading was successful
-                        robotroutine->disableCamera();
+                        robotControl->disableCamera();
 
                         // save parameters read from QR code
                         pathplanner->setMatrixDimension(qrCodeParams.mapDimension);
@@ -154,7 +154,7 @@ int main(int argc, char **argv) {
                     }
                 }
                 else {
-                    robotroutine->setWheelSpeedFollowLine();
+                    robotControl->setWheelSpeedFollowLine();
                     initProcedureDistanceToScanCounter += timeStep;
                 }
             }
@@ -178,7 +178,7 @@ int main(int argc, char **argv) {
             *   check if the ground sensors of the robot have detected a crossroad or
             *   if the crossroad maneuver behaviour is already active
             */
-            if (crossroadManeuverActive || robotroutine->detectLineCrossroad())
+            if (crossroadManeuverActive || robotControl->detectLineCrossroad())
             {
                 if (crossroadManeuverActive) {
                     /*
@@ -222,15 +222,15 @@ int main(int argc, char **argv) {
                         *   configure wheel speed and maneuver threshold according to moving direction
                         */
                         if (nextMovingDirection == turnLeft) {
-                            robotroutine->setWheelSpeedTurnLeft();
+                            robotControl->setWheelSpeedTurnLeft();
                             crossroadManeuverThreshold = TURNLEFTRIGHTTHRESHOLD;
                         }
                         else if (nextMovingDirection == turnRight) {
-                            robotroutine->setWheelSpeedTurnRight();
+                            robotControl->setWheelSpeedTurnRight();
                             crossroadManeuverThreshold = TURNLEFTRIGHTTHRESHOLD;
                         }
                         else if (nextMovingDirection == turnAround) {
-                            robotroutine->setWheelSpeedTurnAround();
+                            robotControl->setWheelSpeedTurnAround();
                             crossroadManeuverThreshold = TURNAROUNDTHRESHOLD;
                         }
                         else {
@@ -238,7 +238,7 @@ int main(int argc, char **argv) {
                             *   nextMovingDirection == straightOn, configure wheel speed and maneuver threshold.
                             *   when moving straight ahead on a crossroad, use reduced threshold until movement is done
                             */
-                            robotroutine->setWheelSpeedMoveStraightAhead();
+                            robotControl->setWheelSpeedMoveStraightAhead();
                             crossroadManeuverThreshold = TURNLEFTRIGHTTHRESHOLD / 8;
                         }
 
@@ -258,7 +258,7 @@ int main(int argc, char **argv) {
             *   procedure is already activated
             */
             else if (!pathplanner->pathCompleted() && /* border wall of goal position is no obstacle */
-                (!obstacleDetected && robotroutine->detectObstacle()))
+                (!obstacleDetected && robotControl->detectObstacle()))
             {
                 /* get node parameters from pathplanner module */
                 std::tuple<int, int> startNode, goalNode, collisionNode;
@@ -271,7 +271,7 @@ int main(int argc, char **argv) {
                 obstacleDetected = true;
                 alternativePathReceived = false; 
 
-                robotroutine->performHalt();         
+                robotControl->setWheelSpeedHalt();
 
             }
             else if (obstacleDetected) {
@@ -295,7 +295,7 @@ int main(int argc, char **argv) {
                     *   Supervisor replied with alternative path. Turn around, move to predecessor node and 
                     *   continue following alternative path
                     */
-                    robotroutine->setWheelSpeedTurnAround();
+                    robotControl->setWheelSpeedTurnAround();
 
                     turnCounter += timeStep;
 
@@ -333,12 +333,12 @@ int main(int argc, char **argv) {
                         /*
                         *   if no endless mode active, move until end of line and stop
                         */
-                        if (robotroutine->detectObstacle()) {
-                            robotroutine->performHalt();
+                        if (robotControl->detectObstacle()) {
+                            robotControl->setWheelSpeedHalt();
                             endOfLineGoalReached = true;
                         }
                         else {
-                            robotroutine->setWheelSpeedFollowLine();
+                            robotControl->setWheelSpeedFollowLine();
                         }
                     }
                 }
@@ -347,7 +347,7 @@ int main(int argc, char **argv) {
                     /*
                     *   following path not completed yet, continue following line
                     */
-                    robotroutine->setWheelSpeedFollowLine();
+                    robotControl->setWheelSpeedFollowLine();
                 }
             }
             /*************************************/
@@ -357,7 +357,7 @@ int main(int argc, char **argv) {
         /*
         *   apply configured speed for each wheel after all states were checked 
         */
-        robotroutine->applyRobotWheelSpeed();
+        robotControl->applyRobotWheelSpeed();
 
     };  // END OF MAIN LOOP
     /*************************************/

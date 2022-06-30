@@ -109,7 +109,7 @@
     <ClCompile Include="src\QRModuleEPuckSGD.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="src\RobotRoutine.cpp">
+    <ClCompile Include="src\RobotControlEPuck.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="lib\path_planning\lib\utils\src\utils.cpp">
@@ -126,7 +126,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\RobotRoutine.h">
+    <ClInclude Include="include\RobotControlEPuck.h">
       <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="include\QRModuleEPuckSGD.h">
@@ -157,6 +157,9 @@
       <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="CommunicationModuleWifi.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\IRobotControl.h">
       <Filter>include</Filter>
     </ClInclude>
   </ItemGroup>
