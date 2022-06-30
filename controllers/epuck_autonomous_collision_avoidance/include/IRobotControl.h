@@ -18,11 +18,6 @@ public:
 	// Empty virtual destructor for proper cleanup
 	virtual ~IRobotControl() {}
 
-	// robot time step
-	int basicTimeStep = 0;
-	
-	std::string qrImgFileName;
-
 	/*********************************************************
 	*
 	*	public functions provided by robot routine module
@@ -30,7 +25,9 @@ public:
 	*********************************************************/
 		
 	/* general functions */
+	virtual int getTimeStep(void) = 0;
 	virtual std::string getRobotName(void) = 0;
+	virtual std::string getQrFileName(void) = 0;
 	virtual void readSensors(void) = 0;
 
 	/* ground sensor functions */

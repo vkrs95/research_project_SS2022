@@ -18,7 +18,7 @@ int main(int argc, char **argv) {
     commWifi = new CommunicationModuleWifi();
         
     /*** get time step from robot routine ***/
-    timeStep = robotControl->basicTimeStep;
+    timeStep = robotControl->getTimeStep();
 
     /* before entering main loop init camera by enabling it */
     robotControl->enableCamera();
@@ -120,7 +120,7 @@ int main(int argc, char **argv) {
                     SGDQRParams qrCodeParams;
 
                     // get content from QR image
-                    bool readSuccessful = qrmodule->readQRCode(robotControl->qrImgFileName, &qrCodeParams);
+                    bool readSuccessful = qrmodule->readQRCode(robotControl->getQrFileName(), &qrCodeParams);
 
                     if (readSuccessful) {
 

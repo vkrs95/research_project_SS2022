@@ -16,12 +16,6 @@ class RobotControlEPuck :
 
 public:
 
-	std::string qrImgFileName;
-
-	// robot time step
-	int basicTimeStep = 0;
-
-
 	/*********************************************************
 	*
 	*	public functions provided by robot routine module
@@ -31,7 +25,9 @@ public:
 	RobotControlEPuck(Robot* robot);
 	
 	/* general functions */
+	int getTimeStep(void);
 	std::string getRobotName(void);
+	std::string getQrFileName(void);
 	void readSensors(void);
 
 	/* ground sensor functions */
@@ -121,17 +117,17 @@ private:
 	*
 	*********************************************************/
 
+	int basicTimeStep = 0; // robot time step
 	std::string robotName;
+	std::string qrImgFileName;
 
 	/* robot sensor objects utilized by functions */
 	std::array<DistanceSensor*, NUM_DIST_SENS> proximSensors;
 	std::array<DistanceSensor*, NUM_GROUND_SENS> groundSensors;
-	//std::array<Motor*, NUM_WHEELS> motors;
+	std::array<Motor*, NUM_WHEELS> motors;
 	std::array<LED*, NB_LEDS> robotLEDs;
 	Camera* robotCamera;
 	Receiver* receiver;
-	Motor* motor_left;
-	Motor* motor_right;
 
 	/* robot's ground sensor values */
 	unsigned short gsValues[NUM_GROUND_SENS] = { 0, 0, 0 };

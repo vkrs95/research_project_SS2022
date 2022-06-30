@@ -5,14 +5,14 @@ RobotControlEPuck::RobotControlEPuck(Robot* robot)
     basicTimeStep = (int)robot->getBasicTimeStep();
 
     /* Motor initialization */
-    motor_left = robot->getMotor("left wheel motor");
-    motor_right = robot->getMotor("right wheel motor");
+    motors[LEFT] = robot->getMotor("left wheel motor");
+    motors[RIGHT] = robot->getMotor("right wheel motor");
 
-    motor_left->setVelocity(0.0);
-    motor_right->setVelocity(0.0);
+    motors[LEFT]->setVelocity(0.0);
+    motors[RIGHT]->setVelocity(0.0);
 
-    motor_left->setPosition(INFINITY);
-    motor_right->setPosition(INFINITY);
+    motors[LEFT]->setPosition(INFINITY);
+    motors[RIGHT]->setPosition(INFINITY);
 
     wheelSetValue[LEFT] = 0;
     wheelSetValue[RIGHT] = 0;
@@ -55,9 +55,19 @@ RobotControlEPuck::RobotControlEPuck(Robot* robot)
     robotCamera = robot->getCamera("camera");
 }
 
+int RobotControlEPuck::getTimeStep(void)
+{
+    return basicTimeStep;
+}
+
 std::string RobotControlEPuck::getRobotName(void)
 {
     return robotName;
+}
+
+std::string RobotControlEPuck::getQrFileName(void)
+{
+    return qrImgFileName;
 }
 
 void RobotControlEPuck::readSensors()
@@ -151,8 +161,8 @@ void RobotControlEPuck::applyRobotWheelSpeed(void)
     speed[LEFT] = wheelSetValue[LEFT];
     speed[RIGHT] = wheelSetValue[RIGHT];
 
-    motor_left->setVelocity(MOTOR_RATIO * speed[LEFT]);
-    motor_right->setVelocity(MOTOR_RATIO * speed[RIGHT]);
+    motors[LEFT]->setVelocity(MOTOR_RATIO * speed[LEFT]);
+    motors[RIGHT]->setVelocity(MOTOR_RATIO * speed[RIGHT]);
 }
 
 void RobotControlEPuck::setWheelSpeedHalt(void)
