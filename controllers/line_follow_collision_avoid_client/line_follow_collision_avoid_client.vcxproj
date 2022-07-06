@@ -173,7 +173,6 @@
     <ClCompile Include="src\RobotControlEPuck.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\CollisionSupervisorModule.h" />
     <ClInclude Include="include\CommModuleTCP.h" />
     <ClInclude Include="include\ICommModule.h" />
     <ClInclude Include="include\IMainController.h" />

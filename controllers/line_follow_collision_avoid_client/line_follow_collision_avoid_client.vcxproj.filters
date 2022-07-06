@@ -156,9 +156,6 @@
     <ClInclude Include="include\IRobotControl.h">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="include\CollisionSupervisorModule.h">
-      <Filter>include</Filter>
-    </ClInclude>
     <ClInclude Include="include\CommModuleTCP.h">
       <Filter>include</Filter>
     </ClInclude>

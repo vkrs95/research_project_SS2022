@@ -4,10 +4,10 @@
 ## Get latest from https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 
 # webots controller exe
-controllers/epuck_autonomous_collision_avoidance/epuck_autonomous_collision_avoidance.exe
+controllers/line_follow_collision_avoid_client/line_follow_collision_avoid_client.exe
 
 # e-puck camera captures
-controllers/epuck_autonomous_collision_avoidance/start_goal_*.jpg
+controllers/line_follow_collision_avoid_client/start_goal_*.jpg
 
 # world project files 
 worlds/.*.wbproj
