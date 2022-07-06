@@ -100,7 +100,7 @@
     <ClCompile Include="$(WEBOTS_HOME)\resources\languages\cpp\TouchSensor.cpp">
       <Filter>Webots</Filter>
     </ClCompile>
-    <ClCompile Include="src\epuck_autonomous_collision_avoidance.cpp">
+    <ClCompile Include="src\line_follow_collision_avoid_client.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\PathPlannerEPuck.cpp">
@@ -121,7 +121,10 @@
     <ClCompile Include="lib\path_planning\src\dijkstra.cpp">
       <Filter>lib\path_planning\src</Filter>
     </ClCompile>
-    <ClCompile Include="CommunicationModuleWifi.cpp">
+    <ClCompile Include="src\CommModuleTCP.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\MainControllerEPuck.cpp">
       <Filter>src</Filter>
     </ClCompile>
   </ItemGroup>
@@ -141,9 +144,6 @@
     <ClInclude Include="include\PathPlannerEPuck.h">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="include\epuck_autonomous_collision_avoidance.h">
-      <Filter>include</Filter>
-    </ClInclude>
     <ClInclude Include="lib\path_planning\lib\utils\include\utils\utils.hpp">
       <Filter>lib\path_planning\lib\utils\include\utils</Filter>
     </ClInclude>
@@ -153,13 +153,22 @@
     <ClInclude Include="lib\path_planning\include\path_planning\dijkstra.hpp">
       <Filter>lib\path_planning\include</Filter>
     </ClInclude>
-    <ClInclude Include="CollisionSupervisorModule.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="CommunicationModuleWifi.h">
-      <Filter>include</Filter>
-    </ClInclude>
     <ClInclude Include="include\IRobotControl.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\CollisionSupervisorModule.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\CommModuleTCP.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ICommModule.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\IMainController.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\MainControllerEPuck.h">
       <Filter>include</Filter>
     </ClInclude>
   </ItemGroup>
