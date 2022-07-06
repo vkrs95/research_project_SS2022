@@ -6,9 +6,9 @@ int main(int argc, char **argv) {
     IMainController* robotMainController = new MainControllerEPuck();
 
     /* call main routine of robot controller */
-    robotMainController->mainControllerRoutine(argc, argv);
+    int result = robotMainController->mainControllerRoutine(argc, argv);
         
     delete robotMainController;
 
-    return 0;
+    return result;
 }

@@ -13,7 +13,7 @@ MainControllerEPuck::MainControllerEPuck(void)
     timeStep = robotControl->getTimeStep();
 
     /* before entering main loop init camera by enabling it */
-    robotControl->enableCamera();
+    //robotControl->enableCamera();
 }
 
 int MainControllerEPuck::mainControllerRoutine(int argc, char** argv)
@@ -27,8 +27,8 @@ int MainControllerEPuck::mainControllerRoutine(int argc, char** argv)
     *   environment/actions/states different behaviour blocks are executed.
     *
     *   Moving through environment:
-    *   depending on the current state(s) a speed for each wheel is configured in parameter
-    *   wheelSetValue of the robotControl object.
+    *   depending on the current state(s) a speed for each motor is configured in parameter
+    *   motorSpeedSetValue of the robotControl object.
     *   At the end of each main loop pass the preconfigured speed is then applied to the robot
     *
     */
@@ -58,9 +58,11 @@ int MainControllerEPuck::mainControllerRoutine(int argc, char** argv)
         
         if (!initProcedureDone) {
 
-            if (initProcedureHandling() > 0) {
-                /* init procedure expects to finish this routine step */
-                continue;
+            if (initProcedureHandling() != 0) {
+                /* init procedure returned error */
+                std::cout << robotControl->getRobotName() 
+                    << ": error in init procedure handling. Number of QR scan attempts exceeded." << std::endl;
+                return -1;
             }
         }
 
@@ -83,7 +85,7 @@ int MainControllerEPuck::mainControllerRoutine(int argc, char** argv)
             *   check if an obstacle has been detected by the proximity sensors
             *   or if obstacle handling flag is already set
             */
-            else if (robotControl->detectObstacle() || obstacleHandlingActive)
+            else if (obstacleHandlingActive || robotControl->detectObstacle())
             {
                 obstacleHandling();
             }
@@ -166,6 +168,7 @@ int MainControllerEPuck::initProcedureHandling(void)
             /* check if camera is enabled and take a snapshot via camera while robot is facing towards QR code*/
             if (robotControl->isCameraEnabled()) {
 
+                robotActiveWait(20);
                 robotControl->takeCameraSnapshot();
             }
             else {
@@ -175,19 +178,14 @@ int MainControllerEPuck::initProcedureHandling(void)
                 *   Finish this step of routine afterwards
                 */
                 robotControl->setMotorSpeedHalt();
-                robotControl->applyRobotMotorSpeed();
                 robotControl->enableCamera();
-                robotActiveWait(20);
-                return 1;
+                return 0;
             }
 
             // generate structure to save read parameters into
             SGDQRParams qrCodeParams;
 
-            // get content from QR image
-            bool readSuccessful = qrmodule->readQRCode(robotControl->getQrFileName(), &qrCodeParams);
-
-            if (readSuccessful) {
+            if (qrmodule->readQRCode(robotControl->getQrFileName(), &qrCodeParams)) {
 
                 // deactivate camera since reading was successful
                 robotControl->disableCamera();
@@ -209,7 +207,7 @@ int MainControllerEPuck::initProcedureHandling(void)
 
                 if (readQrCodeAttemptCounter < QR_READ_ATTEMPTS_THRESHOLD) {
                     readQrCodeAttemptCounter++;
-                    return 1; // finish this routine step 
+                    return 0;
                 }
                 else {
                     // number of attempts exceeded, handle error
