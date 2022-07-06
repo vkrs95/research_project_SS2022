@@ -21,8 +21,9 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
     <ProjectGuid>{B2AA53B0-6416-4406-8FF5-6D43BBA8B305}</ProjectGuid>
-    <RootNamespace>epuck_autonomous_collision_avoidance</RootNamespace>
+    <RootNamespace>line_follow_collision_avoid_client</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>line_follow_collision_avoid_client</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -161,24 +162,27 @@
     <ClCompile Include="$(WEBOTS_HOME)\resources\languages\cpp\Speaker.cpp" />
     <ClCompile Include="$(WEBOTS_HOME)\resources\languages\cpp\Supervisor.cpp" />
     <ClCompile Include="$(WEBOTS_HOME)\resources\languages\cpp\TouchSensor.cpp" />
-    <ClCompile Include="CommunicationModuleWifi.cpp" />
     <ClCompile Include="lib\path_planning\lib\utils\src\utils.cpp" />
     <ClCompile Include="lib\path_planning\src\a_star.cpp" />
     <ClCompile Include="lib\path_planning\src\dijkstra.cpp" />
-    <ClCompile Include="src\epuck_autonomous_collision_avoidance.cpp" />
+    <ClCompile Include="src\CommModuleTCP.cpp" />
+    <ClCompile Include="src\line_follow_collision_avoid_client.cpp" />
+    <ClCompile Include="src\MainControllerEPuck.cpp" />
     <ClCompile Include="src\PathPlannerEPuck.cpp" />
     <ClCompile Include="src\QRModuleEPuckSGD.cpp" />
-    <ClCompile Include="src\RobotRoutine.cpp" />
+    <ClCompile Include="src\RobotControlEPuck.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="CollisionSupervisorModule.h" />
-    <ClInclude Include="CommunicationModuleWifi.h" />
-    <ClInclude Include="include\epuck_autonomous_collision_avoidance.h" />
+    <ClInclude Include="include\CommModuleTCP.h" />
+    <ClInclude Include="include\ICommModule.h" />
+    <ClInclude Include="include\IMainController.h" />
+    <ClInclude Include="include\IRobotControl.h" />
+    <ClInclude Include="include\MainControllerEPuck.h" />
     <ClInclude Include="include\PathPlannerEPuck.h" />
     <ClInclude Include="include\PathPlanningModule.h" />
-    <ClInclude Include="include\QRModule.h" />
+    <ClInclude Include="include\IQRModule.h" />
     <ClInclude Include="include\QRModuleEPuckSGD.h" />
-    <ClInclude Include="include\RobotRoutine.h" />
+    <ClInclude Include="include\RobotControlEPuck.h" />
     <ClInclude Include="lib\path_planning\include\path_planning\a_star.hpp" />
     <ClInclude Include="lib\path_planning\include\path_planning\dijkstra.hpp" />
     <ClInclude Include="lib\path_planning\lib\utils\include\utils\utils.hpp" />

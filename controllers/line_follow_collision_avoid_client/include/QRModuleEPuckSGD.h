@@ -1,5 +1,5 @@
 #pragma once
-#include "QRModule.h"
+#include "IQRModule.h"
 
 #include <iostream>
 
@@ -9,7 +9,7 @@
 #include <opencv2/highgui/highgui.hpp>
 
 /*
-*   This class represents an implementation of the QRModule used by an EPuck robot. 
+*   This class represents an implementation of the IQRModule used by an EPuck robot. 
 *   The module expects to read a QR code containing information with the structure: 'start_position:goal_position:world_dimension'
 * 
 *       - start position: current position of the EPuck as a number between 1 and 4*dimension of world
@@ -49,7 +49,7 @@ public:
 };
 
 class QRModuleEPuckSGD :
-    public QRModule<SGDQRParams>
+    public IQRModule<SGDQRParams>
 {
 public:
     QRModuleEPuckSGD();
