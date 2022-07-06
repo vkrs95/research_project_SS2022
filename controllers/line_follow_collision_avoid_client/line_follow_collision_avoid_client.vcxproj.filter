@@ -18,7 +18,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="epuck_autonomous_collision_avoidance.cpp">
+    <ClCompile Include="line_follow_collision_avoid_client.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="$(WEBOTS_HOME)\resources\languages\cpp\Accelerometer.cpp">

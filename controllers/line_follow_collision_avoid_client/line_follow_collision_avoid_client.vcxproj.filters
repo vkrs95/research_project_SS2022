@@ -100,7 +100,7 @@
     <ClCompile Include="$(WEBOTS_HOME)\resources\languages\cpp\TouchSensor.cpp">
       <Filter>Webots</Filter>
     </ClCompile>
-    <ClCompile Include="src\epuck_autonomous_collision_avoidance.cpp">
+    <ClCompile Include="src\line_follow_collision_avoid_client.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\PathPlannerEPuck.cpp">
