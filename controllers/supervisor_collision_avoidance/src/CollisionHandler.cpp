@@ -12,14 +12,15 @@
 * 
 */
 
-CollisionHandler::CollisionHandler(void)
+CollisionHandler::CollisionHandler(PathPlanner* planner)
 {
+    mPlanner = planner;
 }
 
 void CollisionHandler::registerCollision(std::string name, coordinate start, coordinate goal, coordinate collision)
 {
     if (mCollisionList[collision] == nullptr) {
-        mCollisionList[collision] = new CollisionEvent(collision);
+        mCollisionList[collision] = new CollisionEvent(collision, mPlanner);
     }
 
     mCollisionList[collision]->addParticipant(name, start, goal);

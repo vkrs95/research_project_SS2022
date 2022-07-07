@@ -36,7 +36,7 @@ protected:
 	};
 
 public:
-	CollisionEvent(coordinate collisionPoint);
+	CollisionEvent(coordinate collisionPoint, PathPlanner* planner);
 	//coordinate getCollisionID(void);
 	void addParticipant(CollisionParticipant newParticipant);
 	void addParticipant(std::string name, coordinate start, coordinate goal);

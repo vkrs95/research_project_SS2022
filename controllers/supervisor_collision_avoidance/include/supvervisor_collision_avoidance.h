@@ -18,10 +18,12 @@ Emitter* emitter;
 //Camera* camera;
 CommModuleTCPSocketServer* socketServer;
 CollisionHandler* collisionHandler;
+PathPlanner* pathPlanner;
 
 
 /*** define member variables ***/
 unsigned int mTimeStep = 0;
+unsigned int mWorldDimension = 3;
 
 
 /*** functions ***/

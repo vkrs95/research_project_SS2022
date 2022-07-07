@@ -12,12 +12,12 @@
 * 
 */
 
-CollisionEvent::CollisionEvent(coordinate collisionPoint)
+CollisionEvent::CollisionEvent(coordinate collisionPoint, PathPlanner* planner)
 {
     mCollisionPoint = collisionPoint;
     mParticipants.clear();
 
-    planner = new PathPlanner(MATRIX_DIM);
+    this->planner = planner;
 
     /* create and run event thread */
     resolveEventThread = new std::thread(&CollisionEvent::resolveEventThreadRoutine, this);

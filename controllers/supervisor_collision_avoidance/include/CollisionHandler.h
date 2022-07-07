@@ -12,13 +12,15 @@ class CollisionHandler
 {
 
 public:
-	CollisionHandler(void);
+	CollisionHandler(PathPlanner* planner);
 	void registerCollision(std::string name, coordinate start, coordinate goal, coordinate collision);
 	bool collisionResolved(std::map<std::string, std::vector<coordinate>>* clientPathList);
 
 private:
 	void processCollisionEvents(void);
 	std::map<coordinate, CollisionEvent*> mCollisionList;
+
+	PathPlanner* mPlanner;
 };
 
 

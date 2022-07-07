@@ -7,19 +7,34 @@ int main(int argc, char **argv) {
     emitter = robot->getEmitter("emitter");
     //camera = robot->getCamera("camera");
     socketServer = new CommModuleTCPSocketServer(1000); // initialise socket server on port 1000
-    collisionHandler = new CollisionHandler();
 
     /*************************************/
     mTimeStep =(unsigned int)robot->getBasicTimeStep();
 
     std::list<CollisionNotification> collisionNotList;
     std::map<std::string, std::vector<coordinate>> clientPaths;
+    
+    /*
+    *   Supervisor needs to determine world dimension by 
+    *   image processing of scanned line grid camera image 
+    */
+    // camera->enable(50);
+    // camera->saveImage("supervisor_cam_test.jpg", 100);
+    // mWorldDimension = getWorldDimensionFromScan("supervisor_cam_test.jpg");
 
-    //camera->enable(50);
+    /*
+    *   initialize rest of handler objects
+    */
+    pathPlanner = new PathPlanner(mWorldDimension); // TODO: replace temporary value with read out dimension
+    collisionHandler = new CollisionHandler(pathPlanner);
 
+    /*
+    *   supervisor controller main routine
+    *   periodically check for various conditions and handle them
+    */
     while (robot->step(mTimeStep) != -1) {
 
-        /* check for collisions periodically */
+        /* check for collisions */
         if (socketServer->checkCollisionNotifications(&collisionNotList)) {
             /* 
             *   some clients have send collision messages; reigster them
@@ -41,14 +56,16 @@ int main(int argc, char **argv) {
             collisionNotList.clear();
         }
 
+        /* check for resolved collisions */
         if (collisionHandler->collisionResolved(&clientPaths)) {
             socketServer->sendCollisionMessageReply(clientPaths);
             clientPaths.clear();
         }
-            
-        robotActiveWait(50);
 
-        //camera->saveImage("supervisor_cam_test.jpg", 100);
+        /* check for */
+         
+        /* sleep for 50 timesteps */
+        robotActiveWait(50);
     }
 
     /*  optional cleanup  */
