@@ -35,21 +35,24 @@ int main(int argc, char **argv) {
     */
     while (robot->step(mTimeStep) != -1) {
 
-        /* check for collisions */
+        /* check for notifications */
         if (socketServer->checkClientNotifications(&pathNotList, &collisionNotList)) {
-            
+
+            /* check for path requests */
             if (!pathNotList.empty()) {
                 /*
                 *   some clients have send path messages; calculate paths for each request 
                 *   and send them back
                 */
                 for (CommModuleTCPSocketServer::PathNotification pmsg : pathNotList) {
-
+                    std::vector<coordinate> path = toCoordinateVector(pathPlanner->getShortestPath(pmsg.startNode, pmsg.goalNode));
+                    socketServer->sendPathMessage(pmsg.clientName, path);
                 }
 
                 pathNotList.clear();
             }
 
+            /* check for collisions */
             if (!collisionNotList.empty()) {
                 /*
                 *   some clients have send collision messages; reigster them
@@ -96,4 +99,15 @@ void robotActiveWait(int numOfSteps)
         if (robot->step(mTimeStep) == -1)
             break;
     }
+}
+
+std::vector<coordinate> toCoordinateVector(std::vector <Node> nodeVector)
+{
+    std::vector<coordinate> coordV;
+    for (const auto node : nodeVector) {
+
+        coordV.push_back(std::make_tuple(node.x_, node.y_));
+    }
+
+    return coordV;
 }

@@ -28,3 +28,4 @@ unsigned int mWorldDimension = 3;
 
 /*** functions ***/
 void	robotActiveWait(int numOfSteps);
+std::vector<coordinate> toCoordinateVector(std::vector <Node> nodeVector);
