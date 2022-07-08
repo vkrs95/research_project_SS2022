@@ -11,7 +11,8 @@ int main(int argc, char **argv) {
     /*************************************/
     mTimeStep =(unsigned int)robot->getBasicTimeStep();
 
-    std::list<CollisionNotification> collisionNotList;
+    std::list<CommModuleTCPSocketServer::PathNotification> pathNotList;
+    std::list<CommModuleTCPSocketServer::CollisionNotification> collisionNotList;
     std::map<std::string, std::vector<coordinate>> clientPaths;
     
     /*
@@ -35,25 +36,40 @@ int main(int argc, char **argv) {
     while (robot->step(mTimeStep) != -1) {
 
         /* check for collisions */
-        if (socketServer->checkCollisionNotifications(&collisionNotList)) {
-            /* 
-            *   some clients have send collision messages; reigster them
-            *   at collision handler
-            */
-            for (CollisionNotification cmsg : collisionNotList) {
+        if (socketServer->checkClientNotifications(&pathNotList, &collisionNotList)) {
+            
+            if (!pathNotList.empty()) {
+                /*
+                *   some clients have send path messages; calculate paths for each request 
+                *   and send them back
+                */
+                for (CommModuleTCPSocketServer::PathNotification pmsg : pathNotList) {
 
-                std::cout << "Supervisor: received collision at (" 
-                    << std::get<0>(cmsg.collisionNode)
-                    << ", "
-                    << std::get<1>(cmsg.collisionNode)
-                    << ") by "
-                    << cmsg.clientName
-                    << std::endl;
+                }
 
-                collisionHandler->registerCollision(cmsg.clientName, cmsg.startNode, cmsg.goalNode, cmsg.collisionNode);
+                pathNotList.clear();
             }
 
-            collisionNotList.clear();
+            if (!collisionNotList.empty()) {
+                /*
+                *   some clients have send collision messages; reigster them
+                *   at collision handler
+                */
+                for (CommModuleTCPSocketServer::CollisionNotification cmsg : collisionNotList) {
+
+                    std::cout << "Supervisor: received collision at ("
+                        << std::get<0>(cmsg.collisionNode)
+                        << ", "
+                        << std::get<1>(cmsg.collisionNode)
+                        << ") by "
+                        << cmsg.clientName
+                        << std::endl;
+
+                    collisionHandler->registerCollision(cmsg.clientName, cmsg.startNode, cmsg.goalNode, cmsg.collisionNode);
+                }
+
+                collisionNotList.clear();
+            }
         }
 
         /* check for resolved collisions */

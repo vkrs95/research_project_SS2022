@@ -150,48 +150,36 @@ void CommModuleTCPSocketServer::sendMessageToClient(std::string clientName, Mess
     }
 }
 
-bool CommModuleTCPSocketServer::checkCollisionNotifications(std::list<CollisionNotification>* collisionNotifications)
+bool CommModuleTCPSocketServer::checkClientNotifications(
+    std::list<PathNotification>* pathNotifications, 
+    std::list<CollisionNotification>* collisionNotifications)
 {
     Message* currentMsg;
     std::vector<ClientCommHandler*>::iterator it;
 
     it = mCommHandlerThreadPool.begin();
 
+    /* iterate through comm handlers of all registered clients */
     while (it != mCommHandlerThreadPool.end()) {
         
         ClientCommHandler* clientThread = *it;
 
         currentMsg = clientThread->getInboxMessage();
 
-        if (currentMsg != nullptr &&
-                currentMsg->getType() == MessageType::COLLISION ) {
-
-            /* client got a message in its inbox */
-            CollisionNotification colNot;
-            std::string subStr;
-            std::vector<std::string> subStrings;
-
-            /* load message content into string stream */
-            std::istringstream iss(currentMsg->getPayload());
-            
-            /* go through stream and extract substring between delimiter */
-            while (std::getline(iss, subStr, ';')) {
-                subStrings.push_back(subStr);
-            }
-
-            /* we need three substrings for start, goal and collision node */
-            if (subStrings.size() != 3) {
-                std::cerr << "CommModuleTCPSocketServer: handler message contains invalid number of nodes. (" << subStrings.size() << ")." << std::endl;
-                // go on with next message
-            }
-            else {
-                /* assign values to struct */
-                colNot.clientName = clientThread->getClientName();
-                colNot.startNode = getCoordinatesTuple(subStrings.at(0));
-                colNot.goalNode = getCoordinatesTuple(subStrings.at(1));
-                colNot.collisionNode = getCoordinatesTuple(subStrings.at(2));
-
-                collisionNotifications->push_back(colNot);
+        if (currentMsg != nullptr)
+        {
+            switch (currentMsg->getType())
+            {
+            case MessageType::PATH:
+                pathNotifications->push_back(
+                    PathNotification(clientThread->getClientName(), currentMsg->getPayload()));
+                break;
+            case MessageType::COLLISION:
+                collisionNotifications->push_back(
+                    CollisionNotification(clientThread->getClientName(), currentMsg->getPayload()));
+                break;
+            default:
+                break;
             }
         } 
         else {
@@ -199,7 +187,8 @@ bool CommModuleTCPSocketServer::checkCollisionNotifications(std::list<CollisionN
         }
     }
 
-    return collisionNotifications->size() > 0 ? true : false;
+    /* return true if at least one notfication has been added, else false */
+    return (collisionNotifications->empty() && pathNotifications->empty());
 
 }
 
@@ -209,11 +198,23 @@ void CommModuleTCPSocketServer::sendCollisionMessageReply(std::map<std::string, 
 
     /* prepare message for each client */
     for (auto clientPath : clientPaths) {
-        std::string pathMsgString = buildPathMsgString(clientPath.second);
+        std::string pathMsgString = buildPathMsgString(clientPath.second, MessageType::COLLISION);
         msg = new Message(pathMsgString);
 
         sendMessageToClient(clientPath.first, msg);
     }
+}
+
+void CommModuleTCPSocketServer::sendPathMessage(std::string clientName, std::vector<coordinate> clientPath)
+{
+    Message* msg;
+
+    /* build message string for client */
+    std::string pathMsgString = buildPathMsgString(clientPath, MessageType::PATH);
+    msg = new Message(pathMsgString);
+
+   sendMessageToClient(clientName, msg);
+   
 }
 
 std::tuple<int, int> CommModuleTCPSocketServer::getCoordinatesTuple(std::string tupleString)
@@ -263,12 +264,12 @@ void CommModuleTCPSocketServer::socketListenerRoutine(void)
     std::cout << "Communication Module Supervisor: Socket listener thread shutting down. No more connections accepted on port " << mServerPort << "." << std::endl;
 }
 
-std::string CommModuleTCPSocketServer::buildPathMsgString(std::vector<coordinate> path)
+std::string CommModuleTCPSocketServer::buildPathMsgString(std::vector<coordinate> path, MessageType msgType)
 {
     std::stringstream sStrm;
 
     /* build string containing type and path, separated with semicolon */
-    sStrm << (int)MessageType::COLLISION << ";";
+    sStrm << (int)msgType << ";";
 
     /* each coordinate is parsed in pattern: 'x,y;x,y;x,y'*/
     for (coordinate c : path) {
@@ -276,4 +277,73 @@ std::string CommModuleTCPSocketServer::buildPathMsgString(std::vector<coordinate
     }
     sStrm << "\0";
     return sStrm.str();
+}
+
+
+/***********************************************************
+*
+*	Implementation of nested class PathNotification
+*
+***********************************************************/
+
+CommModuleTCPSocketServer::PathNotification::PathNotification(std::string clientName, std::string pathMsg)
+{
+    /* client got a message in its inbox */
+    std::string subStr;
+    std::vector<std::string> subStrings;
+
+    /* load message content into string stream */
+    std::istringstream iss(pathMsg);
+
+    /* go through stream and extract substring between delimiter */
+    while (std::getline(iss, subStr, ';')) {
+        subStrings.push_back(subStr);
+    }
+
+    /* we need three substrings for start, goal and collision node */
+    if (subStrings.size() != 3) {
+        std::cerr << "CommModuleTCPSocketServer: handler message contains invalid number of nodes. (" << subStrings.size() << ")." << std::endl;
+        // go on with next message
+    }
+    else {
+        /* assign values to struct */
+        this->clientName = clientName;
+        this->startNode = getCoordinatesTuple(subStrings.at(0));
+        this->goalNode = getCoordinatesTuple(subStrings.at(1));
+    }
+}
+
+
+/***********************************************************
+*
+*	Implementation of nested class CollisionNotification
+*
+***********************************************************/
+
+CommModuleTCPSocketServer::CollisionNotification::CollisionNotification(std::string clientName, std::string collisionMsg)
+{
+    /* client got a message in its inbox */
+    std::string subStr;
+    std::vector<std::string> subStrings;
+
+    /* load message content into string stream */
+    std::istringstream iss(collisionMsg);
+
+    /* go through stream and extract substring between delimiter */
+    while (std::getline(iss, subStr, ';')) {
+        subStrings.push_back(subStr);
+    }
+
+    /* we need three substrings for start, goal and collision node */
+    if (subStrings.size() != 3) {
+        std::cerr << "CommModuleTCPSocketServer: handler message contains invalid number of nodes. (" << subStrings.size() << ")." << std::endl;
+        // go on with next message
+    }
+    else {
+        /* assign values to struct */
+        this->clientName = clientName;
+        this->startNode = getCoordinatesTuple(subStrings.at(0));
+        this->goalNode = getCoordinatesTuple(subStrings.at(1));
+        this->collisionNode = getCoordinatesTuple(subStrings.at(2));
+    }
 }

@@ -122,18 +122,27 @@ void ClientCommHandler::registerNameAndSendACK(Message* message)
 {
     Message* msg = new Message(*message);
 
+    /* update client name */
     mClientName = msg->getPayload();
     std::cout << "ClientCommHandler: client '" << mClientName << "' registered on socket " << mClientSocket << "!" << std::endl;
-    
-    /* send ACK to client */
-    std::string ackData = "0;ACK";
 
+    /* add ACK msg to outbox */
+    generateACKMsg();
+}
+
+void ClientCommHandler::generateACKMsg(void)
+{
+    /* prepare ACK msg payload */
+    std::string ackData = std::to_string((int)MessageType::REGISTER) + std::string(";ACK");
+
+    /* add ACK to outbox */
     Message* ackMsg = new Message(ackData);
     addMsgToOutbox(ackMsg);
 }
 
 void ClientCommHandler::addMsgToOutbox(Message* message)
 {
+    /* create local copy of message */
     Message* msg = new Message(*message);
 
     /* set local mutex and add passed message to outbox */

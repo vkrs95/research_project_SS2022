@@ -36,6 +36,7 @@ private:
 	void socketCommunicationHandlerRoutine(void);
 	void receiveMessage(void);
 	void sendMessage(void);
+	void generateACKMsg(void);
 	void registerNameAndSendACK(Message* message);
 
 	std::string mClientName;

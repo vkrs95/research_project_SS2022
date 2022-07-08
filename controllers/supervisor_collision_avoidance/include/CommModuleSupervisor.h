@@ -29,6 +29,12 @@
 
 using coordinate = std::tuple<int, int>;
 
+struct PathNotification {
+	std::string clientName;
+	std::tuple<int, int> startNode;
+	std::tuple<int, int> goalNode;
+};
+
 struct CollisionNotification {
 	std::string clientName;
 	std::tuple<int, int> startNode;
@@ -37,15 +43,47 @@ struct CollisionNotification {
 };
 
 class CommModuleTCPSocketServer{
+
 public:
+	/*************************************
+	* 
+	*	Nested class PathNotification
+	* 
+	**************************************/
+	class PathNotification {
+	public:
+		std::string clientName;
+		std::tuple<int, int> startNode;
+		std::tuple<int, int> goalNode;
+
+		PathNotification(std::string clientName, std::string pathMsg);
+	};
+
+	/*************************************
+	*
+	*	Nested class PathNotification
+	*
+	**************************************/
+	class CollisionNotification {
+	public:
+		std::string clientName;
+		std::tuple<int, int> startNode;
+		std::tuple<int, int> goalNode;
+		std::tuple<int, int> collisionNode;
+
+		CollisionNotification(std::string clientName, std::string collisionMsg);
+	};
+
+
 	CommModuleTCPSocketServer(int port = 1000);
 	~CommModuleTCPSocketServer();
-	void sendMessageToClient(std::string clientName, Message* message);
-	bool checkCollisionNotifications(std::list<CollisionNotification>* collisionNotifications);
+	bool checkClientNotifications(std::list<PathNotification>* pathNotifications, std::list<CollisionNotification>* collisionNotifications);
 	void sendCollisionMessageReply(std::map<std::string, std::vector<coordinate>> clientPaths);
+	void sendPathMessage(std::string clientName, std::vector<coordinate> clientPath);
 
 protected:
 	int socketAccept(int server_fd);
+	static coordinate getCoordinatesTuple(std::string tupleString);
 	const static int maxMsgLen = 512;
 
 private:
@@ -57,8 +95,9 @@ private:
 	bool	socketClose(int fd);
 	bool	socketCleanup(void);
 	void	socketListenerRoutine(void);
-	coordinate getCoordinatesTuple(std::string tupleString);
-	std::string buildPathMsgString(std::vector<coordinate> path);
+	void	sendMessageToClient(std::string clientName, Message* message);
+	std::string buildPathMsgString(std::vector<coordinate> path, MessageType msgType);
+
 
 
 	/* member variables */

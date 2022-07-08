@@ -7,6 +7,7 @@ enum class MessageType
 {
 	REGISTER = 0,
 	UNREGISTER,
+	PATH,
 	COLLISION, 
 	INVALID = 99
 };
