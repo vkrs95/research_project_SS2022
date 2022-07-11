@@ -116,7 +116,7 @@ bool QRModuleEPuckSGD::readQRCode(std::string qrFilePath, SGDQRParams* qrContent
         std::vector<std::string> splitGoal = processCoordinateString(splitContent.at(1));
 
         qrContent->startXY = { std::stoi(splitStart.at(0)), std::stoi(splitStart.at(1)) };
-        qrContent->goalXY = { std::stoi(splitStart.at(0)), std::stoi(splitStart.at(1)) };
+        qrContent->goalXY = { std::stoi(splitGoal.at(0)), std::stoi(splitGoal.at(1)) };
         qrContent->mapDimension = std::stoi(splitContent.at(2));
 
     }
