@@ -138,7 +138,7 @@
     <ClInclude Include="include\IQRModule.h">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="include\PathPlanningModule.h">
+    <ClInclude Include="include\IPathPlanningModule.h">
       <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="include\PathPlannerEPuck.h">

@@ -55,15 +55,29 @@ int MainControllerEPuck::mainControllerRoutine(int argc, char** argv)
                 std::cerr << robotControl->getRobotName() << ": failed to connect to supervisor." << std::endl;
             }
         }
-        
-        if (!initProcedureDone) {
 
-            if (initProcedureHandling() != 0) {
-                /* init procedure returned error */
-                std::cout << robotControl->getRobotName() 
-                    << ": error in init procedure handling. Number of QR scan attempts exceeded." << std::endl;
+        /*
+        *   #1 step of init procedure:
+        *   Scan path information from QR code to later send them to supervisor.
+        */
+        else if (!qrScanCompleted) {
+
+            if (qrScanHandling() != 0) {
+                /* qr scan returned error */
+                std::cout << robotControl->getRobotName()
+                    << ": error in qr scan procedure. Number of QR scan attempts exceeded." << std::endl;
                 return -1;
             }
+        }
+
+        /*
+        *   #2 step of init procedure: 
+        *   Send path information to supervisor and await reply containing shortest 
+        *   path to goal. Established connection to supervisor mandatory.
+        */
+        else if (!initProcedureDone) {
+
+            initPathHandling();
         }
 
         /*
@@ -141,15 +155,76 @@ void MainControllerEPuck::controlLEDHandling(void)
     }
 }
 
-int MainControllerEPuck::initProcedureHandling(void)
+int MainControllerEPuck::qrScanHandling(void)
 {
     /*
     *   This block is executed when the robot (re-)starts and is facing towards
     *   the border wall of the environment. It shall try to scan a QR code which
     *   is placed at the border wall.
     *   The code should contain start and goal information based on which a path
-    *   can be computed. The robot then turns 180° and starts following the line and
-    *   its calculated path until it has reached its destination.
+    *   can be computed.
+    */
+
+    /* move towards QR code at start edge node */
+    if (initProcedureDistanceToScanCounter >= QR_SCAN_DISTANCE_THRESHOLD) {
+
+        /* check if camera is enabled and take a snapshot via camera while robot is facing towards QR code*/
+        if (robotControl->isCameraEnabled()) {
+
+            robotActiveWait(20);
+            robotControl->takeCameraSnapshot();
+        }
+        else {
+            /*
+            *   halt, enable camera and wait for 20 steps to
+            *   ensure camera is fully enabled when taking a snapshot.
+            *   Finish this step of routine afterwards
+            */
+            robotControl->setMotorSpeedHalt();
+            robotControl->enableCamera();
+            return 0;
+        }
+
+        if (qrmodule->readQRCode(robotControl->getQrFileName(), &qrCodeParams)) {
+
+            // deactivate camera since reading was successful
+            robotControl->disableCamera();
+
+            mStartNode = qrCodeParams.startXY;
+            mGoalNode = qrCodeParams.goalXY;
+
+            qrScanCompleted = true;
+        }
+        else {
+
+            if (readQrCodeAttemptCounter < QR_READ_ATTEMPTS_THRESHOLD) {
+                readQrCodeAttemptCounter++;
+                return 0;
+            }
+            else {
+                // number of attempts exceeded, handle error
+                endOfLineGoalReached = true;
+                return -1;
+            }
+        }
+    }
+    else {
+        robotControl->setMotorSpeedFollowLine();
+        initProcedureDistanceToScanCounter += timeStep;
+    }
+    
+
+    return 0;
+}
+
+void MainControllerEPuck::initPathHandling(void)
+{
+    /*
+    *   This block is executed after the robot successfully read the start and goal
+    *   coordinates out of a QR code. These informations are sent to the 
+    *   supervisor, awaiting a reply message containing a path. The robot then 
+    *   turns 180° to complete the init procedure and is ready to start following 
+    *   the line and its calculated path until it has reached its destination.
     */
     if (pathPlanningCompleted) {
 
@@ -162,67 +237,25 @@ int MainControllerEPuck::initProcedureHandling(void)
         }
     }
     else {
-        /* move towards QR code at start edge node */
-        if (initProcedureDistanceToScanCounter >= QR_SCAN_DISTANCE_THRESHOLD) {
+        /* send start + goal information to supervisor */
+        if (!pathRequestSent) {
+            commModule->requestPath(mStartNode, mGoalNode);
+            pathRequestSent = true;
+        }
+        /* poll and wait for supervisor path reply */
+        else {
+            /*
+            *   Start and goal information has been sent.
+            *   Wait for supervisor's reply with path.
+            */
+            std::vector<std::tuple<int, int>> path;
 
-            /* check if camera is enabled and take a snapshot via camera while robot is facing towards QR code*/
-            if (robotControl->isCameraEnabled()) {
-
-                robotActiveWait(20);
-                robotControl->takeCameraSnapshot();
-            }
-            else {
-                /*
-                *   halt, enable camera and wait for 20 steps to
-                *   ensure camera is fully enabled when taking a snapshot.
-                *   Finish this step of routine afterwards
-                */
-                robotControl->setMotorSpeedHalt();
-                robotControl->enableCamera();
-                return 0;
-            }
-
-            // generate structure to save read parameters into
-            SGDQRParams qrCodeParams;
-
-            if (qrmodule->readQRCode(robotControl->getQrFileName(), &qrCodeParams)) {
-
-                // deactivate camera since reading was successful
-                robotControl->disableCamera();
-
-                // save parameters read from QR code
-                pathplanner->setMatrixDimension(qrCodeParams.mapDimension);
-                pathplanner->setStartGoalPositionByIndex(qrCodeParams.startIndex, qrCodeParams.goalIndex);
-
-                /*
-                *   do path planning, no parameters necessary since start and goal are
-                *   known by pathplanner through call of setStartGoalPositionByIndex()
-                */
-                pathplanner->findPath();
-
-                initProcedureDistanceToScanCounter = 0;
+            if (commModule->receivePath(&path)) {
+                pathplanner->setPath(path);
                 pathPlanningCompleted = true;
             }
-            else {
-
-                if (readQrCodeAttemptCounter < QR_READ_ATTEMPTS_THRESHOLD) {
-                    readQrCodeAttemptCounter++;
-                    return 0;
-                }
-                else {
-                    // number of attempts exceeded, handle error
-                    endOfLineGoalReached = true;
-                    return -1;
-                }
-            }
-        }
-        else {
-            robotControl->setMotorSpeedFollowLine();
-            initProcedureDistanceToScanCounter += timeStep;
         }
     }
-
-    return 0;
 }
 
 void MainControllerEPuck::crossroadDetectionHandling(void)
@@ -310,8 +343,8 @@ void MainControllerEPuck::obstacleHandling(void)
             std::vector<std::tuple<int, int>> path;
 
             /* check routine step, check for supervisor response */
-            if (commModule->receiveCollisionReply(&path)) {
-                pathplanner->runAlternativePath(path);
+            if (commModule->receiveAlternativePath(&path)) {
+                pathplanner->setPath(path);
                 alternativePathReceived = true;
             }
             else { /* wait some time ? ... */ }
@@ -369,9 +402,7 @@ void MainControllerEPuck::goalReachedHandling(void)
         /*
         *   endless mode behavior
         */
-        // reset variables -> reset_controller_state();
-        pathPlanningCompleted = false;
-        initProcedureDone = false;
+        resetControllerStates();
     }
     else
     {
@@ -388,4 +419,15 @@ void MainControllerEPuck::goalReachedHandling(void)
             robotControl->setMotorSpeedFollowLine();
         }
     }
+}
+
+void MainControllerEPuck::resetControllerStates(void)
+{
+    initProcedureDistanceToScanCounter = 0;
+    readQrCodeAttemptCounter = 0;
+
+    qrScanCompleted = false;
+    pathRequestSent = false;
+    pathPlanningCompleted = false;
+    initProcedureDone = false;
 }

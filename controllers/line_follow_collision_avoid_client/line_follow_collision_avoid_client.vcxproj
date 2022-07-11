@@ -179,7 +179,7 @@
     <ClInclude Include="include\IRobotControl.h" />
     <ClInclude Include="include\MainControllerEPuck.h" />
     <ClInclude Include="include\PathPlannerEPuck.h" />
-    <ClInclude Include="include\PathPlanningModule.h" />
+    <ClInclude Include="include\IPathPlanningModule.h" />
     <ClInclude Include="include\IQRModule.h" />
     <ClInclude Include="include\QRModuleEPuckSGD.h" />
     <ClInclude Include="include\RobotControlEPuck.h" />

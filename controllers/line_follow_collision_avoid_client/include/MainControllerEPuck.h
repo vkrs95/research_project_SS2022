@@ -34,11 +34,12 @@ private:
     *
     *********************************************************/
     void controlLEDHandling(void);
-    int  initProcedureHandling(void);
+    int  qrScanHandling(void);
+    void initPathHandling(void);
     void crossroadDetectionHandling(void);
     void obstacleHandling(void);
     void goalReachedHandling(void);
-
+    void resetControllerStates(void);
 
     /*********************************************************
     *
@@ -61,6 +62,8 @@ private:
 
     int timeStep = 0;
     unsigned int crossroadManeuverThreshold = 0;    // is set when next direction is read  
+    std::tuple <int, int> mStartNode, mGoalNode;    // local copies of start and goal node that has been read from QR code            
+    SGDQRParams qrCodeParams;                       // structure to save read QR parameters into
 
     /*** object pointers ***/
     Robot* robot;
@@ -85,5 +88,7 @@ private:
     bool pathPlanningCompleted = false;
     bool supervisorConnected = false;
     bool alternativePathReceived = false;
+    bool pathRequestSent = false;
+    bool qrScanCompleted = false;
 
 };
