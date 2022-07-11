@@ -188,7 +188,7 @@ bool CommModuleTCPSocketServer::checkClientNotifications(
     }
 
     /* return true if at least one notfication has been added, else false */
-    return (collisionNotifications->empty() && pathNotifications->empty());
+    return !(collisionNotifications->empty() && pathNotifications->empty());
 
 }
 
@@ -300,8 +300,8 @@ CommModuleTCPSocketServer::PathNotification::PathNotification(std::string client
         subStrings.push_back(subStr);
     }
 
-    /* we need three substrings for start, goal and collision node */
-    if (subStrings.size() != 3) {
+    /* we need two substrings for start and goal node */
+    if (subStrings.size() != 2) {
         std::cerr << "CommModuleTCPSocketServer: handler message contains invalid number of nodes. (" << subStrings.size() << ")." << std::endl;
         // go on with next message
     }

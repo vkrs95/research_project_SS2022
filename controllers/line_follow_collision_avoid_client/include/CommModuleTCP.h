@@ -33,12 +33,15 @@ class CommModuleTCP :
 public:
 
     CommModuleTCP(int port = 1000);
+    
     bool registerAtSupervisor(std::string robotName);
     void unregisterFromSupervisor(std::string reason = std::string("none"));
-    bool reportCollision(coordinate startXY, 
-                            coordinate goalXY, 
-                            coordinate collisionXY);
-    bool receiveCollisionReply(std::vector<coordinate>* path);
+
+    bool requestPath(coordinate startXY, coordinate goalXY);
+    bool receivePath(std::vector<coordinate>* path);
+
+    bool reportCollision(coordinate startXY, coordinate goalXY, coordinate collisionXY);
+    bool receiveAlternativePath(std::vector<coordinate>* path);
 
 private:
 
@@ -46,7 +49,9 @@ private:
     {
         REGISTER = 0,
         UNREGISTER,
-        COLLISION
+        PATH,
+        COLLISION, 
+        INVALID = 99
     };
 
     bool socketInit();

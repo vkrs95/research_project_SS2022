@@ -237,15 +237,52 @@ void CommModuleTCP::unregisterFromSupervisor(std::string reason)
     sendMessage(msgString.c_str(), msgString.size());
 }
 
+bool CommModuleTCP::requestPath(coordinate startXY, coordinate goalXY)
+{
+    /* prepare path message */
+    /* e.g. 2;1,2;6,0 */
+    std::ostringstream stringStream;
+
+    /* build path msg string */
+    stringStream << MessageType::PATH << ";"
+        << std::get<0>(startXY) << "," << std::get<1>(startXY) << ";"
+        << std::get<0>(goalXY) << "," << std::get<1>(goalXY);
+
+    std::string msgString = stringStream.str();
+
+    return sendMessage(msgString.c_str(), msgString.size());
+}
+
+bool CommModuleTCP::receivePath(std::vector<coordinate>* path)
+{
+    std::string msg = receiveMessage();
+
+    if (!msg.empty()) {
+
+        /* get msg type as integer from msg */
+        int msgIdentifier = msg.at(0) - '0';
+
+        if (msgIdentifier == MessageType::PATH) {
+            /* received supervisor response with path */
+            *path = parsePath(msg);
+
+            return true;
+        }
+    }
+
+    return false;
+}
+
 bool CommModuleTCP::reportCollision(
     coordinate startXY,
     coordinate goalXY,
     coordinate collisionXY)
 {
     /* prepare collision message */
-    /* e.g. 2;1,2;6,0;3,2 */
+    /* e.g. 3;1,2;6,0;3,2 */
     std::ostringstream stringStream;
 
+    /* build collision msg string */
     stringStream << MessageType::COLLISION << ";" 
         << std::get<0>(startXY)     << "," << std::get<1>(startXY)  << ";"
         << std::get<0>(goalXY)      << "," << std::get<1>(goalXY)   << ";"
@@ -256,7 +293,7 @@ bool CommModuleTCP::reportCollision(
     return sendMessage(msgString.c_str(), msgString.size());
 }
 
-bool CommModuleTCP::receiveCollisionReply(std::vector<std::tuple<int, int>>* path)
+bool CommModuleTCP::receiveAlternativePath(std::vector<std::tuple<int, int>>* path)
 {
     std::string msg = receiveMessage();
 

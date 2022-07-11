@@ -55,26 +55,7 @@ void Message::parseMessage(const char* data)
 
 MessageType Message::determineMessageType(int typeInt)
 {
-	MessageType mtype; 
-
-	switch (typeInt)
-	{
-	case 0:
-		mtype = MessageType::REGISTER;
-		break;
-
-	case 1:
-		mtype = MessageType::UNREGISTER;
-		break;
-
-	case 2:
-		mtype = MessageType::COLLISION;
-		break;
-
-	default:
-		mtype = MessageType::INVALID;
-		break;
-	}
+	MessageType mtype = static_cast<MessageType>(typeInt); 
 
 	return mtype;
 }
