@@ -17,22 +17,12 @@ std::vector<Node> PathPlanner::getShortestPath(std::tuple<int, int> start, std::
     /* calculate path between start and goal */
     auto [planningSuccessful, pathVector] = dijkstraPlanning.Plan(startPosition, goalPosition);
 
-    
-    /* client path planning needs obstacle as entry to determine first movement direction */
-    Node obstacle(std::get<0>(collision), std::get<1>(collision));
-    pathVector.push_back(obstacle);
-
-    ///* */
-    //auto itCollision = std::find(pathVector.begin(), pathVector.end(), obstacle);
-    //if (itCollision == pathVector.end()) {
-    //    std::cout << "PathPlanner: cannot find collision point in shortest path vector" << std::endl;
-    //    return std::vector<Node>();
-    //}
-
-    ///* go backwards removing all elements from start until collision node */
-    //for (auto it = pathVector.end() - 1; it != itCollision; it--) {
-    //    pathVector.pop_back();
-    //}
+    /* if collision is (0,0) shortest path does not include a collision point */
+    if (collision != std::tuple(0,0)) {
+        /* client path planning needs obstacle as entry to determine first movement direction */
+        Node obstacle(std::get<0>(collision), std::get<1>(collision));
+        pathVector.push_back(obstacle);
+    }
 
     /*
     *   pathCoordinatesList is ordered goal to start,
@@ -75,7 +65,7 @@ std::vector<Node> PathPlanner::getAlternativePath(std::tuple<int, int> start, st
 
 void PathPlanner::prepareWorldGrid(void)
 {
-    int n = worldDimension + 1;
+    int n = worldDimension*2 + 1; // arena lines per side * 2 + 1 for walls between each line  
 
     /* reset world grid */
     worldGrid.clear();
