@@ -61,5 +61,6 @@ public:
 private:
     std::string getContentStringFromQrImage(std::string qrFilePath);
     std::vector<std::string> splitString(std::string str, std::string delimiter);
+    std::vector<std::string> processCoordinateString(std::string str);
 
 };
