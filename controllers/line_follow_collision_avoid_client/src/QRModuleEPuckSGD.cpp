@@ -43,6 +43,22 @@ std::string QRModuleEPuckSGD::getContentStringFromQrImage(std::string qrFilePath
     return qrContent;
 }
 
+std::vector<std::string> QRModuleEPuckSGD::splitString(std::string str, std::string delimiter)
+{
+    std::string strToSplit(str);
+    std::vector<std::string> splitContent;
+    std::string substr;
+    size_t pos = 0;
+
+    while ((pos = str.find(delimiter)) != std::string::npos) {
+        substr = strToSplit.substr(0, pos);
+        splitContent.push_back(substr);
+        strToSplit.erase(0, pos + delimiter.length());
+    }
+
+    return splitContent;
+}
+
 bool QRModuleEPuckSGD::readQRCode(std::string qrFilePath, SGDQRParams* qrContent)
 {
 
@@ -50,25 +66,22 @@ bool QRModuleEPuckSGD::readQRCode(std::string qrFilePath, SGDQRParams* qrContent
     std::string qrContentString = getContentStringFromQrImage(qrFilePath);
 
   
-    /*** extract the numbers out of the qr string ****/
-    std::vector<int> mapPositions;
+    /*** extract the coordinates out of the qr string ****/
+    std::vector<std::string> splitContent;
     std::stringstream ss(qrContentString);
+        
+    /* split string to get start;goal;dimension */
+    splitContent = splitString(qrContentString, ";");
 
-    // extract the numbers out of the qr string
-    // this should result in an vector with the length of two
-    for (int i; ss >> i;) {
-        mapPositions.push_back(i);
-        if (ss.peek() == ':')
-            ss.ignore();
-    }
+    /*** validity check and coordination extraction ****/
+    if (splitContent.size() >= 3) {
 
-    /*** validity check and index extraction ****/
-    if (mapPositions.size() >= 3) {
+        std::vector<std::string> splitStart = splitString(splitContent.at(0), ";");
+        std::vector<std::string> splitGoal = splitString(splitContent.at(1), ";");
 
-        // set start and goal position, value-1 since P1 is list index 0
-        qrContent->startIndex = mapPositions.at(0) - 1;
-        qrContent->goalIndex = mapPositions.at(1) - 1;
-        qrContent->mapDimension = mapPositions.at(2);
+        qrContent->startXY = { std::stoi(splitStart.at(0)), std::stoi(splitStart.at(1)) };
+        qrContent->goalXY = { std::stoi(splitStart.at(0)), std::stoi(splitStart.at(1)) };
+        qrContent->mapDimension = std::stoi(splitContent.at(2));
 
     }
     else {
