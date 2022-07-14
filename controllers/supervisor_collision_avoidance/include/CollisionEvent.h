@@ -54,6 +54,8 @@ private:
 	bool mResolved = false;
 	std::thread* resolveEventThread;
 	static const int MATRIX_DIM = 6;	// arena lines per side * 2
+	static const int PARTICIPANT_TIMEOUT = 2000; // timeout in ms 
+	static const int PARTICIPANT_WAIT_TIME = 200; // time duration to sleep in ms 
 };
 
 

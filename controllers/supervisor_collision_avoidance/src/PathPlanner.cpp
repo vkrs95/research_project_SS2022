@@ -29,7 +29,7 @@ std::vector<Node> PathPlanner::getShortestPath(std::tuple<int, int> start, std::
     *   reverse list to have steps from start to goal instead
     *   or in our case from collision to goal 
     */
-    std::reverse(pathVector.begin(), pathVector.end());
+    std::reverse(pathVector.begin(), pathVector.end()); 
 
     return pathVector;
 }

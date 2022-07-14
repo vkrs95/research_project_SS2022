@@ -33,11 +33,14 @@ void CollisionEvent::resolveEventThreadRoutine(void)
     *   Robot A with shortest distance to goal has right of way, 
     *   robot B calculates alternative path
     */
-        
+    unsigned int timeoutCounter = 0;
     /* for now we expect two participants registered in a collision event */
     while (mParticipants.size() < 2) {
         /* sleep for 100ms and check number of participants again */
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        std::this_thread::sleep_for(std::chrono::milliseconds(PARTICIPANT_WAIT_TIME));
+
+        if ((timeoutCounter += PARTICIPANT_WAIT_TIME) >= PARTICIPANT_TIMEOUT) 
+            break;
     }
 
     /*** go through all participants and try to resolve collision properly ***/
