@@ -41,7 +41,7 @@ public:
     bool receivePath(std::vector<coordinate>* path);
 
     bool reportCollision(coordinate startXY, coordinate goalXY, coordinate collisionXY);
-    bool receiveAlternativePath(std::vector<coordinate>* path);
+    bool receiveAlternativePath(std::vector<coordinate>* path, int* msgTypeError = 0);
 
 private:
 
@@ -64,6 +64,9 @@ private:
     std::string receiveMessage(void);
     std::vector<coordinate> parsePath(std::string msg);
     coordinate getCoordinateTuple(std::string tupleString);
+    MessageType getMessageIdentifier(std::string msg);
+    int getMessageTypeErrorCode(std::string msg);
+    std::vector<std::string> msgStringSplit(std::string msg);
 
     SOCKET connectSocket;
     int wifiPort;

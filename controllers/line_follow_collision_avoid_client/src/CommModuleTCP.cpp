@@ -215,7 +215,7 @@ bool CommModuleTCP::receiveRegistrationAck(void)
 
     if (!msg.empty()) {
 
-        int msgIdentifier = msg.at(0) - '0';
+        MessageType msgIdentifier = getMessageIdentifier(msg);
 
         if (msgIdentifier == MessageType::REGISTER) {
             return true;
@@ -260,7 +260,7 @@ bool CommModuleTCP::receivePath(std::vector<coordinate>* path)
     if (!msg.empty()) {
 
         /* get msg type as integer from msg */
-        int msgIdentifier = msg.at(0) - '0';
+        MessageType msgIdentifier = getMessageIdentifier(msg);
 
         if (msgIdentifier == MessageType::PATH) {
             /* received supervisor response with path */
@@ -293,18 +293,19 @@ bool CommModuleTCP::reportCollision(
     return sendMessage(msgString.c_str(), msgString.size());
 }
 
-bool CommModuleTCP::receiveAlternativePath(std::vector<std::tuple<int, int>>* path)
+bool CommModuleTCP::receiveAlternativePath(std::vector<std::tuple<int, int>>* path, int* msgState)
 {
     std::string msg = receiveMessage();
 
     if (!msg.empty()) {
 
+        MessageType msgIdentifier = getMessageIdentifier(msg);
+        
         /* get msg type as integer from msg */
-        int msgIdentifier = msg.at(0) - '0';
-
         if (msgIdentifier == MessageType::COLLISION) {
             /* received supervisor response with collision avoidance path */
             *path = parsePath(msg);
+            *msgState = getMessageTypeErrorCode(msg);
 
             return true;
         }
@@ -315,19 +316,10 @@ bool CommModuleTCP::receiveAlternativePath(std::vector<std::tuple<int, int>>* pa
 
 std::vector<coordinate> CommModuleTCP::parsePath(std::string msg)
 {
-    std::string subStr;
     std::vector<coordinate> path;
-    std::vector<std::string> subStrings;
+    std::vector<std::string> subStrings = msgStringSplit(msg);
 
-    /* load message content into string stream */
-    std::istringstream iss(msg);
-
-    /* go through stream and extract substring between delimiter ';' */
-    while (std::getline(iss, subStr, ';')) {
-        subStrings.push_back(subStr);
-    }
-
-    for (int i = 1; i < subStrings.size(); i++) {
+    for (int i = 2; i < subStrings.size(); i++) {
         /* convert coordinates from string and add them to path list */
         path.push_back(getCoordinateTuple(subStrings[i]));
     }
@@ -350,4 +342,49 @@ coordinate CommModuleTCP::getCoordinateTuple(std::string tupleString)
     yCoord = std::stoi(tupleString.substr(pos + 1, tupleString.size() - pos + 1));
 
     return { xCoord, yCoord };
+}
+
+CommModuleTCP::MessageType CommModuleTCP::getMessageIdentifier(std::string msg)
+{
+    std::vector<std::string> subStrings = msgStringSplit(msg);
+
+    if (subStrings.size() < 1) {
+        // msg does not contain semicolon delimiter
+        return MessageType::INVALID;
+    }
+
+    /* get msg type as integer from msg */
+    int msgIdentifier = std::stoi(subStrings.at(0));
+
+    return static_cast<MessageType>(msgIdentifier);
+}
+
+std::vector<std::string> CommModuleTCP::msgStringSplit(std::string msg)
+{
+    std::string subStr;
+    std::vector<coordinate> path;
+    std::vector<std::string> subStrings;
+
+    /* load message content into string stream */
+    std::istringstream iss(msg);
+
+    /* go through stream and extract substring between delimiter ';' */
+    while (std::getline(iss, subStr, ';')) {
+        subStrings.push_back(subStr);
+    }
+
+    return subStrings;
+}
+
+int CommModuleTCP::getMessageTypeErrorCode(std::string msg)
+{
+    std::vector<std::string> subStrings = msgStringSplit(msg);
+
+    if (subStrings.size() < 2) {
+        // msg does not contain semicolon delimiter
+        return 99; // ERROR CODE ?
+    }
+
+    /* get msg type as integer from msg */
+    return std::stoi(subStrings.at(1));
 }

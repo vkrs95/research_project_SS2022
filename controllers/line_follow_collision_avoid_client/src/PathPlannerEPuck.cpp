@@ -25,6 +25,19 @@ void PathPlannerEPuck::setPath(std::vector<std::tuple<int, int>> path)
     std::cout << "------------------------" << "\n";
 }
 
+bool PathPlannerEPuck::setAlternativePath(std::vector<std::tuple<int, int>> path)
+{
+    /* 
+    *   check if alternative path contains a loop :
+    *   when alternative path is calculated and this robot has right of way 
+    *   the same shortest path is set as before but with the collision point 
+    *   added in the beginning of the path. 
+    *   If the collision point is not included, 
+    */
+
+    return false;
+}
+
 bool PathPlannerEPuck::pathCompleted(void)
 {
     /*

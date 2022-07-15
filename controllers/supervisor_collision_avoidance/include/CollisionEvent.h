@@ -14,8 +14,8 @@ using coordinate = std::tuple<int, int>;
 
 enum class EventState 
 {
-	UNINITIATED = 0,
-	IN_PROGRESS,
+	UNINITIATED = -2,
+	IN_PROGRESS = -1,
 	RESOLVED, 
 	CANCELED,
 	INVALID = 99

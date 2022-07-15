@@ -21,6 +21,7 @@ public:
 
     /* provide additional public functions to use this planner */
     void setPath(std::vector<std::tuple<int, int>> path);
+    bool setAlternativePath(std::vector<std::tuple<int, int>> path);
     bool pathCompleted(void);
     void getObstacleParameters(std::tuple<int,int> *startCoords, std::tuple<int, int> *goalCoords, std::tuple<int, int> *collisionCoords);
 

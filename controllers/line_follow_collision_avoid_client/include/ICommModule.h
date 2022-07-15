@@ -19,5 +19,5 @@ public:
     
     /* collision functions */
     virtual bool reportCollision(coordinate startXY, coordinate goalXY, coordinate collisionXY) = 0;
-    virtual bool receiveAlternativePath(std::vector<coordinate>* path) = 0;
+    virtual bool receiveAlternativePath(std::vector<coordinate>* path, int* msgTypeError) = 0;
 };

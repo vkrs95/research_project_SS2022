@@ -341,10 +341,19 @@ void MainControllerEPuck::obstacleHandling(void)
             *   Wait for supervisor's reply with alternative path.
             */
             std::vector<std::tuple<int, int>> path;
+            int collisionErrorCode = 0; 
 
             /* check routine step, check for supervisor response */
-            if (commModule->receiveAlternativePath(&path)) {
-                pathplanner->setPath(path);
+            if (commModule->receiveAlternativePath(&path, &collisionErrorCode)) {
+                
+                if (collisionErrorCode > 0) {
+                    /* collision was canceled or is invalid, stop obstacle handling */
+                    obstacleHandlingActive = false;
+                }
+                else {
+                    pathplanner->setPath(path);
+                }
+
                 alternativePathReceived = true;
             }
             else { /* wait some time ? ... */ }
