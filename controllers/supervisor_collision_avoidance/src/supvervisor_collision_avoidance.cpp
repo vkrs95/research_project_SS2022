@@ -13,7 +13,7 @@ int main(int argc, char **argv) {
 
     std::list<CommModuleTCPSocketServer::PathNotification> pathNotList;
     std::list<CommModuleTCPSocketServer::CollisionNotification> collisionNotList;
-    std::map<std::string, std::vector<coordinate>> clientPaths;
+    std::map<std::string, std::pair<int, std::vector<coordinate>>> clientPaths;
     
     /*
     *   Supervisor needs to determine world dimension by 

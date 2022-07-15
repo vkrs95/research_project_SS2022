@@ -78,7 +78,7 @@ public:
 	CommModuleTCPSocketServer(int port = 1000);
 	~CommModuleTCPSocketServer();
 	bool checkClientNotifications(std::list<PathNotification>* pathNotifications, std::list<CollisionNotification>* collisionNotifications);
-	void sendCollisionMessageReply(std::map<std::string, std::vector<coordinate>> clientPaths);
+	void sendCollisionMessageReply(std::map<std::string, std::pair<int, std::vector<coordinate>>> clientPaths);
 	void sendPathMessage(std::string clientName, std::vector<coordinate> clientPath);
 
 protected:
@@ -96,7 +96,7 @@ private:
 	bool	socketCleanup(void);
 	void	socketListenerRoutine(void);
 	void	sendMessageToClient(std::string clientName, Message* message);
-	std::string buildPathMsgString(std::vector<coordinate> path, MessageType msgType);
+	std::string buildPathMsgString(std::vector<coordinate> path, MessageType msgType, int optMsgState = 0);
 
 
 

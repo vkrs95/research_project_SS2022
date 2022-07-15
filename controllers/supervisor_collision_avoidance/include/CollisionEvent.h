@@ -12,6 +12,14 @@
 
 using coordinate = std::tuple<int, int>;
 
+enum class EventState 
+{
+	UNINITIATED = 0,
+	IN_PROGRESS,
+	RESOLVED, 
+	CANCELED,
+	INVALID = 99
+};
 
 class CollisionEvent {
 	
@@ -42,6 +50,7 @@ public:
 	void addParticipant(std::string name, coordinate start, coordinate goal);
 	bool eventResolved(void);
 	std::map<std::string, std::vector<Node>> getParticipants(void);
+	EventState getState(void);
 
 private:
 	void resolveEventThreadRoutine(void);
@@ -51,7 +60,7 @@ private:
 
 	std::vector<CollisionParticipant> mParticipants;	// internal list to manage participants
 	coordinate mCollisionPoint;
-	bool mResolved = false;
+	EventState mState = EventState::UNINITIATED;
 	std::thread* resolveEventThread;
 	static const int MATRIX_DIM = 6;	// arena lines per side * 2
 	static const int PARTICIPANT_TIMEOUT = 2000; // timeout in ms 

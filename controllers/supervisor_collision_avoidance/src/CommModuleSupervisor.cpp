@@ -192,16 +192,20 @@ bool CommModuleTCPSocketServer::checkClientNotifications(
 
 }
 
-void CommModuleTCPSocketServer::sendCollisionMessageReply(std::map<std::string, std::vector<coordinate>> clientPaths)
+void CommModuleTCPSocketServer::sendCollisionMessageReply(std::map<std::string, std::pair<int, std::vector<coordinate>>> clientPaths)
 {
     Message* msg;
 
     /* prepare message for each client */
     for (auto clientPath : clientPaths) {
-        std::string pathMsgString = buildPathMsgString(clientPath.second, MessageType::COLLISION);
+
+        const std::string clientName = clientPath.first;
+        int collState = clientPath.second.first;
+
+        std::string pathMsgString = buildPathMsgString(clientPath.second.second, MessageType::COLLISION, collState);
         msg = new Message(pathMsgString);
 
-        sendMessageToClient(clientPath.first, msg);
+        sendMessageToClient(clientName, msg);
     }
 }
 
@@ -264,12 +268,13 @@ void CommModuleTCPSocketServer::socketListenerRoutine(void)
     std::cout << "Communication Module Supervisor: Socket listener thread shutting down. No more connections accepted on port " << mServerPort << "." << std::endl;
 }
 
-std::string CommModuleTCPSocketServer::buildPathMsgString(std::vector<coordinate> path, MessageType msgType)
+std::string CommModuleTCPSocketServer::buildPathMsgString(std::vector<coordinate> path, MessageType msgType, int optMsgState)
 {
     std::stringstream sStrm;
 
-    /* build string containing type and path, separated with semicolon */
+    /* build string containing type, state and path, separated with semicolon */
     sStrm << (int)msgType << ";";
+    sStrm << optMsgState << ";";
 
     /* each coordinate is parsed in pattern: 'x,y;x,y;x,y'*/
     for (coordinate c : path) {
