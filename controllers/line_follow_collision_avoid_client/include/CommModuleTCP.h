@@ -26,6 +26,9 @@
 /* include abstract module interface */
 #include "ICommModule.h"
 
+/* member imports */
+#include "Message.h"
+
 class CommModuleTCP : 
     public ICommModule
 {
@@ -45,20 +48,11 @@ public:
 
 private:
 
-    enum MessageType
-    {
-        REGISTER = 0,
-        UNREGISTER,
-        PATH,
-        COLLISION, 
-        INVALID = 99
-    };
-
     bool socketInit();
     bool socketClose(int fd);
     bool socketCleanup();
     bool socketSetNonBlocking(int fd);
-    bool sendMessage(const char* message, size_t msgLen);
+    bool sendMessage(Message* message);
     bool sendRegistrationToSupervisor(std::string robotName);
     bool receiveRegistrationAck(void);
     std::string receiveMessage(void);

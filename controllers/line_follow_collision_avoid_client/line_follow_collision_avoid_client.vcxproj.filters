@@ -121,6 +121,9 @@
     <ClCompile Include="..\..\libraries\path_planning\lib\utils\src\utils.cpp">
       <Filter>lib\path_planning\lib\utils\src</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\libraries\messaging\src\Message.cpp">
+      <Filter>lib\messaging\src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\RobotControlEPuck.h">
@@ -156,6 +159,9 @@
     <ClInclude Include="..\..\libraries\path_planning\lib\utils\include\utils\utils.hpp">
       <Filter>lib\path_planning\lib\utils\include\utils</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\libraries\messaging\include\Message.h">
+      <Filter>lib\messaging\include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Webots">
@@ -187,6 +193,15 @@
     </Filter>
     <Filter Include="lib\path_planning\lib\utils\src">
       <UniqueIdentifier>{9f98fdb4-bdc4-4c52-8709-dc6de26e9b49}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="lib\messaging">
+      <UniqueIdentifier>{0ac74256-6985-4e3c-9c6d-0b1dec26069d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="lib\messaging\include">
+      <UniqueIdentifier>{2e173b1d-b10d-4609-b5a6-0f6e59b5dca7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="lib\messaging\src">
+      <UniqueIdentifier>{b90369fa-a76e-4069-b2ad-e40624791a4d}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

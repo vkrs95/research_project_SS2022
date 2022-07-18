@@ -18,6 +18,7 @@ public:
 	/* constructors */
 	Message(const char* data, int dataSize);
 	Message(std::string data);
+	Message(MessageType type, std::string payload);
 	
 	/* get data functions */
 	std::string getPayload(void);

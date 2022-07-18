@@ -149,12 +149,12 @@ bool CommModuleTCP::registerAtSupervisor(std::string robotName)
     return false;
 }
 
-bool CommModuleTCP::sendMessage(const char* message, size_t msgLen)
+bool CommModuleTCP::sendMessage(Message* message)
 {
     int sendResult;
 
     /* send message to client via tcp socket */
-    sendResult = send(connectSocket, message, maxMsgLen, 0);
+    sendResult = send(connectSocket, message->getMessageAsChar() , maxMsgLen, 0);
 
     if (sendResult == SOCKET_ERROR) {
         std::cerr << "CommModuleTCP (" << mClientName << "): Failed to send message to server" << std::endl;
@@ -198,11 +198,9 @@ std::string CommModuleTCP::receiveMessage(void)
 bool CommModuleTCP::sendRegistrationToSupervisor(std::string robotName)
 {
     /* prepare register message */
-    std::ostringstream stringStream;
-    stringStream << MessageType::REGISTER << ";" << robotName;
-    std::string msgString = stringStream.str();
+    Message* msg = new Message(MessageType::REGISTER, robotName);
 
-    if (!sendMessage(msgString.c_str(), msgString.size())) {
+    if (!sendMessage(msg)) {
         return false;
     }
 
@@ -221,7 +219,7 @@ bool CommModuleTCP::receiveRegistrationAck(void)
             return true;
         }   
 
-        std::cout << "CommModuleTCP: error when trying to receive ACK msg. Received: " << msgIdentifier << std::endl;
+        std::cout << "CommModuleTCP: error when trying to receive ACK msg. Received: " << static_cast<int>(msgIdentifier) << std::endl;
     }
 
     return false;
@@ -230,11 +228,9 @@ bool CommModuleTCP::receiveRegistrationAck(void)
 void CommModuleTCP::unregisterFromSupervisor(std::string reason)
 {
     /* prepare unregister message */
-    std::ostringstream stringStream;
-    stringStream << MessageType::UNREGISTER << ";" << reason;
-    std::string msgString = stringStream.str();
+    Message* msg = new Message(MessageType::UNREGISTER, reason);
 
-    sendMessage(msgString.c_str(), msgString.size());
+    sendMessage(msg);
 }
 
 bool CommModuleTCP::requestPath(coordinate startXY, coordinate goalXY)
@@ -244,13 +240,14 @@ bool CommModuleTCP::requestPath(coordinate startXY, coordinate goalXY)
     std::ostringstream stringStream;
 
     /* build path msg string */
-    stringStream << MessageType::PATH << ";"
-        << std::get<0>(startXY) << "," << std::get<1>(startXY) << ";"
-        << std::get<0>(goalXY) << "," << std::get<1>(goalXY);
+    stringStream << std::get<0>(startXY) << "," << std::get<1>(startXY) << ";"
+                << std::get<0>(goalXY) << "," << std::get<1>(goalXY);
 
     std::string msgString = stringStream.str();
 
-    return sendMessage(msgString.c_str(), msgString.size());
+    Message* msg = new Message(MessageType::PATH, msgString);
+
+    return sendMessage(msg);
 }
 
 bool CommModuleTCP::receivePath(std::vector<coordinate>* path)
@@ -283,14 +280,15 @@ bool CommModuleTCP::reportCollision(
     std::ostringstream stringStream;
 
     /* build collision msg string */
-    stringStream << MessageType::COLLISION << ";" 
-        << std::get<0>(startXY)     << "," << std::get<1>(startXY)  << ";"
-        << std::get<0>(goalXY)      << "," << std::get<1>(goalXY)   << ";"
-        << std::get<0>(collisionXY) << "," << std::get<1>(collisionXY);
+    stringStream << std::get<0>(startXY)     << "," << std::get<1>(startXY)  << ";"
+                << std::get<0>(goalXY)      << "," << std::get<1>(goalXY)   << ";"
+                << std::get<0>(collisionXY) << "," << std::get<1>(collisionXY);
 
     std::string msgString = stringStream.str();
+    
+    Message* msg = new Message(MessageType::COLLISION, msgString);
 
-    return sendMessage(msgString.c_str(), msgString.size());
+    return sendMessage(msg);
 }
 
 bool CommModuleTCP::receiveAlternativePath(std::vector<std::tuple<int, int>>* path, int* msgState)
@@ -344,7 +342,7 @@ coordinate CommModuleTCP::getCoordinateTuple(std::string tupleString)
     return { xCoord, yCoord };
 }
 
-CommModuleTCP::MessageType CommModuleTCP::getMessageIdentifier(std::string msg)
+MessageType CommModuleTCP::getMessageIdentifier(std::string msg)
 {
     std::vector<std::string> subStrings = msgStringSplit(msg);
 

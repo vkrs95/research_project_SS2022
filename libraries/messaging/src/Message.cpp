@@ -14,6 +14,14 @@ Message::Message(std::string data)
 	/* forward message content to interpret data */
 	parseMessage(data.c_str());
 }
+
+Message::Message(MessageType type, std::string payload)
+{
+	mMsgType = type;
+	mMsgSize = payload.size();
+	mPayload = payload;
+}
+
 std::string Message::getPayload()
 {
 	return mPayload;
