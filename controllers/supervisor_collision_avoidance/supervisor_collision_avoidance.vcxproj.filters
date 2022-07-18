@@ -103,22 +103,10 @@
     <ClCompile Include="src\supvervisor_collision_avoidance.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="lib\path_planning\lib\utils\src\utils.cpp">
-      <Filter>lib\path_planning\lib\utils\src</Filter>
-    </ClCompile>
-    <ClCompile Include="lib\path_planning\src\a_star.cpp">
-      <Filter>lib\path_planning\src</Filter>
-    </ClCompile>
-    <ClCompile Include="lib\path_planning\src\dijkstra.cpp">
-      <Filter>lib\path_planning\src</Filter>
-    </ClCompile>
     <ClCompile Include="src\CommModuleSupervisor.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\ClientCommHandler.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Message.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\CollisionHandler.cpp">
@@ -130,27 +118,27 @@
     <ClCompile Include="src\PathPlanner.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\libraries\messaging\src\Message.cpp">
+      <Filter>lib\messaging\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\libraries\path_planning\src\a_star.cpp">
+      <Filter>lib\path_planning\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\libraries\path_planning\src\dijkstra.cpp">
+      <Filter>lib\path_planning\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\libraries\path_planning\lib\utils\src\utils.cpp">
+      <Filter>lib\path_planning\lib\utils\src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\supvervisor_collision_avoidance.h">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="lib\path_planning\lib\utils\include\utils\utils.hpp">
-      <Filter>lib\path_planning\lib\utils\include\utils</Filter>
-    </ClInclude>
-    <ClInclude Include="lib\path_planning\include\path_planning\a_star.hpp">
-      <Filter>lib\path_planning\include</Filter>
-    </ClInclude>
-    <ClInclude Include="lib\path_planning\include\path_planning\dijkstra.hpp">
-      <Filter>lib\path_planning\include</Filter>
-    </ClInclude>
     <ClInclude Include="include\CommModuleSupervisor.h">
       <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="include\ClientCommHandler.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Message.h">
       <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="include\CollisionHandler.h">
@@ -161,6 +149,18 @@
     </ClInclude>
     <ClInclude Include="include\PathPlanner.h">
       <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\libraries\messaging\include\Message.h">
+      <Filter>lib\messaging\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\libraries\path_planning\include\path_planning\a_star.hpp">
+      <Filter>lib\path_planning\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\libraries\path_planning\include\path_planning\dijkstra.hpp">
+      <Filter>lib\path_planning\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\libraries\path_planning\lib\utils\include\utils\utils.hpp">
+      <Filter>lib\path_planning\lib\utils\include\utils</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -199,6 +199,15 @@
     </Filter>
     <Filter Include="lib\path_planning\lib\utils\src">
       <UniqueIdentifier>{9f98fdb4-bdc4-4c52-8709-dc6de26e9b49}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="lib\messaging">
+      <UniqueIdentifier>{b029915e-4d7e-4318-89c5-0a939abb095a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="lib\messaging\include">
+      <UniqueIdentifier>{7de2ff2a-83e8-4d6b-8f98-a17a2d8a8a64}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="lib\messaging\src">
+      <UniqueIdentifier>{17953e79-061c-43e2-8456-2cff4934ac12}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

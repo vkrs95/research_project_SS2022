@@ -112,14 +112,14 @@
     <ClCompile Include="src\RobotControlEPuck.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="lib\path_planning\lib\utils\src\utils.cpp">
-      <Filter>lib\path_planning\lib\utils\src</Filter>
-    </ClCompile>
     <ClCompile Include="src\CommModuleTCP.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\MainControllerEPuck.cpp">
       <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\libraries\path_planning\lib\utils\src\utils.cpp">
+      <Filter>lib\path_planning\lib\utils\src</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -138,9 +138,6 @@
     <ClInclude Include="include\PathPlannerEPuck.h">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="lib\path_planning\lib\utils\include\utils\utils.hpp">
-      <Filter>lib\path_planning\lib\utils\include\utils</Filter>
-    </ClInclude>
     <ClInclude Include="include\IRobotControl.h">
       <Filter>include</Filter>
     </ClInclude>
@@ -155,6 +152,9 @@
     </ClInclude>
     <ClInclude Include="include\MainControllerEPuck.h">
       <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\libraries\path_planning\lib\utils\include\utils\utils.hpp">
+      <Filter>lib\path_planning\lib\utils\include\utils</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

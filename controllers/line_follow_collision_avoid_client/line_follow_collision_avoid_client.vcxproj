@@ -113,7 +113,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(WEBOTS_HOME)/include/controller/c;$(WEBOTS_HOME)\include\controller\cpp;$(ProjectDir);$(ProjectDir)include;$(ProjectDir)lib\opencv\build\include;$(ProjectDir)lib\ZBar\include;$(ProjectDir)lib\path_planning\include;$(ProjectDir)lib\path_planning\lib\utils\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(WEBOTS_HOME)/include/controller/c;$(WEBOTS_HOME)\include\controller\cpp;$(ProjectDir);$(ProjectDir)include;$(ProjectDir)..\..\libraries\opencv\build\include;$(ProjectDir)..\..\libraries\zbar\include;$(ProjectDir)..\..\libraries\path_planning\include;$(ProjectDir)..\..\libraries\path_planning\lib\utils\include</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <DisableSpecificWarnings>4996;%(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>
@@ -162,7 +162,7 @@
     <ClCompile Include="$(WEBOTS_HOME)\resources\languages\cpp\Speaker.cpp" />
     <ClCompile Include="$(WEBOTS_HOME)\resources\languages\cpp\Supervisor.cpp" />
     <ClCompile Include="$(WEBOTS_HOME)\resources\languages\cpp\TouchSensor.cpp" />
-    <ClCompile Include="lib\path_planning\lib\utils\src\utils.cpp" />
+    <ClCompile Include="..\..\libraries\path_planning\lib\utils\src\utils.cpp" />
     <ClCompile Include="src\CommModuleTCP.cpp" />
     <ClCompile Include="src\line_follow_collision_avoid_client.cpp" />
     <ClCompile Include="src\MainControllerEPuck.cpp" />
@@ -171,6 +171,7 @@
     <ClCompile Include="src\RobotControlEPuck.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\libraries\path_planning\lib\utils\include\utils\utils.hpp" />
     <ClInclude Include="include\CommModuleTCP.h" />
     <ClInclude Include="include\ICommModule.h" />
     <ClInclude Include="include\IMainController.h" />
@@ -181,7 +182,6 @@
     <ClInclude Include="include\IQRModule.h" />
     <ClInclude Include="include\QRModuleEPuckSGD.h" />
     <ClInclude Include="include\RobotControlEPuck.h" />
-    <ClInclude Include="lib\path_planning\lib\utils\include\utils\utils.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
