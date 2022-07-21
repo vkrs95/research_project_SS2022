@@ -96,7 +96,7 @@ private:
 	bool	socketCleanup(void);
 	void	socketListenerRoutine(void);
 	void	sendMessageToClient(std::string clientName, Message* message);
-	std::string buildPathMsgString(std::vector<coordinate> path, MessageType msgType, int optMsgState = 0);
+	std::string buildPathMsgString(std::vector<coordinate> path);
 
 
 
