@@ -52,10 +52,11 @@ private:
     bool socketClose(int fd);
     bool socketCleanup();
     bool socketSetNonBlocking(int fd);
+    bool socketWritable(void);
     bool sendMessage(Message* message);
     bool sendRegistrationToSupervisor(std::string robotName);
     bool receiveRegistrationAck(void);
-    std::string receiveMessage(void);
+    Message* receiveMessage(void);
     std::vector<coordinate> parsePath(std::string msg);
     coordinate getCoordinateTuple(std::string tupleString);
     MessageType getMessageIdentifier(std::string msg);
@@ -64,7 +65,7 @@ private:
 
     SOCKET connectSocket;
     int wifiPort;
-    static const size_t maxMsgLen = 512;
     std::string mClientName;
     bool socketApiInitialized = false;
+    bool socketReady = false;
 };

@@ -48,60 +48,10 @@ bool CommModuleTCP::socketSetNonBlocking(int fd) {
 #endif
 }
 
-bool CommModuleTCP::registerAtSupervisor(std::string robotName)
+bool CommModuleTCP::socketWritable(void)
 {
-    if (!socketApiInitialized) {
-        if (!socketInit()) {
-            std::cerr << "Failed to init socket API." << std::endl;
-            return false;
-        }
-    }
-
-    // set client name 
-    mClientName = robotName;
-
-    struct sockaddr_in address;
-
-    memset(&address, 0, sizeof(struct sockaddr_in));
-    address.sin_family = AF_INET;
-    address.sin_port = htons((unsigned short) wifiPort);
-    address.sin_addr.s_addr = inet_addr("127.0.0.1"); // INADDR_ANY;
-
-    // Create a SOCKET for connecting to server
-    connectSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-
-    if (connectSocket == INVALID_SOCKET) {
-        std::cerr << "socket failed with error: " << WSAGetLastError() << std::endl;
-        WSACleanup();
-        return false;
-    }
-
-    if (!socketSetNonBlocking((int) connectSocket)) {
-        std::cerr << "Failed to set connect socket non-blocking." << std::endl;
-        return false;
-    }
-
-    // Connect to server.
-    int iResult = connect(connectSocket, (struct sockaddr*)&address, sizeof(struct sockaddr));
-
-
     /*
-    *   Socket is non-blocking so connection is not completed immediately thus we
-    *   expect a SOCKET_ERROR result in the first place and WSAEWOULDBLOCK as errno.
-    * 
-    *   See: https://docs.microsoft.com/de-de/windows/win32/api/winsock2/nf-winsock2-wsaconnect?redirectedfrom=MSDN
-    */
-    if (iResult != SOCKET_ERROR && WSAGetLastError() != WSAEWOULDBLOCK)
-    {
-        closesocket(connectSocket);
-        connectSocket = INVALID_SOCKET;
-        std::cerr << "The server is down... did not connect" << std::endl;
-        return false;   
-    }
-
-    /*
-    *   Continue with checking if socket is writable...
-    *   When a socket is processing a connect call (nonblocking), a socket is writable if 
+    *   When a socket is processing a connect call(nonblocking), a socket is writable if
     *   the connection establishment successfully completes.
     */
     fd_set wfds;
@@ -119,6 +69,68 @@ bool CommModuleTCP::registerAtSupervisor(std::string robotName)
         return false;
     }
 
+    return true;
+}
+
+bool CommModuleTCP::registerAtSupervisor(std::string robotName)
+{
+    if (!socketApiInitialized) {
+        if (!socketInit()) {
+            std::cerr << "Failed to init socket API." << std::endl;
+            return false;
+        }
+    }
+
+    if (!socketReady) {
+
+        // set client name 
+        mClientName = robotName;
+
+        struct sockaddr_in address;
+
+        memset(&address, 0, sizeof(struct sockaddr_in));
+        address.sin_family = AF_INET;
+        address.sin_port = htons((unsigned short)wifiPort);
+        address.sin_addr.s_addr = inet_addr("127.0.0.1"); // INADDR_ANY;
+
+        // Create a SOCKET for connecting to server
+        connectSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+
+        if (connectSocket == INVALID_SOCKET) {
+            std::cerr << "socket failed with error: " << WSAGetLastError() << std::endl;
+            WSACleanup();
+            return false;
+        }
+
+        if (!socketSetNonBlocking((int)connectSocket)) {
+            std::cerr << "Failed to set connect socket non-blocking." << std::endl;
+            return false;
+        }
+
+        // Connect to server.
+        int iResult = connect(connectSocket, (struct sockaddr*)&address, sizeof(struct sockaddr));
+
+        /*
+        *   Socket is non-blocking so connection is not completed immediately thus we
+        *   expect a SOCKET_ERROR result in the first place and WSAEWOULDBLOCK as errno.
+        *
+        *   See: https://docs.microsoft.com/de-de/windows/win32/api/winsock2/nf-winsock2-wsaconnect?redirectedfrom=MSDN
+        */
+        if (iResult != SOCKET_ERROR && WSAGetLastError() != WSAEWOULDBLOCK)
+        {
+            closesocket(connectSocket);
+            connectSocket = INVALID_SOCKET;
+            std::cerr << "The server is down... did not connect" << std::endl;
+            return false;
+        }
+
+        /*  Continue with checking if socket is writable */
+        if (!socketWritable())
+            return false;
+
+        socketReady = true;
+    }
+
     /*
     *   Try to send register message and receive ACK. 
     *   When sendRegistrationToSupervisor was successful, try to receive the acknowledge. 
@@ -131,21 +143,44 @@ bool CommModuleTCP::registerAtSupervisor(std::string robotName)
         /* Try to send register message */
         if (sendRegistrationToSupervisor(robotName)) {
 
+            std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
             /* Try to receive ACK */
             for (int i = 0; i < maxRegisterAttempts; i++) {
 
-                //std::this_thread::sleep_for(std::chrono::milliseconds(100));
-
                 /* Check for registration acknowledge */
-                if (receiveRegistrationAck())
-                    return true;
+                Message* msg = receiveMessage();
+
+                if (msg != nullptr) {
+
+                    if (msg->getType() == MessageType::REGISTER) {
+                        if (msg->getErrorCode() == MessageErrorCode::SUCCESS)
+                            return true;
+                    }
+                    else {
+                        /* 
+                        *   Received message is valid but not expected ACK message.
+                        *   Abort procedure and send another registration message in next step
+                        */
+                        std::cout << "CommModuleTCP: error when trying to receive ACK msg. Received ID: " << static_cast<int>(msg->getType())
+                            << ", Error Code: " << static_cast<int>(msg->getErrorCode()) << std::endl;
+
+                        return false;
+                    }
+                }
+                
+                std::this_thread::sleep_for(std::chrono::milliseconds(100));
             }
             /* error case: failed to receive ACK after maxRegisterAttempts attempts */
             break;  
         }
+        else {
+
+            std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        }
     }
 
-    std::cerr << "Error " << robotName.c_str() << ": maximum attempts of sending / receiving ACK exceeded." << std::endl;
+    std::cout << "Error " << robotName.c_str() << ": maximum attempts of sending / receiving ACK exceeded." << std::endl;
     return false;
 }
 
@@ -154,7 +189,7 @@ bool CommModuleTCP::sendMessage(Message* message)
     int sendResult;
 
     /* send message to client via tcp socket */
-    sendResult = send(connectSocket, message->getMessageAsChar() , maxMsgLen, 0);
+    sendResult = send(connectSocket, message->getMessageAsChar() , Message::MAX_MSG_LEN, 0);
 
     if (sendResult == SOCKET_ERROR) {
         std::cerr << "CommModuleTCP (" << mClientName << "): Failed to send message to server" << std::endl;
@@ -164,9 +199,9 @@ bool CommModuleTCP::sendMessage(Message* message)
     return true;
 }
 
-std::string CommModuleTCP::receiveMessage(void)
+Message* CommModuleTCP::receiveMessage(void)
 {
-    char recvBuffer[maxMsgLen] = {};
+    char recvBuffer[Message::MAX_MSG_LEN] = {};
 
     /* check socket if there is something to read */
     fd_set rfds;
@@ -182,17 +217,19 @@ std::string CommModuleTCP::receiveMessage(void)
     int number = select((int)connectSocket, &rfds, NULL, NULL, &tv);
 
     if (number != 0) {
-        int recvSize = recv(connectSocket, recvBuffer, maxMsgLen, 0);
+        int recvSize = recv(connectSocket, recvBuffer, Message::MAX_MSG_LEN, 0);
 
-        if (recvSize > 0) {
-            std::string recvStr(recvBuffer);
-            //std::cout << "CommModuleTCP(" << mClientName << ") : received message string'" << recvStr << "'" << std::endl;
-            return recvStr;
+        if (recvSize >= Message::MIN_MSG_LEN) {
+
+            Message* msg = new Message(recvBuffer, recvSize);
+
+            //std::cout << "CommModuleTCP(" << mClientName << ") : received message string'" << msg->getMessageAsChar() << "' with size " << recvSize << std::endl;
+            return msg;
         }
     }
 
     // std::cerr << "CommModuleTCP (" << mClientName << "): No data received from server" << std::endl;
-    return "";
+    return nullptr;
 }
 
 bool CommModuleTCP::sendRegistrationToSupervisor(std::string robotName)
@@ -209,17 +246,17 @@ bool CommModuleTCP::sendRegistrationToSupervisor(std::string robotName)
 
 bool CommModuleTCP::receiveRegistrationAck(void)
 {
-    std::string msg = receiveMessage();
+    Message* msg = receiveMessage();
 
-    if (!msg.empty()) {
+    if (msg != nullptr) {
 
-        MessageType msgIdentifier = getMessageIdentifier(msg);
-
-        if (msgIdentifier == MessageType::REGISTER) {
-            return true;
+        if (msg->getType() == MessageType::REGISTER) {
+            if(msg->getErrorCode() == MessageErrorCode::SUCCESS)
+                return true;
         }   
 
-        std::cout << "CommModuleTCP: error when trying to receive ACK msg. Received: " << static_cast<int>(msgIdentifier) << std::endl;
+        std::cout << "CommModuleTCP: error when trying to receive ACK msg. Received ID: " << static_cast<int>(msg->getType())
+            << ", Error Code: " << static_cast<int>(msg->getErrorCode()) << std::endl;
     }
 
     return false;
@@ -252,16 +289,13 @@ bool CommModuleTCP::requestPath(coordinate startXY, coordinate goalXY)
 
 bool CommModuleTCP::receivePath(std::vector<coordinate>* path)
 {
-    std::string msg = receiveMessage();
+    Message* msg = receiveMessage();
 
-    if (!msg.empty()) {
+    if (msg != nullptr) {
 
-        /* get msg type as integer from msg */
-        MessageType msgIdentifier = getMessageIdentifier(msg);
-
-        if (msgIdentifier == MessageType::PATH) {
+        if (msg->getType() == MessageType::PATH) {
             /* received supervisor response with path */
-            *path = parsePath(msg);
+            *path = parsePath(msg->getPayload());
 
             return true;
         }
@@ -293,17 +327,15 @@ bool CommModuleTCP::reportCollision(
 
 bool CommModuleTCP::receiveAlternativePath(std::vector<std::tuple<int, int>>* path, int* msgState)
 {
-    std::string msg = receiveMessage();
+    Message* msg = receiveMessage();
 
-    if (!msg.empty()) {
-
-        MessageType msgIdentifier = getMessageIdentifier(msg);
-        
+    if (msg != nullptr) {
+                
         /* get msg type as integer from msg */
-        if (msgIdentifier == MessageType::COLLISION) {
+        if (msg->getType() == MessageType::COLLISION) {
             /* received supervisor response with collision avoidance path */
-            *path = parsePath(msg);
-            *msgState = getMessageTypeErrorCode(msg);
+            *path = parsePath(msg->getPayload());
+            *msgState = static_cast<int>(msg->getErrorCode());
 
             return true;
         }
@@ -317,7 +349,7 @@ std::vector<coordinate> CommModuleTCP::parsePath(std::string msg)
     std::vector<coordinate> path;
     std::vector<std::string> subStrings = msgStringSplit(msg);
 
-    for (int i = 2; i < subStrings.size(); i++) {
+    for (int i = 0; i < subStrings.size(); i++) {
         /* convert coordinates from string and add them to path list */
         path.push_back(getCoordinateTuple(subStrings[i]));
     }
@@ -382,6 +414,8 @@ int CommModuleTCP::getMessageTypeErrorCode(std::string msg)
         // msg does not contain semicolon delimiter
         return 99; // ERROR CODE ?
     }
+
+    std::cout << "Error Code as string: " << subStrings.at(1) << " from " << msg << std::endl;
 
     /* get msg type as integer from msg */
     return std::stoi(subStrings.at(1));

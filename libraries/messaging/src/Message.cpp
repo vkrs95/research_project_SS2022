@@ -18,8 +18,25 @@ Message::Message(std::string data)
 Message::Message(MessageType type, std::string payload)
 {
 	mMsgType = type;
+	mPayload = payload;
+	mErrCode = MessageErrorCode::SUCCESS;
+	mMsgSize = std::string(getMessageAsChar()).size();
+}
+
+Message::Message(MessageType type, MessageErrorCode errCode, std::string payload)
+{
+	mMsgType = type;
+	mPayload = payload;
+	mErrCode = errCode;
+	mMsgSize = std::string(getMessageAsChar()).size();
+}
+
+Message::Message(MessageType type, int errCode, std::string payload)
+{
+	mMsgType = type;
 	mMsgSize = payload.size();
 	mPayload = payload;
+	mErrCode = static_cast<MessageErrorCode>(errCode);
 }
 
 std::string Message::getPayload()
@@ -37,12 +54,17 @@ MessageType Message::getType(void)
 	return mMsgType;
 }
 
+MessageErrorCode Message::getErrorCode()
+{
+	return mErrCode;
+}
+
 const char* Message::getMessageAsChar(void)
 {
 	std::stringstream sStrm;
 
 	/* build string containing type and payload, separated with semicolon */
-	sStrm << (int) mMsgType << ";" << mPayload;
+	sStrm << (int) mMsgType << ";" << (int) mErrCode << ";" << mPayload;
 	std::string contentStr(sStrm.str());
 
 	/* use vector as a dynamic container to convert string into char */
@@ -53,17 +75,37 @@ const char* Message::getMessageAsChar(void)
 
 void Message::parseMessage(const char* data)
 {
-	/* determine and set message type */
-	unsigned int type = data[0] - '0';
-	mMsgType = determineMessageType(type);
+	std::string strToSplit(data);
+	std::vector<std::string> splitContent;
+	std::string substr;
+	size_t pos = 0;
+
+	while ((pos = strToSplit.find(";")) != std::string::npos) {
+		substr = strToSplit.substr(0, pos);             // get content of string until position of delimiter 
+		splitContent.push_back(substr);                 // add substring to container
+		strToSplit.erase(0, pos + 1);  // remove added substring + delimiter from original string 
+
+		if (splitContent.size() == 2)
+			break;
+	}
+
+	if (splitContent.size() < 2) {
+		std::cout << "Error in parsing message: invalid number of delimiters in data" << std::endl;
+
+		/* set message as invalid */
+		mMsgType = MessageType::INVALID;
+		mErrCode = MessageErrorCode::INVALID;
+		mPayload = "-1"; 
+
+		return; // ERROR 
+	}
+
+	/* set message type */
+	mMsgType = static_cast<MessageType>(std::stoi(splitContent.at(0)));
+
+	/* set error code */
+	mErrCode = static_cast<MessageErrorCode>(std::stoi(splitContent.at(1)));
 
 	/* parse message content */
-	mPayload = std::string(data).erase(0, 2); // erase 2 character since first one is message type, second is separator
-}
-
-MessageType Message::determineMessageType(int typeInt)
-{
-	MessageType mtype = static_cast<MessageType>(typeInt); 
-
-	return mtype;
+	mPayload = strToSplit; // set rest of string as payload since type and error code are extracted
 }
