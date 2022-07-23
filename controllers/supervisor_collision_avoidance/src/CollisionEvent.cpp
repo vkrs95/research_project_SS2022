@@ -49,9 +49,9 @@ void CollisionEvent::resolveEventThreadRoutine(void)
     */
     if (mParticipants.size() < 2) {
 
-        CollisionParticipant prtcpnt = mParticipants.at(0);
+        CollisionParticipant* prtcpnt = &mParticipants.at(0);
         /* just set shortest path for participant without collision node included */
-        prtcpnt.setPath(planner->getShortestPath(prtcpnt.mStart, prtcpnt.mGoal));
+        prtcpnt->setPath(planner->getShortestPath(prtcpnt->mStart, prtcpnt->mGoal));
 
         mState = EventState::CANCELED;
     }
@@ -76,16 +76,16 @@ void CollisionEvent::resolveEventThreadRoutine(void)
 
         /* calculate best path for each robot to dissolve collision event */
         for (int i = 0; i < mParticipants.size(); i++) {
-            CollisionParticipant prtcpnt = mParticipants.at(i);
+            CollisionParticipant* prtcpnt = &mParticipants.at(i);
             if (i == minDTGIndex) {
                 /* right of way: continue shortest path */
-                prtcpnt.setPath(
-                    planner->getShortestPath(prtcpnt.mStart, prtcpnt.mGoal, mCollisionPoint));
+                prtcpnt->setPath(
+                    planner->getShortestPath(prtcpnt->mStart, prtcpnt->mGoal, mCollisionPoint));
             }
             else {
                 /* calculate alternative path to circumnavigate collision */
-                prtcpnt.setPath(
-                    planner->getAlternativePath(prtcpnt.mStart, prtcpnt.mGoal, mCollisionPoint));
+                prtcpnt->setPath(
+                    planner->getAlternativePath(prtcpnt->mStart, prtcpnt->mGoal, mCollisionPoint));
             }
         }
 

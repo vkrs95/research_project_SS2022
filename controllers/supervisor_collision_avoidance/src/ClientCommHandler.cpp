@@ -64,7 +64,7 @@ void ClientCommHandler::receiveMessage(void)
     if (number != 0) {
         int recvSize = recv(mClientSocket, recvBuffer, Message::MAX_MSG_LEN, 0);
 
-        if (recvSize > 3) {
+        if (recvSize > Message::MIN_MSG_LEN) {
 
             Message* msg = new Message(recvBuffer, recvSize);
 
