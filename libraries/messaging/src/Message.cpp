@@ -34,9 +34,9 @@ Message::Message(MessageType type, MessageErrorCode errCode, std::string payload
 Message::Message(MessageType type, int errCode, std::string payload)
 {
 	mMsgType = type;
-	mMsgSize = payload.size();
 	mPayload = payload;
 	mErrCode = static_cast<MessageErrorCode>(errCode);
+	mMsgSize = std::string(getMessageAsChar()).size();
 }
 
 std::string Message::getPayload()
