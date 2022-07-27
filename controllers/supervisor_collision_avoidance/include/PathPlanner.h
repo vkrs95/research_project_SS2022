@@ -17,6 +17,8 @@ public:
 private:
 	void prepareWorldGrid(void);
 	void addObstacle(Node obstacle);
+	std::vector<Node> doPathPlanning(std::tuple<int, int> collision);
+
 	int worldDimension = -1;
 
 	Node startPosition, goalPosition;

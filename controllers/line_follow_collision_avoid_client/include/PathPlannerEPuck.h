@@ -23,7 +23,7 @@ public:
     void setPath(std::vector<std::tuple<int, int>> path);
     bool setAlternativePath(std::vector<std::tuple<int, int>> path);
     bool pathCompleted(void);
-    void getObstacleParameters(std::tuple<int,int> *startCoords, std::tuple<int, int> *goalCoords, std::tuple<int, int> *collisionCoords);
+    void getObstacleParameters(std::tuple<int,int> *startCoords, std::tuple<int, int> *goalCoords, std::tuple<int, int> *collisionCoords, bool closeToCrossroad = false);
 
     MovingDirection getNextMovingDirection(void);
 
@@ -31,6 +31,7 @@ private:
     /**** private member functions ****/
 
     std::vector<Node> translateToNodeList(std::vector<std::tuple<int, int>> tupleList);
+    bool pathIsDifferent(std::vector<std::tuple<int, int>> path);
 
     /**** private member variables ****/
 

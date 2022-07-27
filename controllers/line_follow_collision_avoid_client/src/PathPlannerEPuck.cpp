@@ -33,10 +33,41 @@ bool PathPlannerEPuck::setAlternativePath(std::vector<std::tuple<int, int>> path
     *   the same shortest path is set as before but with the collision point 
     *   added in the beginning of the path. 
     *   If the collision point is not included, 
+    * 
+    *   check if oldPath = newPath except first and second entry
     */
+
+    if (pathIsDifferent(path)) {
+        setPath(path);
+        return true;
+    }
 
     return false;
 }
+
+bool PathPlannerEPuck::pathIsDifferent(std::vector<std::tuple<int, int>> path)
+{
+    std::vector<Node> newPath = translateToNodeList(path);
+
+    std::cout << "E-Puck '" << robotName << std::endl;
+    for (Node n : newPath) {
+        std::cout << "x: " << n.x_ << ", y: " << n.y_ << std::endl;
+    }
+    std::cout << "Iterator at " << pathIterator << std::endl;
+    for (Node n : pathCoordinatesList) {
+        std::cout << "x: " << n.x_ << ", y: " << n.y_ << std::endl;
+    }
+
+    size_t newIterator = pathIterator - 1;
+    for (int i = 0; i < newPath.size(); i++) {
+        if (newPath.at(i).x_ != pathCoordinatesList.at(newIterator + i).x_ ||
+            newPath.at(i).y_ != pathCoordinatesList.at(newIterator + i).y_)
+            return true;
+    }
+
+    return false;
+}
+
 
 bool PathPlannerEPuck::pathCompleted(void)
 {
@@ -47,22 +78,33 @@ bool PathPlannerEPuck::pathCompleted(void)
     return pathCoordinatesList.size() > 0 && pathIterator >= pathCoordinatesList.size();
 }
 
-void PathPlannerEPuck::getObstacleParameters(std::tuple<int, int>* startCoords, std::tuple<int, int>* goalCoords, std::tuple<int, int>* collisionCoords)
+void PathPlannerEPuck::getObstacleParameters(std::tuple<int, int>* startCoords, std::tuple<int, int>* goalCoords, std::tuple<int, int>* collisionCoords, bool closeToCrossroad)
 {
     /*
     *   To circumnavigate the obstacle the robot turns around and
     *   sets the position of the predecessor as its new start position. After this
     *   a new path is planned with the updated nodes and obstacles.
     */
-    startPosition = pathCoordinatesList[pathIterator - 2];
+    
+    if (closeToCrossroad) {
+
+        startPosition = pathCoordinatesList[pathIterator - 1];
+
+        // add position of current successor as new detected obstacle
+        *collisionCoords = std::make_tuple((pathCoordinatesList[pathIterator]).x_,
+            (pathCoordinatesList[pathIterator]).y_);
+    }
+    else {
+        startPosition = pathCoordinatesList[pathIterator - 2];
+
+        // add position of node before current successor as new detected obstacle
+        *collisionCoords = std::make_tuple((pathCoordinatesList[pathIterator - 1]).x_,
+            (pathCoordinatesList[pathIterator - 1]).y_);
+    }    
 
     *startCoords = std::make_tuple(startPosition.x_, startPosition.y_);
 
     *goalCoords = std::make_tuple(goalPosition.x_, goalPosition.y_);
-
-    // add position of current successor as new detected obstacle
-    *collisionCoords = std::make_tuple((pathCoordinatesList[pathIterator - 1]).x_,
-        (pathCoordinatesList[pathIterator - 1]).y_);
 }
 
 std::vector<Node> PathPlannerEPuck::translateToNodeList(std::vector<std::tuple<int, int>> tupleList)

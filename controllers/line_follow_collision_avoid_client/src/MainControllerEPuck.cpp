@@ -126,6 +126,7 @@ int MainControllerEPuck::mainControllerRoutine(int argc, char** argv)
 
         /* apply configured speed for each wheel after all states were checked */
         robotControl->applyRobotMotorSpeed();
+        stepCounter++;
 
     };  // END OF MAIN LOOP
 
@@ -273,6 +274,7 @@ void MainControllerEPuck::crossroadDetectionHandling(void)
             turnCounter = 0;
             crossroadManeuverActive = false;
             performingTurn = false;
+            stepCounter = 0;
         }
     }
     else {
@@ -351,7 +353,8 @@ void MainControllerEPuck::obstacleHandling(void)
                     obstacleHandlingActive = false;
                 }
                 else {
-                    pathplanner->setPath(path);
+                    if (!pathplanner->setAlternativePath(path))
+                        obstacleHandlingActive = false;
                 }
 
                 alternativePathReceived = true;
@@ -380,9 +383,10 @@ void MainControllerEPuck::obstacleHandling(void)
     */
     else if (!obstacleHandlingActive && !pathplanner->pathCompleted())
     {
+        bool closeToCrossroad = stepCounter > STEPS_TO_CROSSROAD_THRESHOLD;
         /* get node parameters from pathplanner module */
         std::tuple<int, int> startNode, goalNode, collisionNode;
-        pathplanner->getObstacleParameters(&startNode, &goalNode, &collisionNode);
+        pathplanner->getObstacleParameters(&startNode, &goalNode, &collisionNode, closeToCrossroad);
 
         /* notify supervisor of collision */
         commModule->reportCollision(startNode, goalNode, collisionNode);

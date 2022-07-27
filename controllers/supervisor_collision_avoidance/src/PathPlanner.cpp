@@ -12,26 +12,7 @@ std::vector<Node> PathPlanner::getShortestPath(std::tuple<int, int> start, std::
 
     prepareWorldGrid();
         
-    Dijkstra dijkstraPlanning(worldGrid);
-
-    /* calculate path between start and goal */
-    auto [planningSuccessful, pathVector] = dijkstraPlanning.Plan(startPosition, goalPosition);
-
-    /* if collision is (0,0) shortest path does not include a collision point */
-    if (collision != std::tuple(0,0)) {
-        /* client path planning needs obstacle as entry to determine first movement direction */
-        Node obstacle(std::get<0>(collision), std::get<1>(collision));
-        pathVector.push_back(obstacle);
-    }
-
-    /*
-    *   pathCoordinatesList is ordered goal to start,
-    *   reverse list to have steps from start to goal instead
-    *   or in our case from collision to goal 
-    */
-    std::reverse(pathVector.begin(), pathVector.end()); 
-
-    return pathVector;
+    return doPathPlanning(collision);
 }
 
 std::vector<Node> PathPlanner::getAlternativePath(std::tuple<int, int> start, std::tuple<int, int> goal, std::tuple<int, int> collision)
@@ -45,21 +26,7 @@ std::vector<Node> PathPlanner::getAlternativePath(std::tuple<int, int> start, st
     Node obstacle(std::get<0>(collision), std::get<1>(collision));
     addObstacle(obstacle);
 
-    Dijkstra dijkstraPlanning(worldGrid);
-
-    /* calculate path between start and goal */
-    auto [planningSuccessful, pathVector] = dijkstraPlanning.Plan(startPosition, goalPosition);
-
-    /* client path planning needs obstacle as entry to determine first movement direction */
-    pathVector.push_back(obstacle);
-
-    /*
-    *   pathCoordinatesList is ordered goal to start,
-    *   reverse list to have steps from start to goal instead
-    */
-    std::reverse(pathVector.begin(), pathVector.end());
-
-    return pathVector;
+    return doPathPlanning(collision);
 }
 
 
@@ -92,4 +59,70 @@ void PathPlanner::prepareWorldGrid(void)
 void PathPlanner::addObstacle(Node obstacle)
 {
     worldGrid[obstacle.x_][obstacle.y_] = 1;
+}
+
+std::vector<Node> PathPlanner::doPathPlanning(std::tuple<int, int> collision)
+{
+    Dijkstra dijkstraPlanning(worldGrid);
+
+    /* calculate path between start and goal */
+    auto [planningSuccessful, pathVector] = dijkstraPlanning.Plan(startPosition, goalPosition);
+
+    /* if collision is (0,0) shortest path does not include a collision point */
+    if (collision != std::tuple(0, 0)) {
+
+        /* client path planning needs obstacle as entry to determine first movement direction */
+
+        Node* obstacle;
+        //Node firstPos = pathVector.back();
+        //bool distX = (std::abs(firstPos.x_ - std::get<0>(collision)) > 1);
+        //bool distY = (std::abs(firstPos.y_ - std::get<1>(collision)) > 1);
+
+
+        /*
+        *   if collision at crossroad:
+        *   we need 
+        */
+
+
+        //if (distX || distY) {
+
+
+        //    // Anpassung gemacht bei Startknoten wenn Kollision an Kreuzung ist
+
+        //    /*
+        //    *   if distance between collision and first node is higher than 1, collision is on a crossroad.
+        //    *   In this case, we need the intermediate node as an obstacle to determine movement direction
+        //    */
+        //    if (distX) {
+        //        unsigned int intermediateX = firstPos.x_ + std::get<0>(collision) / 2;
+        //        obstacle = new Node(intermediateX, std::get<1>(collision));
+        //    }
+        //    else {
+        //        unsigned int intermediateY = firstPos.y_ + std::get<1>(collision) / 2;
+        //        obstacle = new Node(std::get<0>(collision), intermediateY);
+        //    }
+        //}
+        //else {
+        //}
+
+        /* if collision is not on crossroad */
+            if (std::get<0>(collision) % 2 == 0 || std::get<1>(collision) == 0) {
+
+                /*  collision occured on a intermediate node and thus can be used for movement direction */
+                obstacle = new Node(std::get<0>(collision), std::get<1>(collision));
+
+                /* add obstacle to path list */
+                pathVector.push_back(*obstacle);
+        }
+    }
+
+    /*
+    *   pathCoordinatesList is ordered goal to start,
+    *   reverse list to have steps from start to goal instead
+    *   or in our case from collision to goal
+    */
+    std::reverse(pathVector.begin(), pathVector.end());
+
+    return pathVector;
 }

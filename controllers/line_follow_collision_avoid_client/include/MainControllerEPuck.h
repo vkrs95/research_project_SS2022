@@ -52,6 +52,7 @@ private:
     const unsigned int GROUND_SENSOR_JITTER_THRESHOLD = 4;
     const unsigned int QR_SCAN_DISTANCE_THRESHOLD = 2200;
     const unsigned int QR_READ_ATTEMPTS_THRESHOLD = 3;
+    const unsigned int STEPS_TO_CROSSROAD_THRESHOLD = 50;
 
 
     /*********************************************************
@@ -74,6 +75,7 @@ private:
 
     /* state timestep counters */
     unsigned int turnCounter = 0;
+    unsigned int stepCounter = 0;
     unsigned int groundSensorJitter = 0;
     unsigned int readQrCodeAttemptCounter = 0;
     unsigned int initProcedureDistanceToScanCounter = 0;
