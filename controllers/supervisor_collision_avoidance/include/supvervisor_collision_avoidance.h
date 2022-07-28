@@ -23,7 +23,7 @@ PathPlanner* pathPlanner;
 
 /*** define member variables ***/
 unsigned int mTimeStep = 0;
-unsigned int mWorldDimension = 3;
+unsigned int mWorldDimension = 7;
 
 
 /*** functions ***/

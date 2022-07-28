@@ -1,0 +1,447 @@
+#VRML_SIM R2020b utf8
+WorldInfo {
+  coordinateSystem "NUE"
+}
+Viewpoint {
+  orientation 0.5049159889850088 0.8390541734683749 0.20260290731525285 5.391024937958733
+  position -1.5922066227582083 1.255296062593934 1.5765349900760777
+}
+TexturedBackground {
+}
+TexturedBackgroundLight {
+}
+RectangleArena {
+  name "rectangle matrix arena"
+  floorSize 1.2000000000000002 1.2000000000000002
+  floorTileSize 0.2 0.2
+  floorAppearance PBRAppearance {
+    baseColorMap ImageTexture {
+      url [
+        "textures/grid_element_512px.png"
+      ]
+      filtering 0
+    }
+    roughness 0.5
+    metalness 0.7
+  }
+  wallHeight 0.06
+  wallAppearance OsbWood {
+    colorOverride 0 0 0
+    IBLStrength 3
+  }
+}
+E-puck {
+  translation 0.4 0 -0.2
+  rotation 0 1 0 -1.5708
+  name "EPuck 0"
+  controller "line_follow_collision_avoid_client"
+  camera_width 640
+  camera_height 480
+  groundSensorsSlot [
+    E-puckGroundSensors {
+    }
+  ]
+}
+E-puck {
+  translation -0.4 0 -0.2
+  rotation 0 1 0 1.5708
+  name "EPuck 1"
+  controller "line_follow_collision_avoid_client"
+  camera_width 640
+  camera_height 480
+  groundSensorsSlot [
+    E-puckGroundSensors {
+    }
+  ]
+}
+E-puck {
+  translation -0.4 0 0.4
+  rotation 0 1 0 3.14159
+  name "EPuck 2"
+  controller "line_follow_collision_avoid_client"
+  camera_width 640
+  camera_height 480
+  groundSensorsSlot [
+    E-puckGroundSensors {
+    }
+  ]
+}
+E-puck {
+  translation 0.2 0 -0.4
+  name "EPuck 3"
+  controller "line_follow_collision_avoid_client"
+  camera_width 640
+  camera_height 480
+  groundSensorsSlot [
+    E-puckGroundSensors {
+    }
+  ]
+}
+E-puck {
+  translation 0.2 0 0.4
+  rotation 0 1 0 3.14159
+  name "EPuck 4"
+  controller "line_follow_collision_avoid_client"
+  camera_width 640
+  camera_height 480
+  groundSensorsSlot [
+    E-puckGroundSensors {
+    }
+  ]
+}
+Robot {
+  translation 1.54719e-06 1.05 -5.83702e-06
+  rotation 1 -1.19015e-06 1.19015e-06 -1.5708053071795867
+  children [
+    Shape {
+      appearance PBRAppearance {
+        baseColor 1 0.333333 0
+        metalness 0
+      }
+      geometry Box {
+        size 0.05 0.05 0.1
+      }
+    }
+    Camera {
+      width 800
+      height 800
+    }
+    Emitter {
+      range 10
+      baudRate 115200
+    }
+  ]
+  name "supervisor"
+  controller "supervisor_collision_avoidance"
+  supervisor TRUE
+}
+Wall {
+  translation -0.4 0 -0.6
+  name "P1"
+  size 0.05 0.05 0.01
+  appearance Appearance {
+    material Material {
+      ambientIntensity 1
+      diffuseColor 1 1 1
+    }
+    texture ImageTexture {
+      url [
+        "textures/5X5/P1.jpg"
+      ]
+    }
+  }
+}
+Wall {
+  translation -0.4 0 0.6
+  name "P6"
+  size 0.05 0.05 0.01
+  appearance Appearance {
+    material Material {
+      ambientIntensity 1
+      diffuseColor 1 1 1
+    }
+    texture ImageTexture {
+      url [
+        "textures/5X5/P6.jpg"
+      ]
+    }
+  }
+}
+Wall {
+  translation -0.6 0 -0.4
+  rotation 0 1 0 1.578
+  name "P11"
+  size 0.05 0.05 0.01
+  appearance Appearance {
+    material Material {
+      ambientIntensity 1
+      diffuseColor 1 1 1
+    }
+    texture ImageTexture {
+      url [
+        "textures/5X5/P11.jpg"
+      ]
+    }
+  }
+}
+Wall {
+  translation 0.6 0 -0.4
+  rotation 0 1 0 1.578
+  name "P16"
+  size 0.05 0.05 0.01
+  appearance Appearance {
+    material Material {
+      ambientIntensity 1
+      diffuseColor 1 1 1
+    }
+    texture ImageTexture {
+      url [
+        "textures/5X5/P16.jpg"
+      ]
+    }
+  }
+}
+Wall {
+  translation -0.2 0 -0.6
+  name "P2"
+  size 0.05 0.05 0.01
+  appearance Appearance {
+    material Material {
+      ambientIntensity 1
+      diffuseColor 1 1 1
+    }
+    texture ImageTexture {
+      url [
+        "textures/5X5/P2.jpg"
+      ]
+    }
+  }
+}
+Wall {
+  translation -0.2 0 0.6
+  name "P7"
+  size 0.05 0.05 0.01
+  appearance Appearance {
+    material Material {
+      ambientIntensity 1
+      diffuseColor 1 1 1
+    }
+    texture ImageTexture {
+      url [
+        "textures/5X5/P7.jpg"
+      ]
+    }
+  }
+}
+Wall {
+  translation -0.6 0 -0.2
+  rotation 0 1 0 1.578
+  name "P12"
+  size 0.05 0.05 0.01
+  appearance Appearance {
+    material Material {
+      ambientIntensity 1
+      diffuseColor 1 1 1
+    }
+    texture ImageTexture {
+      url [
+        "textures/5X5/P12.jpg"
+      ]
+    }
+  }
+}
+Wall {
+  translation 0.6 0 -0.2
+  rotation 0 1 0 1.578
+  name "P17"
+  size 0.05 0.05 0.01
+  appearance Appearance {
+    material Material {
+      ambientIntensity 1
+      diffuseColor 1 1 1
+    }
+    texture ImageTexture {
+      url [
+        "textures/5X5/P17.jpg"
+      ]
+    }
+  }
+}
+Wall {
+  translation 0 0 -0.6
+  name "P3"
+  size 0.05 0.05 0.01
+  appearance Appearance {
+    material Material {
+      ambientIntensity 1
+      diffuseColor 1 1 1
+    }
+    texture ImageTexture {
+      url [
+        "textures/5X5/P3.jpg"
+      ]
+    }
+  }
+}
+Wall {
+  translation 0 0 0.6
+  name "P8"
+  size 0.05 0.05 0.01
+  appearance Appearance {
+    material Material {
+      ambientIntensity 1
+      diffuseColor 1 1 1
+    }
+    texture ImageTexture {
+      url [
+        "textures/5X5/P8.jpg"
+      ]
+    }
+  }
+}
+Wall {
+  translation -0.6 0 0
+  rotation 0 1 0 1.578
+  name "P13"
+  size 0.05 0.05 0.01
+  appearance Appearance {
+    material Material {
+      ambientIntensity 1
+      diffuseColor 1 1 1
+    }
+    texture ImageTexture {
+      url [
+        "textures/5X5/P13.jpg"
+      ]
+    }
+  }
+}
+Wall {
+  translation 0.6 0 0
+  rotation 0 1 0 1.578
+  name "P18"
+  size 0.05 0.05 0.01
+  appearance Appearance {
+    material Material {
+      ambientIntensity 1
+      diffuseColor 1 1 1
+    }
+    texture ImageTexture {
+      url [
+        "textures/5X5/P18.jpg"
+      ]
+    }
+  }
+}
+Wall {
+  translation 0.2 0 -0.6
+  name "P4"
+  size 0.05 0.05 0.01
+  appearance Appearance {
+    material Material {
+      ambientIntensity 1
+      diffuseColor 1 1 1
+    }
+    texture ImageTexture {
+      url [
+        "textures/5X5/P4.jpg"
+      ]
+    }
+  }
+}
+Wall {
+  translation 0.2 0 0.6
+  name "P9"
+  size 0.05 0.05 0.01
+  appearance Appearance {
+    material Material {
+      ambientIntensity 1
+      diffuseColor 1 1 1
+    }
+    texture ImageTexture {
+      url [
+        "textures/5X5/P9.jpg"
+      ]
+    }
+  }
+}
+Wall {
+  translation -0.6 0 0.2
+  rotation 0 1 0 1.578
+  name "P14"
+  size 0.05 0.05 0.01
+  appearance Appearance {
+    material Material {
+      ambientIntensity 1
+      diffuseColor 1 1 1
+    }
+    texture ImageTexture {
+      url [
+        "textures/5X5/P14.jpg"
+      ]
+    }
+  }
+}
+Wall {
+  translation 0.6 0 0.2
+  rotation 0 1 0 1.578
+  name "P19"
+  size 0.05 0.05 0.01
+  appearance Appearance {
+    material Material {
+      ambientIntensity 1
+      diffuseColor 1 1 1
+    }
+    texture ImageTexture {
+      url [
+        "textures/5X5/P19.jpg"
+      ]
+    }
+  }
+}
+Wall {
+  translation 0.4 0 -0.6
+  name "P5"
+  size 0.05 0.05 0.01
+  appearance Appearance {
+    material Material {
+      ambientIntensity 1
+      diffuseColor 1 1 1
+    }
+    texture ImageTexture {
+      url [
+        "textures/5X5/P5.jpg"
+      ]
+    }
+  }
+}
+Wall {
+  translation 0.4 0 0.6
+  name "P10"
+  size 0.05 0.05 0.01
+  appearance Appearance {
+    material Material {
+      ambientIntensity 1
+      diffuseColor 1 1 1
+    }
+    texture ImageTexture {
+      url [
+        "textures/5X5/P10.jpg"
+      ]
+    }
+  }
+}
+Wall {
+  translation -0.6 0 0.4
+  rotation 0 1 0 1.578
+  name "P15"
+  size 0.05 0.05 0.01
+  appearance Appearance {
+    material Material {
+      ambientIntensity 1
+      diffuseColor 1 1 1
+    }
+    texture ImageTexture {
+      url [
+        "textures/5X5/P15.jpg"
+      ]
+    }
+  }
+}
+Wall {
+  translation 0.6 0 0.4
+  rotation 0 1 0 1.578
+  name "P20"
+  size 0.05 0.05 0.01
+  appearance Appearance {
+    material Material {
+      ambientIntensity 1
+      diffuseColor 1 1 1
+    }
+    texture ImageTexture {
+      url [
+        "textures/5X5/P20.jpg"
+      ]
+    }
+  }
+}
