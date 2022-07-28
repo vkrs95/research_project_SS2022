@@ -2,6 +2,7 @@
 #include "IQRModule.h"
 
 #include <iostream>
+#include <tuple>
 
 #include <zbar.h>
 
@@ -43,8 +44,8 @@
 */
 class SGDQRParams {
 public:
-    unsigned int startIndex;
-    unsigned int goalIndex;
+    std::tuple<int, int> startXY;
+    std::tuple<int, int> goalXY;
     unsigned int mapDimension;
 };
 
@@ -59,5 +60,7 @@ public:
 
 private:
     std::string getContentStringFromQrImage(std::string qrFilePath);
+    std::vector<std::string> splitString(std::string str, std::string delimiter);
+    std::vector<std::string> processCoordinateString(std::string str);
 
 };

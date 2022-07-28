@@ -112,7 +112,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(WEBOTS_HOME)/include/controller/c;$(WEBOTS_HOME)\include\controller\cpp;$(ProjectDir);$(ProjectDir)include;$(ProjectDir)lib\opencv\build\include;$(ProjectDir)lib\ZBar\include;$(ProjectDir)lib\path_planning\include;$(ProjectDir)lib\path_planning\lib\utils\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(WEBOTS_HOME)/include/controller/c;$(WEBOTS_HOME)\include\controller\cpp;$(ProjectDir);$(ProjectDir)include;$(ProjectDir)lib\opencv\build\include;$(ProjectDir)lib\ZBar\include;$(ProjectDir)..\..\libraries\path_planning\include;$(ProjectDir)..\..\libraries\path_planning\lib\utils\include;$(ProjectDir)..\..\libraries\messaging\include</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <DisableSpecificWarnings>4996;%(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>
@@ -161,28 +161,28 @@
     <ClCompile Include="$(WEBOTS_HOME)\resources\languages\cpp\Speaker.cpp" />
     <ClCompile Include="$(WEBOTS_HOME)\resources\languages\cpp\Supervisor.cpp" />
     <ClCompile Include="$(WEBOTS_HOME)\resources\languages\cpp\TouchSensor.cpp" />
-    <ClCompile Include="lib\path_planning\lib\utils\src\utils.cpp" />
-    <ClCompile Include="lib\path_planning\src\a_star.cpp" />
-    <ClCompile Include="lib\path_planning\src\dijkstra.cpp" />
+    <ClCompile Include="..\..\libraries\messaging\src\Message.cpp" />
+    <ClCompile Include="..\..\libraries\path_planning\lib\utils\src\utils.cpp" />
+    <ClCompile Include="..\..\libraries\path_planning\src\a_star.cpp" />
+    <ClCompile Include="..\..\libraries\path_planning\src\dijkstra.cpp" />
     <ClCompile Include="src\ClientCommHandler.cpp" />
     <ClCompile Include="src\CollisionEvent.cpp" />
     <ClCompile Include="src\CollisionHandler.cpp" />
     <ClCompile Include="src\CommModuleSupervisor.cpp" />
-    <ClCompile Include="src\Message.cpp" />
     <ClCompile Include="src\PathPlanner.cpp" />
     <ClCompile Include="src\supvervisor_collision_avoidance.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\libraries\messaging\include\Message.h" />
+    <ClInclude Include="..\..\libraries\path_planning\include\path_planning\a_star.hpp" />
+    <ClInclude Include="..\..\libraries\path_planning\include\path_planning\dijkstra.hpp" />
+    <ClInclude Include="..\..\libraries\path_planning\lib\utils\include\utils\utils.hpp" />
     <ClInclude Include="include\ClientCommHandler.h" />
     <ClInclude Include="include\CollisionEvent.h" />
     <ClInclude Include="include\CollisionHandler.h" />
     <ClInclude Include="include\CommModuleSupervisor.h" />
-    <ClInclude Include="include\Message.h" />
     <ClInclude Include="include\PathPlanner.h" />
     <ClInclude Include="include\supvervisor_collision_avoidance.h" />
-    <ClInclude Include="lib\path_planning\include\path_planning\a_star.hpp" />
-    <ClInclude Include="lib\path_planning\include\path_planning\dijkstra.hpp" />
-    <ClInclude Include="lib\path_planning\lib\utils\include\utils\utils.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

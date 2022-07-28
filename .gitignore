@@ -5,6 +5,7 @@
 
 # webots controller exe
 controllers/line_follow_collision_avoid_client/line_follow_collision_avoid_client.exe
+controllers/supervisor_collision_avoidance/supervisor_collision_avoidance.exe
 
 # e-puck camera captures
 controllers/line_follow_collision_avoid_client/start_goal_*.jpg

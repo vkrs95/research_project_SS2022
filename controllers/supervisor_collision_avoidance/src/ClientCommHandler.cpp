@@ -39,7 +39,7 @@ void ClientCommHandler::socketCommunicationHandlerRoutine(void)
         sendMessage();
 
         /* TODO: how long should the thread wait until next check ? */
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        std::this_thread::sleep_for(std::chrono::milliseconds(50));
     }
 }
 
@@ -64,21 +64,28 @@ void ClientCommHandler::receiveMessage(void)
     if (number != 0) {
         int recvSize = recv(mClientSocket, recvBuffer, Message::MAX_MSG_LEN, 0);
 
-        if (recvSize > 0) {
+        if (recvSize > Message::MIN_MSG_LEN) {
 
             Message* msg = new Message(recvBuffer, recvSize);
 
             /* might be first message sent by client containing client's name */
-            if (mClientName.compare("undefined") == 0) {
+            if (msg->getType() == MessageType::REGISTER) {
 
-                /* check if message is of type REGISTER */
-                if (msg->getType() == MessageType::REGISTER) {
+                /* register received name of client if not done yet */
+                registerName(msg->getPayload());
+                
+                /* send registration ACK */
+                sendACKMessage();
 
-                    /* send registration ACK */
-                    registerNameAndSendACK(msg);
-                    return;
-                }
-                /* if MessageType != REGISTER just continue adding message to inbox */
+                return;
+            }
+            else if (mClientName.compare("undefined") == 0) {
+                /*
+                *   ERROR CASE : client communication handler must not accept messages until client
+                *   is registered succesfully.
+                */
+                std::cout << "Error in receiveMessage: client sent message without being registered succesfully." << std::endl;
+                return;
             }
 
             /* add received message to internal inbox */
@@ -86,7 +93,7 @@ void ClientCommHandler::receiveMessage(void)
             mMsgInbox.push_back(*msg);
             msgInboxLock.unlock();
 
-            // std::cout << "ClientCommHandler: received message '" << msg->getMessageAsChar() << "' and pushed in inbox." << std::endl;
+            //std::cout << "ClientCommHandler: received message '" << msg->getMessageAsChar() << "' and pushed in inbox." << std::endl;
         }
     }
 }
@@ -112,28 +119,33 @@ void ClientCommHandler::sendMessage(void)
         if (sendResult == SOCKET_ERROR) {
             std::cerr << "ClientCommHandler: Failed to send message to " << mClientName << std::endl;
         }
-        /*else {
-            std::cout << "ClientCommHandler: Sent message content '" << lastMessage->getMessageAsChar() << "' to " << mClientName << " with length: " << sendResult << std::endl;
-        }*/
+        //else {
+        //    std::cout << "ClientCommHandler: Sent message content '" << lastMessage->getMessageAsChar() << "' to " << mClientName << " with length: " << sendResult << std::endl;
+        //}
     }
 }
 
-void ClientCommHandler::registerNameAndSendACK(Message* message)
+void ClientCommHandler::registerName(std::string name)
 {
-    Message* msg = new Message(*message);
+    if (mClientName.compare("undefined") == 0) {
+        /* update client name */
+        mClientName = name;
+        std::cout << "ClientCommHandler: client '" << mClientName << "' registered on socket " << mClientSocket << "!" << std::endl;
+    }
+}
 
-    mClientName = msg->getPayload();
-    std::cout << "ClientCommHandler: client '" << mClientName << "' registered on socket " << mClientSocket << "!" << std::endl;
-    
-    /* send ACK to client */
-    std::string ackData = "0;ACK";
+void ClientCommHandler::sendACKMessage(void)
+{
+    /* prepare ACK msg payload */
+    Message* ackMsg = new Message(MessageType::REGISTER, std::string("ACK"));
 
-    Message* ackMsg = new Message(ackData);
+    /* add ACK to outbox */
     addMsgToOutbox(ackMsg);
 }
 
 void ClientCommHandler::addMsgToOutbox(Message* message)
 {
+    /* create local copy of message */
     Message* msg = new Message(*message);
 
     /* set local mutex and add passed message to outbox */

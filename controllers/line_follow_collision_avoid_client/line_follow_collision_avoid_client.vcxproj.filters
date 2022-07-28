@@ -112,20 +112,17 @@
     <ClCompile Include="src\RobotControlEPuck.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="lib\path_planning\lib\utils\src\utils.cpp">
-      <Filter>lib\path_planning\lib\utils\src</Filter>
-    </ClCompile>
-    <ClCompile Include="lib\path_planning\src\a_star.cpp">
-      <Filter>lib\path_planning\src</Filter>
-    </ClCompile>
-    <ClCompile Include="lib\path_planning\src\dijkstra.cpp">
-      <Filter>lib\path_planning\src</Filter>
-    </ClCompile>
     <ClCompile Include="src\CommModuleTCP.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\MainControllerEPuck.cpp">
       <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\libraries\path_planning\lib\utils\src\utils.cpp">
+      <Filter>lib\path_planning\lib\utils\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\libraries\messaging\src\Message.cpp">
+      <Filter>lib\messaging\src</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -138,20 +135,11 @@
     <ClInclude Include="include\IQRModule.h">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="include\PathPlanningModule.h">
+    <ClInclude Include="include\IPathPlanningModule.h">
       <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="include\PathPlannerEPuck.h">
       <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="lib\path_planning\lib\utils\include\utils\utils.hpp">
-      <Filter>lib\path_planning\lib\utils\include\utils</Filter>
-    </ClInclude>
-    <ClInclude Include="lib\path_planning\include\path_planning\a_star.hpp">
-      <Filter>lib\path_planning\include</Filter>
-    </ClInclude>
-    <ClInclude Include="lib\path_planning\include\path_planning\dijkstra.hpp">
-      <Filter>lib\path_planning\include</Filter>
     </ClInclude>
     <ClInclude Include="include\IRobotControl.h">
       <Filter>include</Filter>
@@ -167,6 +155,12 @@
     </ClInclude>
     <ClInclude Include="include\MainControllerEPuck.h">
       <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\libraries\path_planning\lib\utils\include\utils\utils.hpp">
+      <Filter>lib\path_planning\lib\utils\include\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\libraries\messaging\include\Message.h">
+      <Filter>lib\messaging\include</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -185,12 +179,6 @@
     <Filter Include="lib\path_planning">
       <UniqueIdentifier>{b2d0a494-4f37-48c7-b125-cd7a4e7b75c0}</UniqueIdentifier>
     </Filter>
-    <Filter Include="lib\path_planning\src">
-      <UniqueIdentifier>{4f90f8e1-ab18-4c37-af7b-0df91a084b83}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="lib\path_planning\include">
-      <UniqueIdentifier>{08a69b94-0afe-4443-aa6d-5d069997b50b}</UniqueIdentifier>
-    </Filter>
     <Filter Include="lib\path_planning\lib">
       <UniqueIdentifier>{a1053a81-d19c-4f64-8275-eac60e06b2c2}</UniqueIdentifier>
     </Filter>
@@ -205,6 +193,15 @@
     </Filter>
     <Filter Include="lib\path_planning\lib\utils\src">
       <UniqueIdentifier>{9f98fdb4-bdc4-4c52-8709-dc6de26e9b49}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="lib\messaging">
+      <UniqueIdentifier>{0ac74256-6985-4e3c-9c6d-0b1dec26069d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="lib\messaging\include">
+      <UniqueIdentifier>{2e173b1d-b10d-4609-b5a6-0f6e59b5dca7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="lib\messaging\src">
+      <UniqueIdentifier>{b90369fa-a76e-4069-b2ad-e40624791a4d}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

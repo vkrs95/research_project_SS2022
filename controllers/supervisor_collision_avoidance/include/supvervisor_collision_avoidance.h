@@ -18,11 +18,14 @@ Emitter* emitter;
 //Camera* camera;
 CommModuleTCPSocketServer* socketServer;
 CollisionHandler* collisionHandler;
+PathPlanner* pathPlanner;
 
 
 /*** define member variables ***/
 unsigned int mTimeStep = 0;
+unsigned int mWorldDimension = 3;
 
 
 /*** functions ***/
 void	robotActiveWait(int numOfSteps);
+std::vector<coordinate> toCoordinateVector(std::vector <Node> nodeVector);

@@ -10,12 +10,15 @@ class PathPlanner
 public:
 	/* constructors */
 	PathPlanner(int dimension);
-	std::vector<Node> getShortestPath(std::tuple<int, int> start, std::tuple<int, int> goal, std::tuple<int, int> collision);
+	std::vector<Node> getShortestPath(std::tuple<int, int> start, std::tuple<int, int> goal, std::tuple<int, int> collision = { 0,0 });
 	std::vector<Node> getAlternativePath(std::tuple<int, int> start, std::tuple<int, int> goal, std::tuple<int, int> collision);
+
 
 private:
 	void prepareWorldGrid(void);
 	void addObstacle(Node obstacle);
+	std::vector<Node> doPathPlanning(std::tuple<int, int> collision);
+
 	int worldDimension = -1;
 
 	Node startPosition, goalPosition;

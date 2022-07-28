@@ -12,16 +12,17 @@
 * 
 */
 
-CollisionEvent::CollisionEvent(coordinate collisionPoint)
+CollisionEvent::CollisionEvent(coordinate collisionPoint, PathPlanner* planner)
 {
     mCollisionPoint = collisionPoint;
     mParticipants.clear();
 
-    planner = new PathPlanner(MATRIX_DIM);
+    this->planner = planner;
 
     /* create and run event thread */
     resolveEventThread = new std::thread(&CollisionEvent::resolveEventThreadRoutine, this);
     resolveEventThread->detach();
+    mState = EventState::IN_PROGRESS;
 }
 
 
@@ -33,53 +34,73 @@ void CollisionEvent::resolveEventThreadRoutine(void)
     *   Robot A with shortest distance to goal has right of way, 
     *   robot B calculates alternative path
     */
-        
+    unsigned int timeoutCounter = 0;
     /* for now we expect two participants registered in a collision event */
     while (mParticipants.size() < 2) {
         /* sleep for 100ms and check number of participants again */
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        std::this_thread::sleep_for(std::chrono::milliseconds(PARTICIPANT_WAIT_TIME));
+
+        if ((timeoutCounter += PARTICIPANT_WAIT_TIME) >= PARTICIPANT_TIMEOUT)
+            break;
     }
 
-    /*** go through all participants and try to resolve collision properly ***/
-    //std::cout << "Start resolving collision at " << std::get<0>(mCollisionPoint) << "," << std::get<1>(mCollisionPoint) << std::endl;
-    
-    /* find smallest distance to goal out of all robot paths */
-    int curDTG = INT16_MAX;
-    int minDTG = INT16_MAX;
-    int minDTGIndex = -1;
-    
-    for(int i = 0; i < mParticipants.size(); i++) {
+    /*
+    *   timeout case: collision event has been aborted since only one particpant is registered 
+    */
+    if (mParticipants.size() < 2) {
 
-        curDTG = determineDTG(&mParticipants[i]);
+        CollisionParticipant* prtcpnt = &mParticipants.at(0);
+        /* just set shortest path for participant without collision node included */
+        prtcpnt->setPath(planner->getShortestPath(prtcpnt->mStart, prtcpnt->mGoal));
 
-        if (curDTG < minDTG) {
-            minDTG = curDTG;
-            minDTGIndex = i;
-        }        
+        mState = EventState::CANCELED;
     }
+    /*
+    *   event handling case: go through all participants and try to resolve collision properly
+    */
+    else {
+        /* find smallest distance to goal out of all robot paths */
+        int curDTG = INT16_MAX;
+        int minDTG = INT16_MAX;
+        int minDTGIndex = -1;
 
-    /* calculate best path for each robot to dissolve collision event */
-    for (int i = 0; i < mParticipants.size(); i++) {
-        CollisionParticipant prtcpnt = mParticipants.at(i);
-        if (i == minDTGIndex) {
-            /* right of way: continue shortest path */
-            mParticipants[i].setPath(
-                planner->getShortestPath(prtcpnt.mStart, prtcpnt.mGoal, mCollisionPoint));
+        for (int i = 0; i < mParticipants.size(); i++) {
+
+            curDTG = determineDTG(&mParticipants[i]);
+
+            if (curDTG < minDTG) {
+                minDTG = curDTG;
+                minDTGIndex = i;
+            }
         }
-        else {
-            /* calculate alternative path to circumnavigate collision */
-            mParticipants[i].setPath(
-                planner->getAlternativePath(prtcpnt.mStart, prtcpnt.mGoal, mCollisionPoint));
+
+        /* calculate best path for each robot to dissolve collision event */
+        for (int i = 0; i < mParticipants.size(); i++) {
+            CollisionParticipant* prtcpnt = &mParticipants.at(i);
+            if (i == minDTGIndex) {
+                /* right of way: continue shortest path */
+                prtcpnt->setPath(
+                    planner->getShortestPath(prtcpnt->mStart, prtcpnt->mGoal, mCollisionPoint));
+            }
+            else {
+                /* calculate alternative path to circumnavigate collision */
+                prtcpnt->setPath(
+                    planner->getAlternativePath(prtcpnt->mStart, prtcpnt->mGoal, mCollisionPoint));
+            }
         }
+
+        mState = EventState::RESOLVED;
     }
-
-    mResolved = true;
-
 }
 
 int CollisionEvent::determineDTG(CollisionParticipant* participant)
 {
     return planner->getShortestPath(participant->mStart, participant->mGoal, mCollisionPoint).size();
+}
+
+EventState CollisionEvent::getState(void)
+{
+    return mState;
 }
 
 void CollisionEvent::addParticipant(CollisionParticipant newParticipant)
@@ -95,7 +116,7 @@ void CollisionEvent::addParticipant(std::string name, coordinate start, coordina
 
 bool CollisionEvent::eventResolved(void)
 {
-    return mResolved;
+    return (mState != EventState::UNINITIATED && mState != EventState::IN_PROGRESS);
 }
 
 

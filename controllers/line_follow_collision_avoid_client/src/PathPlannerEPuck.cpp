@@ -6,83 +6,68 @@ PathPlannerEPuck::PathPlannerEPuck(std::string robotsName)
     this->robotName = robotsName;
 }
 
-void PathPlannerEPuck::prepareGridAndRunPlanner(bool addObstaclesFromList)
-{
-
-    /* initate world grid */
-    prepareWorldGrid(addObstaclesFromList);
-    //AStar aStarPlanning(worldGrid);
-    Dijkstra dijkstraPlanning(worldGrid);
-
-    /* calculate path between start and goal */
-    //auto [planningSuccessful, pathVector] = aStarPlanning.Plan(this->startPosition, this->goalPosition);
-    auto [planningSuccessful, pathVector] = dijkstraPlanning.Plan(this->startPosition, this->goalPosition);
-
-    /* assign results to member variables */
-    lastPathPlanningSuccessful = planningSuccessful;
-    pathCoordinatesList = pathVector;
-
-    /* add obstacle as entry to determine direction on first crossroad */
-    if (addObstaclesFromList) {
-        pathCoordinatesList.push_back(obstacleList.at(0));
-    }
-
-    /*
-    *   pathCoordinatesList is ordered goal to start,
-    *   reverse list to have steps from start to goal instead
-    */
-    std::reverse(pathCoordinatesList.begin(), pathCoordinatesList.end());
-}
-
-void PathPlannerEPuck::findPath(Node startPosition, Node goalPosition)
-{
-    if (startPosition.x_ == 0 && startPosition.y_ == 0 &&
-        goalPosition.x_ == 0 && goalPosition.y_ == 0) {
-        /*
-        *   no parameters passed, use preconfigured start and goal position 
-        *   --> nothing to do here
-        */ 
-    } 
-    else {
-        /* save passed positions in internal variables */
-        this->startPosition = startPosition;
-        this->goalPosition = goalPosition;
-    }
-
-    /* initate world grid and calculate path between start and goal */    
-    prepareGridAndRunPlanner();
-    
-    /* first time path planning, initiate list of obstacles */
-    obstacleList.clear();
-}
-
-void PathPlannerEPuck::getObstacleParameters(std::tuple<int, int> *startCoords, std::tuple<int, int> *goalCoords, std::tuple<int, int> *collisionCoords)
-{
-    /*
-    *   To circumnavigate the obstacle the robot turns around and
-    *   sets the position of the predecessor as its new start position. After this
-    *   a new path is planned with the updated nodes and obstacles.
-    */
-    startPosition = pathCoordinatesList[pathIterator - 2];
-
-    *startCoords = std::make_tuple(startPosition.x_, startPosition.y_);
-
-    *goalCoords = std::make_tuple(goalPosition.x_, goalPosition.y_);
-    
-    // add position of current successor as new detected obstacle
-    *collisionCoords = std::make_tuple((pathCoordinatesList[pathIterator - 1]).x_,
-                        (pathCoordinatesList[pathIterator - 1]).y_ );    
-}
-
-void PathPlannerEPuck::runAlternativePath(std::vector<std::tuple<int, int>> altPath)
+void PathPlannerEPuck::setPath(std::vector<std::tuple<int, int>> path)
 {
     /* reset parameters */
     pathCoordinatesList.clear();
     pathIterator = 1;               // initiate internal iterator, must be 1 to have predecessor at index 0 
 
-    lastPathPlanningSuccessful = true;
-    pathCoordinatesList = translateToNodeList(altPath);
+    pathCoordinatesList = translateToNodeList(path);
+
+    this->startPosition = pathCoordinatesList.at(0);
+    this->goalPosition = pathCoordinatesList.at(pathCoordinatesList.size()-1);
+
+    // debug output of start/goal information
+    std::cout << "------------------------" << "\n";
+    std::cout << "E-Puck '" << robotName << "\n";
+    std::cout << "Start Position: " << "(" << startPosition.x_ << ", " << startPosition.y_ <<
+        ")\nGoal Position: " << "(" << goalPosition.x_ << ", " << goalPosition.y_ << ")" << "\n";
+    std::cout << "------------------------" << "\n";
 }
+
+bool PathPlannerEPuck::setAlternativePath(std::vector<std::tuple<int, int>> path)
+{
+    /* 
+    *   check if alternative path contains a loop :
+    *   when alternative path is calculated and this robot has right of way 
+    *   the same shortest path is set as before but with the collision point 
+    *   added in the beginning of the path. 
+    *   If the collision point is not included, 
+    * 
+    *   check if oldPath = newPath except first and second entry
+    */
+
+    if (pathIsDifferent(path)) {
+        setPath(path);
+        return true;
+    }
+
+    return false;
+}
+
+bool PathPlannerEPuck::pathIsDifferent(std::vector<std::tuple<int, int>> path)
+{
+    std::vector<Node> newPath = translateToNodeList(path);
+
+    std::cout << "E-Puck '" << robotName << std::endl;
+    for (Node n : newPath) {
+        std::cout << "x: " << n.x_ << ", y: " << n.y_ << std::endl;
+    }
+    std::cout << "Iterator at " << pathIterator << std::endl;
+    for (Node n : pathCoordinatesList) {
+        std::cout << "x: " << n.x_ << ", y: " << n.y_ << std::endl;
+    }
+
+    size_t newIterator = pathIterator - 1;
+    for (int i = 0; i < newPath.size(); i++) {
+        if (newPath.at(i).x_ != pathCoordinatesList.at(newIterator + i).x_ ||
+            newPath.at(i).y_ != pathCoordinatesList.at(newIterator + i).y_)
+            return true;
+    }
+
+    return false;
+}
+
 
 bool PathPlannerEPuck::pathCompleted(void)
 {
@@ -93,66 +78,43 @@ bool PathPlannerEPuck::pathCompleted(void)
     return pathCoordinatesList.size() > 0 && pathIterator >= pathCoordinatesList.size();
 }
 
-void PathPlannerEPuck::generateEdgeNodeList()
+void PathPlannerEPuck::getObstacleParameters(std::tuple<int, int>* startCoords, std::tuple<int, int>* goalCoords, std::tuple<int, int>* collisionCoords, int numberOfSteps)
 {
-    int i;
+    /*
+    *   To circumnavigate the obstacle the robot turns around and
+    *   sets the position of the predecessor as its new start position. After this
+    *   a new path is planned with the updated nodes and obstacles.
+    */
+    
+    std::cout << robotName << " steps: " << numberOfSteps << std::endl;
 
-    // top point row
-    for (i = 1; i < MATRIX_N; i += 2) {
-        edgeNodeList.push_back({ i, 0 });
+    if (numberOfSteps > STEPS_TO_CROSSROAD_THRESHOLD) {
+
+        startPosition = pathCoordinatesList[pathIterator - 1];
+
+        // add position of current successor as new detected obstacle
+        *collisionCoords = std::make_tuple((pathCoordinatesList[pathIterator]).x_,
+            (pathCoordinatesList[pathIterator]).y_);
     }
+    else if (numberOfSteps > STEPS_TO_INTERMEDIATE_THRESHOLD){
 
-    // bottom point row
-    for (i = 1; i < MATRIX_N; i += 2) {
-        edgeNodeList.push_back({ i, MATRIX_N });
+        startPosition = pathCoordinatesList[pathIterator - 2];
+
+        // add position of node before current successor as new detected obstacle
+        *collisionCoords = std::make_tuple((pathCoordinatesList[pathIterator - 1]).x_,
+            (pathCoordinatesList[pathIterator - 1]).y_);
     }
+    else {
+        startPosition = pathCoordinatesList[pathIterator - 3];
 
-    // left side points
-    for (i = 1; i < MATRIX_N; i += 2) {
-        edgeNodeList.push_back({ 0, i });
-    }
+        // add position of node before current successor as new detected obstacle
+        *collisionCoords = std::make_tuple((pathCoordinatesList[pathIterator - 2]).x_,
+            (pathCoordinatesList[pathIterator - 2]).y_);
+    }    
 
-    // right side points
-    for (i = 1; i < MATRIX_N; i += 2) {
-        edgeNodeList.push_back({ MATRIX_N, i });
-    }
+    *startCoords = std::make_tuple(startPosition.x_, startPosition.y_);
 
-}
-
-void PathPlannerEPuck::prepareWorldGrid(bool addObstaclesFromList)
-{
-    int n = MATRIX_N + 1;
-
-    /* reset planner parameters*/
-    pathCoordinatesList.clear();
-    pathIterator = 1;               // initiate internal iterator, must be 1 to have predecessor at index 0 
-    worldGrid.resize(n, std::vector<int>(n, 0));
-
-    /* add default walls as collision points to world grid */
-    for (int i = 0; i < n; i++) {
-        if (i % 2 == 0) {
-            for (int j = 0; j < n; j++) {
-                if (j % 2 == 0) {
-                    worldGrid[j][i] = 1;            // add wall
-                }
-            }
-        }
-    }
-
-    /* if flag is set, add obstacles from list as additional collision points to world generator */
-    if (addObstaclesFromList) {
-        for (int i = 0; i < obstacleList.size(); i++)
-        {
-            Node obNode = obstacleList.at(i);
-            worldGrid[obNode.x_][obNode.y_] = 1;
-        }
-    }
-
-    startPosition.id_ = startPosition.x_ * n + startPosition.y_;
-    startPosition.pid_ = startPosition.x_ * n + startPosition.y_;
-    goalPosition.id_ = goalPosition.x_ * n + goalPosition.y_;
-    // use static cast to avoid overflow warning when casting a 4 byte result to an 8 byte value
-    startPosition.h_cost_ = abs(static_cast<double>(startPosition.x_) - goalPosition.x_) + abs(static_cast<double>(startPosition.y_) - goalPosition.y_);
+    *goalCoords = std::make_tuple(goalPosition.x_, goalPosition.y_);
 }
 
 std::vector<Node> PathPlannerEPuck::translateToNodeList(std::vector<std::tuple<int, int>> tupleList)
@@ -165,27 +127,6 @@ std::vector<Node> PathPlannerEPuck::translateToNodeList(std::vector<std::tuple<i
     }
 
     return nodeList;
-}
-
-void PathPlannerEPuck::setMatrixDimension(unsigned int dimension)
-{
-    ARENA_NUMBER_OF_LINES_PER_SIDE = dimension;
-    MATRIX_N = ARENA_NUMBER_OF_LINES_PER_SIDE * 2;
-
-    // dynamically initialize list of edge node coordinates 
-    generateEdgeNodeList();
-}
-
-void PathPlannerEPuck::setStartGoalPositionByIndex(unsigned int startIndex, unsigned int goalIndex)
-{
-    startPosition = edgeNodeList.at(startIndex);
-    goalPosition = edgeNodeList.at(goalIndex);
-
-    // debug output of start/goal information
-    std::cout << "------------------------" << "\n";
-    std::cout << "E-Puck '" << robotName << "' in " << ARENA_NUMBER_OF_LINES_PER_SIDE << "x" << ARENA_NUMBER_OF_LINES_PER_SIDE << " map\n";
-    std::cout << "Start Position: P" << startIndex + 1 << "(" << startPosition.x_ << ", " << startPosition.y_ <<
-        ")\nGoal Position: P" << goalIndex + 1 << "(" << goalPosition.x_ << ", " << goalPosition.y_ << ")" << "\n";
 }
 
 MovingDirection PathPlannerEPuck::getNextMovingDirection(void)
