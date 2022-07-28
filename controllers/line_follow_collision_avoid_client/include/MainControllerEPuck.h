@@ -49,10 +49,10 @@ private:
 
     const unsigned int TURN_LEFT_RIGHT_THRESHOLD = 3200;
     const unsigned int TURN_AROUND_THRESHOLD = 3500;
+    const unsigned int STRAIGHT_AHEAD_THRESHOLD = 400;
     const unsigned int GROUND_SENSOR_JITTER_THRESHOLD = 4;
     const unsigned int QR_SCAN_DISTANCE_THRESHOLD = 2200;
     const unsigned int QR_READ_ATTEMPTS_THRESHOLD = 3;
-    const unsigned int STEPS_TO_CROSSROAD_THRESHOLD = 50;
 
 
     /*********************************************************

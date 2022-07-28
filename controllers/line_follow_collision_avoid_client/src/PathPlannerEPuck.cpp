@@ -78,7 +78,7 @@ bool PathPlannerEPuck::pathCompleted(void)
     return pathCoordinatesList.size() > 0 && pathIterator >= pathCoordinatesList.size();
 }
 
-void PathPlannerEPuck::getObstacleParameters(std::tuple<int, int>* startCoords, std::tuple<int, int>* goalCoords, std::tuple<int, int>* collisionCoords, bool closeToCrossroad)
+void PathPlannerEPuck::getObstacleParameters(std::tuple<int, int>* startCoords, std::tuple<int, int>* goalCoords, std::tuple<int, int>* collisionCoords, int numberOfSteps)
 {
     /*
     *   To circumnavigate the obstacle the robot turns around and
@@ -86,7 +86,9 @@ void PathPlannerEPuck::getObstacleParameters(std::tuple<int, int>* startCoords, 
     *   a new path is planned with the updated nodes and obstacles.
     */
     
-    if (closeToCrossroad) {
+    std::cout << robotName << " steps: " << numberOfSteps << std::endl;
+
+    if (numberOfSteps > STEPS_TO_CROSSROAD_THRESHOLD) {
 
         startPosition = pathCoordinatesList[pathIterator - 1];
 
@@ -94,12 +96,20 @@ void PathPlannerEPuck::getObstacleParameters(std::tuple<int, int>* startCoords, 
         *collisionCoords = std::make_tuple((pathCoordinatesList[pathIterator]).x_,
             (pathCoordinatesList[pathIterator]).y_);
     }
-    else {
+    else if (numberOfSteps > STEPS_TO_INTERMEDIATE_THRESHOLD){
+
         startPosition = pathCoordinatesList[pathIterator - 2];
 
         // add position of node before current successor as new detected obstacle
         *collisionCoords = std::make_tuple((pathCoordinatesList[pathIterator - 1]).x_,
             (pathCoordinatesList[pathIterator - 1]).y_);
+    }
+    else {
+        startPosition = pathCoordinatesList[pathIterator - 3];
+
+        // add position of node before current successor as new detected obstacle
+        *collisionCoords = std::make_tuple((pathCoordinatesList[pathIterator - 2]).x_,
+            (pathCoordinatesList[pathIterator - 2]).y_);
     }    
 
     *startCoords = std::make_tuple(startPosition.x_, startPosition.y_);

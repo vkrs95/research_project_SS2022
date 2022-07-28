@@ -271,10 +271,19 @@ void MainControllerEPuck::crossroadDetectionHandling(void)
         /* turn maneuver should be finished after turn counter has exceeded threshold */
         if (turnCounter >= crossroadManeuverThreshold)
         {
-            turnCounter = 0;
+            /* 
+            *   after a turn left or right, the robot has already made some way into 
+            *   the next lane and thus needs a higher initial step counter
+            */
+            if (crossroadManeuverThreshold == STRAIGHT_AHEAD_THRESHOLD) {
+                stepCounter = 0;
+            }
+            else {
+                stepCounter = 50;
+            }
             crossroadManeuverActive = false;
             performingTurn = false;
-            stepCounter = 0;
+            turnCounter = 0;
         }
     }
     else {
@@ -321,7 +330,7 @@ void MainControllerEPuck::crossroadDetectionHandling(void)
                 *   when moving straight ahead on a crossroad, use reduced threshold until movement is done
                 */
                 robotControl->setMotorSpeedMoveStraightAhead();
-                crossroadManeuverThreshold = TURN_LEFT_RIGHT_THRESHOLD / 8;
+                crossroadManeuverThreshold = STRAIGHT_AHEAD_THRESHOLD;
             }
 
 
@@ -383,10 +392,9 @@ void MainControllerEPuck::obstacleHandling(void)
     */
     else if (!obstacleHandlingActive && !pathplanner->pathCompleted())
     {
-        bool closeToCrossroad = stepCounter > STEPS_TO_CROSSROAD_THRESHOLD;
         /* get node parameters from pathplanner module */
         std::tuple<int, int> startNode, goalNode, collisionNode;
-        pathplanner->getObstacleParameters(&startNode, &goalNode, &collisionNode, closeToCrossroad);
+        pathplanner->getObstacleParameters(&startNode, &goalNode, &collisionNode, stepCounter);
 
         /* notify supervisor of collision */
         commModule->reportCollision(startNode, goalNode, collisionNode);

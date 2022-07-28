@@ -23,7 +23,7 @@ public:
     void setPath(std::vector<std::tuple<int, int>> path);
     bool setAlternativePath(std::vector<std::tuple<int, int>> path);
     bool pathCompleted(void);
-    void getObstacleParameters(std::tuple<int,int> *startCoords, std::tuple<int, int> *goalCoords, std::tuple<int, int> *collisionCoords, bool closeToCrossroad = false);
+    void getObstacleParameters(std::tuple<int,int> *startCoords, std::tuple<int, int> *goalCoords, std::tuple<int, int> *collisionCoords, int numberOfSteps);
 
     MovingDirection getNextMovingDirection(void);
 
@@ -34,6 +34,10 @@ private:
     bool pathIsDifferent(std::vector<std::tuple<int, int>> path);
 
     /**** private member variables ****/
+
+    /* constants */
+    const unsigned int STEPS_TO_INTERMEDIATE_THRESHOLD = 75;
+    const unsigned int STEPS_TO_CROSSROAD_THRESHOLD = 150;
 
     /* list of (x,y) coordinates from start to goal position */
     std::vector<Node> pathCoordinatesList;
