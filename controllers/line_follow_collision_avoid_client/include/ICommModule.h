@@ -9,6 +9,13 @@ class ICommModule
 {
 
 public:
+
+    /*********************************************************
+    *
+    *	public functions
+    *
+    *********************************************************/
+
     /* registration functions*/
     virtual bool registerAtSupervisor(std::string robotName) = 0;
     virtual void unregisterFromSupervisor(std::string reason = std::string("none")) = 0;

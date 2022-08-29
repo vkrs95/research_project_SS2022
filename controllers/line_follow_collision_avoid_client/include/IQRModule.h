@@ -3,6 +3,10 @@
 
 template<typename T>
 
+/*
+*	QRModule interface providing functions for processing 
+*	QR code images
+*/
 class IQRModule
 {
 public:

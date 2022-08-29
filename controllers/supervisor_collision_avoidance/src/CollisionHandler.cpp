@@ -8,7 +8,8 @@
 
 
 /*   
-*   Objects of this class are used to ...
+*   This class represents a collision handler used to manage collision event
+*   objects and their participants. 
 * 
 */
 

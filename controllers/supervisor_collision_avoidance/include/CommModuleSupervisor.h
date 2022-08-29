@@ -29,19 +29,6 @@
 
 using coordinate = std::tuple<int, int>;
 
-struct PathNotification {
-	std::string clientName;
-	std::tuple<int, int> startNode;
-	std::tuple<int, int> goalNode;
-};
-
-struct CollisionNotification {
-	std::string clientName;
-	std::tuple<int, int> startNode;
-	std::tuple<int, int> goalNode;
-	std::tuple<int, int> collisionNode;
-};
-
 class CommModuleTCPSocketServer{
 
 public:

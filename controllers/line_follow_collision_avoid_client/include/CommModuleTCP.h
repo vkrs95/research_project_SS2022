@@ -37,6 +37,13 @@ public:
 
     CommModuleTCP(int port = 1000);
     
+
+    /*********************************************************
+    *
+    *	public functions
+    *
+    *********************************************************/
+
     bool registerAtSupervisor(std::string robotName);
     void unregisterFromSupervisor(std::string reason = std::string("none"));
 
@@ -47,6 +54,12 @@ public:
     bool receiveAlternativePath(std::vector<coordinate>* path, int* msgTypeError = 0);
 
 private:
+
+    /*********************************************************
+    *
+    *	private functions
+    *
+    *********************************************************/
 
     bool socketInit();
     bool socketClose(int fd);
@@ -62,6 +75,12 @@ private:
     MessageType getMessageIdentifier(std::string msg);
     int getMessageTypeErrorCode(std::string msg);
     std::vector<std::string> msgStringSplit(std::string msg);
+
+    /*********************************************************
+    *
+    *	member variables
+    *
+    *********************************************************/
 
     SOCKET connectSocket;
     int wifiPort;

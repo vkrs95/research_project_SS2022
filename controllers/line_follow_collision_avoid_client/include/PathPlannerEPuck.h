@@ -16,6 +16,13 @@ class PathPlannerEPuck:
     public IPathPlanningModule<Node, void>
 {
 public:
+
+    /*********************************************************
+    *
+    *	public functions
+    *
+    *********************************************************/
+
     /* constructor */
     PathPlannerEPuck(std::string robotName = "E-Puck");
 
@@ -28,16 +35,30 @@ public:
     MovingDirection getNextMovingDirection(void);
 
 private:
-    /**** private member functions ****/
+
+    /*********************************************************
+    *
+    *	private functions
+    *
+    *********************************************************/
 
     std::vector<Node> translateToNodeList(std::vector<std::tuple<int, int>> tupleList);
     bool pathIsDifferent(std::vector<std::tuple<int, int>> path);
 
-    /**** private member variables ****/
+    /*********************************************************
+    *
+    *	internal constants
+    *
+    *********************************************************/
 
-    /* constants */
-    const unsigned int STEPS_TO_INTERMEDIATE_THRESHOLD = 75;
+    const unsigned int STEPS_TO_INTERMEDIATE_THRESHOLD = 60;
     const unsigned int STEPS_TO_CROSSROAD_THRESHOLD = 150;
+
+    /*********************************************************
+    *
+    *	member variables
+    *
+    *********************************************************/
 
     /* list of (x,y) coordinates from start to goal position */
     std::vector<Node> pathCoordinatesList;

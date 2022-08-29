@@ -8,7 +8,7 @@
 
 
 /*   
-*   Objects of this class are used to ...
+*   Objects of this class are used to generate and resolve collision events
 * 
 */
 

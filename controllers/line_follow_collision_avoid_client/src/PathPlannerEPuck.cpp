@@ -49,14 +49,15 @@ bool PathPlannerEPuck::pathIsDifferent(std::vector<std::tuple<int, int>> path)
 {
     std::vector<Node> newPath = translateToNodeList(path);
 
-    std::cout << "E-Puck '" << robotName << std::endl;
-    for (Node n : newPath) {
-        std::cout << "x: " << n.x_ << ", y: " << n.y_ << std::endl;
-    }
-    std::cout << "Iterator at " << pathIterator << std::endl;
-    for (Node n : pathCoordinatesList) {
-        std::cout << "x: " << n.x_ << ", y: " << n.y_ << std::endl;
-    }
+    /* debug print */
+    //std::cout << "E-Puck '" << robotName << std::endl;
+    //for (Node n : newPath) {
+    //    std::cout << "x: " << n.x_ << ", y: " << n.y_ << std::endl;
+    //}
+    //std::cout << "Iterator at " << pathIterator << std::endl;
+    //for (Node n : pathCoordinatesList) {
+    //    std::cout << "x: " << n.x_ << ", y: " << n.y_ << std::endl;
+    //}
 
     size_t newIterator = pathIterator - 1;
     for (int i = 0; i < newPath.size(); i++) {
@@ -86,7 +87,7 @@ void PathPlannerEPuck::getObstacleParameters(std::tuple<int, int>* startCoords, 
     *   a new path is planned with the updated nodes and obstacles.
     */
     
-    std::cout << robotName << " steps: " << numberOfSteps << std::endl;
+    //std::cout << robotName << " steps: " << numberOfSteps << std::endl;
 
     if (numberOfSteps > STEPS_TO_CROSSROAD_THRESHOLD) {
 

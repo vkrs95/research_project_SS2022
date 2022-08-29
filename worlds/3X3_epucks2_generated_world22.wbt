@@ -31,7 +31,7 @@ RectangleArena {
   }
 }
 E-puck {
-  translation -0.204735 -2.44249e-15 -0.194233
+  translation -0.203071 -2.44249e-15 -0.0013314
   rotation 0 1 0 1.5708
   name "EPuck 1"
   controller "line_follow_collision_avoid_client"
@@ -45,7 +45,7 @@ E-puck {
   ]
 }
 E-puck {
-  translation 0.000902267 -2.22045e-15 -0.202254
+  translation 0.201386 -2.22045e-15 -0.203315
   rotation 0 -1 0 -5.307179586466759e-06
   name "EPuck 2"
   controller "line_follow_collision_avoid_client"
